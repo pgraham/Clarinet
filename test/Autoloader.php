@@ -11,19 +11,19 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet
+ * @package clarinet/test
  */
-namespace clarinet;
+namespace clarinet\test;
 
 /**
- * Autoloader for clarinet classes.
+ * Autoloader for clarinet test classes.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet
+ * @package clarinet/test
  */
 class Autoloader {
 
-  /* This is the base path where Clarinet source files are found. */
+  /* This is the base path where Clarinet test files are found. */
   private static $_basePath = __DIR__;
 
   /**
@@ -32,16 +32,16 @@ class Autoloader {
    * @param {string} The name of the class to load.
    */
   public static function loadClass($className) {
-    // Make sure this is a Clarinet class
-    if (substr($className, 0, 9) != 'clarinet\\') {
+    // Make sure this is a Clarinet test class
+    if (substr($className, 0, 14) != 'clarinet\\test\\') {
       return;
     }
 
-    $logicalPath = str_replace('\\', '/', substr($className, 9));
+    $logicalPath = str_replace('\\', '/', substr($className, 14));
     $fullPath = self::$_basePath . '/' . $logicalPath . '.php';
     if (file_exists($fullPath)) {
       require_once $fullPath;
     }
   }
 }
-spl_autoload_register(array('clarinet\Autoloader', 'loadClass'));
+spl_autoload_register(array('clarinet\test\Autoloader', 'loadClass'));

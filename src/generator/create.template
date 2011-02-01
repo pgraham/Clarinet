@@ -1,0 +1,16 @@
+  public function create(\${class} $model) {
+    $params = Array();
+${populate_parameters}
+
+    try {
+      $this->_pdo->beginTransaction();
+      $this->_create->execute($params);
+      $id = $this->_pdo->lastInsertId();
+      $this->_pdo->commit();
+      return $id;
+    } catch (PDOException $e) {
+      $this->_pdo->rollback();
+
+      throw new Exception('Error creating ${class}', $e);
+    }
+  }

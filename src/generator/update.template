@@ -1,0 +1,18 @@
+  public function update(\${class} $model) {
+    $params = Array();
+${populate_id_parameter}
+${populate_parameters}
+
+    try {
+      $this->_pdo->beginTransaction();
+      $this->_update->execute($params);
+      $rowCount = $this->_update->rowCount();
+      $this->_pdo->commit();
+
+      return $rowCount;
+    } catch (PDOException $e) {
+      $this->_pdo->rollback();
+
+      throw new Exception('Error updating ${class}', $e);
+    }
+  }

@@ -1,0 +1,17 @@
+  public function delete(\${class} $model) {
+    $params = Array();
+${populate_id_parameter}
+
+    try {
+      $this->_pdo->beginTransaction();
+      $this->_delete->execute($params);
+      $rowCount = $this->_delete->rowCount();
+      $this->_pdo->commit();
+
+      return $rowCount;
+    } catch (PDOException $e) {
+      $this->_pdo->rollback();
+
+      throw new Exception('Error updating ${class}', $e);
+    }
+  }

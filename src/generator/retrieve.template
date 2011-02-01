@@ -1,0 +1,25 @@
+  public function retrieve(\clarinet\Criteria $c = null) {
+    $where = ($c !== null) ? ' ' . $c->__toString() : '';
+    $params = ($c !== null) ? $c->getParameters() : null;
+    $sql = "SELECT * FROM ${table}$where";
+    $stmt = $this->_pdo->prepare($sql);
+
+    try {
+      $stmt->execute($params);
+      
+      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+      $result = Array();
+      foreach ($rows AS $row) {
+        $model = new \${class}();
+
+${populate_id_property}
+${populate_properties}
+
+        $result[] = $model;
+      }
+
+      return $result;
+    } catch (PDOException $e) {
+      throw new Exception('Error retrieving ${class} instances', $e);
+    }
+  }
