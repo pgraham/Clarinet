@@ -50,15 +50,6 @@ class TransformerFactory {
     }
 
     $transformerClass = str_replace('\\', '_', $className);
-    $transformerPath = Clarinet::$outputPath . '/clarinet/transformer/';
-    $fullPath = $transformerPath . $transformerClass . '.php';
-    if (file_exists($fullPath)) {
-      require_once $fullPath;
-    } else {
-      throw new Exception("Unable to load transformer for $className.  Calculated"
-        . " path is $fullPath.");
-    }
-    
     $fullyQualified = "clarinet\\transformer\\$transformerClass";
     $persister = new $fullyQualified();
     self::$_cache[$className] = $persister;

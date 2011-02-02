@@ -157,7 +157,11 @@ class Clarinet {
       throw new Exception('Clarinet needs to know where generated classes are'
         . ' found in order to be able to do anything.');
     }
+
+    // Store the output path for the generators and set the path in the
+    // autoloader so that generated classes are loaded properly
     self::$outputPath = $config['outputPath'];
+    Autoloader::$genBasePath = $config['outputPath'] . '/clarinet';
 
     self::$_initialized = true;
   }

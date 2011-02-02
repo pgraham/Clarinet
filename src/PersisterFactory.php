@@ -47,15 +47,6 @@ class PersisterFactory {
     }
 
     $persisterClass = str_replace('\\', '_', $className);
-    $persisterPath = Clarinet::$outputPath . '/clarinet/persister/';
-    $fullPath = $persisterPath . $persisterClass . '.php';
-    if (file_exists($fullPath)) {
-      require_once $fullPath;
-    } else {
-      throw new Exception("Unable to load persister for $className.  Calculated"
-        . "path is $fullPath");
-    }
-    
     $fullyQualified = "clarinet\\persister\\$persisterClass";
     $persister = new $fullyQualified();
     self::$_cache[$className] = $persister;

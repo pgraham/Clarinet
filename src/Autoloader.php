@@ -23,6 +23,9 @@ namespace clarinet;
  */
 class Autoloader {
 
+  /* This is the base path for generated source files */
+  public static $genBasePath = null;
+
   /* This is the base path where Clarinet source files are found. */
   private static $_basePath = __DIR__;
 
@@ -41,6 +44,11 @@ class Autoloader {
     $fullPath = self::$_basePath . '/' . $logicalPath . '.php';
     if (file_exists($fullPath)) {
       require_once $fullPath;
+    } else if (self::$genBasePath !== null) {
+      $genFullPath = self::$genBasePath . '/' . $logicalPath . '.php';
+      if (file_exists($genFullPath)) {
+        require_once $genFullPath;
+      }
     }
   }
 }
