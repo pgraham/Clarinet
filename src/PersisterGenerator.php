@@ -17,7 +17,7 @@ namespace clarinet;
 
 use \SplFileObject;
 
-use \clarinet\generator\ClassBuilder;
+use \clarinet\persister\ClassBuilder;
 
 /**
  * Generator for model persisters.  Generated code is output into a file at the

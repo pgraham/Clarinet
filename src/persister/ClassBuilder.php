@@ -13,7 +13,7 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/generator
  */
-namespace clarinet\generator;
+namespace clarinet\persister;
 
 use \clarinet\TemplateLoader;
 
