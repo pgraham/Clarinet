@@ -26,6 +26,9 @@ class TemplateLoader {
   /* The base path for where templates are located. */
   private $_basePath;
 
+  /* Cache of previously loaded templates */
+  private $_cache = Array();
+
   /**
    * Create a new template loader for loading templates located in the directory
    * specified by the given path.
@@ -43,7 +46,12 @@ class TemplateLoader {
    * @param array $templateValues
    */
   public function load($templateName, Array $templateValues) {
-    $template = file_get_contents($this->_basePath . "/$templateName.template");
+    if (!isset($this->_cache[$templateName])) {
+      $templatePath = $this->_basePath . "/$templateName.template";
+      $this->_cache[$templateName] = file_get_contents($templatePath);
+    }
+
+    $template = $this->_cache[$templateName];
 
     $toReplace   = array_keys($templateValues);
     $replaceWith = array_values($templateValues);

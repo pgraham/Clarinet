@@ -17,37 +17,40 @@ namespace clarinet;
 
 use \SplFileObject;
 
-use \clarinet\transformer\ClassBuilder;
-
 /**
- * Generator for model transformer classes.
+ * Generator for actor classes.
  *
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet
  */
-class TransformerGenerator {
+class ActorGenerator {
 
   /**
-   * Generate the transformer code for the given model class.  The code is
-   * output at the following path:
+   * Generate the actor of the given type for the given model class.  The code
+   * is output at the following path:
    *
-   *   Clarinet::$outputPath . '/clarinet/transformer/<transformer-class-name>
+   *   Clarinet::$outputPath . '/clarinet/<actor-name>/<actor-class-name>
    *
-   * where <transformer-class-name> is the fully qualified name of the model
-   * class with backslashes (\) replaced with underscores (_).
+   * where <actor-class-name> is the fully qualified name of the model class
+   * with backslashes (\) replaced with underscores (_).
    *
+   * @param string $actorType The type of actor to generate.
    * @param string $className The name of the model class for which to generate
-   *   a transformer.
+   *   the actor.
    */
-  public static function generate($className) {
-    $modelInfo = ModelParser::parse($className);
-    $classBody = ClassBuilder::build($modelInfo);
+  public static function generate($actorType, $modelClass) {
+    $modelInfo = ModelParser::parse($modelClass);
 
-    $filePath = Clarinet::$outputPath . '/clarinet/transformer';
+    // Build the fully qualified name of the actor's class builder and use it
+    // to invoke the class builder's static build function
+    $classBuilder = "clarinet\\$actorType\\ClassBuilder";
+    $classBody = call_user_func("$classBuilder::build", $modelInfo);
+
+    $filePath = Clarinet::$outputPath . '/clarinet/' . $actorType;
     if (!file_exists($filePath)) {
       mkdir($filePath, 0755, true);
     }
-    $fileName = str_replace('\\', '_', $modelInfo['class']) . '.php';
+    $fileName = $modelInfo['actor'] . '.php';
 
     $file = new SplFileObject($filePath . '/' . $fileName, 'w');
     $file->fwrite($classBody);

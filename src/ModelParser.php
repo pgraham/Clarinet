@@ -100,6 +100,7 @@ class ModelParser {
 
     $entityInfo = array(
       'class'      => $className,
+      'actor'      => str_replace('\\', '_', $className),
       'table'      => $classAnnotations['entity']['table'],
       'id'         => $idColumn,
       'properties' => $properties

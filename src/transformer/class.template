@@ -8,7 +8,7 @@ use \clarinet\Exception;
  * Instead, modify the model class of this transformer, then run the clarinet
  * generator to re-generate this file.
  */
-class ${transformer} {
+class ${actor} {
 
 ${asArray}
 ${fromArray}

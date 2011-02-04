@@ -17,27 +17,27 @@ namespace clarinet;
 
 use \SplFileObject;
 
-use \clarinet\transformer\ClassBuilder;
+use \clarinet\validator\ClassBuilder;
 
 /**
- * Generator for model transformer classes.
+ * Genertor for model validator classes.
  *
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet
  */
-class TransformerGenerator {
+class ValidatorGenerator {
 
   /**
-   * Generate the transformer code for the given model class.  The code is
-   * output at the following path:
+   * Generate the validation code for the given model class.  The code is output
+   * at the following path:
    *
-   *   Clarinet::$outputPath . '/clarinet/transformer/<transformer-class-name>
+   *   Clarinet::$outputPath . '/clarinet/validator/<validator-class-name>
    *
-   * where <transformer-class-name> is the fully qualified name of the model
-   * class with backslashes (\) replaced with underscores (_).
+   * where <validator-class-name> is the fully qualified name of the model class
+   * with backslashes (\) replaced with underscores (_).
    *
    * @param string $className The name of the model class for which to generate
-   *   a transformer.
+   *   a validator.
    */
   public static function generate($className) {
     $modelInfo = ModelParser::parse($className);

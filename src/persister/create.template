@@ -1,4 +1,9 @@
   public function create(\${class} $model) {
+    $e = Clarinet::validate($model);
+    if ($e !== null) {
+      throw $e;
+    }
+
     $params = Array();
 ${populate_parameters}
 

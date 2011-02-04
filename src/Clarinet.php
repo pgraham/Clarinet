@@ -47,7 +47,8 @@ class Clarinet {
   public static function asArray($obj) {
     self::_ensureInitialized();
 
-    $transformer = TransformerFactory::getTransformer(get_class($obj));
+    $modelClass = get_class($obj);
+    $transformer = ActorAbstractFactory::getActor('transformer', $modelClass);
     return $transformer->asArray($obj);
   }
 
@@ -55,23 +56,32 @@ class Clarinet {
    * Delete the given object.
    */
   public static function delete($obj) {
-    // TODO
+    self::_ensureInitialized();
+
+    $modelClass = get_class($obj);
+    $persister = ActorAbstractFactory::getAction('persister', $modelClass);
+
+    $rows = $persister->delete($obj);
+    if ($rows != 1) {
+      throw new Exception("Unable to delete $className with id "
+        . $obj->getId());
+    }
   }
 
   /**
    * Retrieve instances of the given class that satisfy the given
    * criteria.
    *
-   * @param {string} $className The name of the class to retrieve.
+   * @param {string} $modelClass The name of the class to retrieve.
    * @param {Criteria} $c An optional criteria object for filtering the
    *     returned objects.
    * @return {array} List of objects of the given type that match the given
    *     criteria.
    */
-  public static function get($className, Criteria $c = null) {
+  public static function get($modelClass, Criteria $c = null) {
     self::_ensureInitialized();
 
-    $persister = PersisterFactory::getPersister($className);
+    $persister = ActorAbstractFactory::getActor('persister', $modelClass);
 
     $rows = $persister->retrieve($c);
     return $rows;
@@ -171,8 +181,31 @@ class Clarinet {
    *
    * @param object $obj The object to save.
    */
-  public static function update($obj) {
-    // TODO
+  public static function save($obj) {
+    self::_ensureInitialized();
+
+    $modelClass = get_class($obj);
+    $persister = ActorAbstractFactory::getAction('persister', $modelClass);
+
+    // TODO - Determine if the obj has an id or not and take the necessary
+    //        action
+  }
+
+  /**
+   * Validates the given object.
+   *
+   * @param object $obj The object to validate.
+   * @return null if the object is valid or a ValidationException that contains
+   *   a list of messages for why the object did not validate.
+   */
+  public static function validate($obj) {
+    self::_ensureInitialized();
+
+    $modelClass = get_class($obj);
+    $validator = ActorAbstractFactory::getActor('validator', $modelClass);
+
+    $e = $validator->validate($obj);
+    return $e;
   }
 
   /* Throws an exception if the class has not been initialized */

@@ -1,0 +1,15 @@
+  public function validate(\${class} $model) {
+    $msgs = Array();
+
+    // Retrieve the properties that are to be validated
+${property_getters}
+
+    // Check the properties and add any messages
+${property_checkers}
+
+    $e = null;
+    if (count($msgs) > 0) {
+      $e = new ValidationException($msgs);
+    }
+    return $e;
+  }

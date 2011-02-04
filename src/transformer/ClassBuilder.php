@@ -52,8 +52,6 @@ class ClassBuilder {
    * to insert into a transformer template.
    */
   private static function _buildTemplateValues(Array $modelInfo) {
-    $transformerName = str_replace('\\', '_', $modelInfo['class']);
-
     $arraySetters = Array();
     $modelSetters = Array();
 
@@ -72,7 +70,7 @@ class ClassBuilder {
     $templateValues = Array
     (
       '${class}'       => $modelInfo['class'],
-      '${transformer}' => $transformerName,
+      '${actor}'       => $modelInfo['actor'],
 
       '${array_setters}' => implode("\n", $arraySetters),
       '${model_setters}' => implode("\n", $modelSetters)
