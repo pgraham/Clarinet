@@ -18,7 +18,7 @@ namespace clarinet;
 use \ReflectionClass;
 use \ReflectionException;
 
-use \Reed\Util\ReflectionHelper;
+use \reed\util\ReflectionHelper;
 
 /**
  * This class parses a model class' information into an array structure that is
