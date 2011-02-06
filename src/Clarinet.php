@@ -134,6 +134,8 @@ class Clarinet {
    *
    * @param {string} $className The name of the class of object to retrieve.
    * @param {Criteria} $c Criteria to use to filter the list of candidates
+   * @return a single instance of the given model class that satisfies the given
+   *   criteria or null if none.
    */
   public static function getOne($className, Criteria $c = null) {
     if ($c === null) {
@@ -142,7 +144,11 @@ class Clarinet {
     $c->setLimit(1);
 
     $rows = self::get($className, $c);
-    return $rows[0];
+    if (count($rows) > 0) {
+      return $rows[0];
+    } else {
+      return null;
+    }
   }
 
   /**
