@@ -15,7 +15,7 @@
  */
 namespace clarinet\test;
 
-use \clarinet\ModelParser;
+use \clarinet\model\Parser;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/test-common.php';
@@ -30,75 +30,40 @@ class ModelParserTest extends TestCase {
   
   /**
    * Tests that the static parse(...) method generates the expected array
-   * structure for clarinet's built in ConfigValue model.
+   * structure for a mock\SimpleEntity model.
    */
-  public function testConfigValueModelParser() {
-    $modelInfo = ModelParser::parse('clarinet\model\ConfigValue');
-    $msg = print_r($modelInfo, true);
+  public function testParseSimpleEntity() {
+    $parser = new Parser('clarinet\test\mock\SimpleEntity');
+    $info = $parser->parse();
+    $msg = print_r($info, true);
 
-    $this->assertInternalType('array', $modelInfo, $msg);
-    $this->assertArrayHasKey('class', $modelInfo, $msg);
-    $this->assertArrayHasKey('table', $modelInfo, $msg);
-    $this->assertArrayHasKey('id', $modelInfo, $msg);
-    $this->assertArrayHasKey('properties', $modelInfo, $msg);
+    $this->assertInstanceOf('clarinet\model\Info', $info, $msg);
 
-    $this->assertEquals('clarinet\model\ConfigValue', $modelInfo['class'],
+    $this->assertEquals('clarinet\test\mock\SimpleEntity', $info->getClass(),
       $msg);
-    $this->assertEquals('config_values', $modelInfo['table'], $msg);
+    $this->assertEquals('config_values', $info->getTable(), $msg);
 
-    $properties = $modelInfo['properties'];
+    $properties = $info->getProperties();
     $this->assertInternalType('array', $properties, $msg);
     $name = null;
     $value = null;
     foreach ($properties AS $property) {
-      $this->assertInternalType('array', $property, $msg);
-      $this->assertArrayHasKey('name', $property, $msg);
-      $this->assertArrayHasKey('column', $property, $msg);
+      $this->assertInstanceOf('clarinet\model\Property', $property, $msg);
 
-      if ($property['name'] == 'Name') {
+      if ($property->getName() == 'Name') {
         $name = $property;
-      } else if ($property['name'] == 'Value') {
+      } else if ($property->getName() == 'Value') {
         $value = $property;
       }
     }
     $this->assertNotNull($name, $msg);
     $this->assertNotNull($value, $msg);
-    $this->assertEquals('name', $name['column'], $msg);
-    $this->assertEquals('value', $value['column'], $msg);
+    $this->assertEquals('name', $name->getColumn(), $msg);
+    $this->assertEquals('value', $value->getColumn(), $msg);
 
-    $id = $modelInfo['id'];
-    $this->assertInternalType('array', $id, $msg);
-    $this->assertArrayHasKey('name', $id, $msg);
-    $this->assertArrayhasKey('column', $id, $msg);
-    $this->assertEquals('Id', $id['name'], $msg);
-    $this->assertEquals('id', $id['column'], $msg);
-  }
-
-  /**
-   * Tests that the static prepareModelInfoForTemplate method generates the
-   * expected array structure for clarinet's built in ConfigValue model.
-   */
-  public function testConfigValueTemplateValues() {
-    $modelInfo = ModelParser::parse('clarinet\model\ConfigValue');
-    $templateValues = ModelParser::prepareModelInfoForTemplate($modelInfo);
-    $msg = print_r($templateValues, true);
-
-    $this->assertInternalType('array', $templateValues, $msg);
-    $this->assertArrayHasKey('${persisterName}', $templateValues, $msg);
-    $this->assertArrayHasKey('${table}', $templateValues, $msg);
-    $this->assertArrayHasKey('${column_names}', $templateValues, $msg);
-    $this->assertArrayHasKey('${value_names}', $templateValues, $msg);
-    $this->assertArrayHasKey('${sql_setters}', $templateValues, $msg);
-    $this->assertArrayHasKey('${id_column}', $templateValues, $msg);
-
-    $this->assertEquals('clarinet_model_ConfigValue',
-      $templateValues['${persisterName}'], $msg);
-    $this->assertEquals('config_values', $templateValues['${table}'], $msg);
-    $this->assertEquals('name,value', $templateValues['${column_names}'], $msg);
-    $this->assertEquals(':name,:value', $templateValues['${value_names}'],
-      $msg);
-    $this->assertEquals('name = :name,value = :value',
-      $templateValues['${sql_setters}'], $msg);
-    $this->assertEquals('id', $templateValues['${id_column}'], $msg);
+    $id = $info->getId();;
+    $this->assertInstanceOf('clarinet\model\Property', $id, $msg);
+    $this->assertEquals('Id', $id->getName(), $msg);
+    $this->assertEquals('id', $id->getColumn(), $msg);
   }
 }

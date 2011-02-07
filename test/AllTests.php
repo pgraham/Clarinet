@@ -32,9 +32,9 @@ class AllTests {
   public static function suite() {
     $suite = new TestSuite('All Clarinet Tests');
 
-    $suite->addTestSuite('clarinet\test\CreateTest');
     $suite->addTestSuite('clarinet\test\CriteriaTest');
     $suite->addTestSuite('clarinet\test\ModelParserTest');
+    //$suite->addTestSuite('clarinet\test\PersisterClassBuilderTest');
 
     return $suite;
   }

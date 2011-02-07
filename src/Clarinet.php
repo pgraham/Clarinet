@@ -110,25 +110,6 @@ class Clarinet {
   }
 
   /**
-   * Retrieve the configuration value with the given name.  In order for this to
-   * work the database must be setup to handler configuration values.
-   *
-   * @param {string} $name The name of the configuration value to retrieve.
-   */
-  public static function getConfigValue($name) {
-    $c = new Criteria();
-    $c->addEquals('name', $name);
-
-    $rows = self::get('clarinet\model\ConfigValue', $c);
-    if (count($rows) == 0) {
-      return null;
-    }
-
-    $obj = $rows[0];
-    return $obj->getValue();
-  }
-
-  /**
    * Return the first instance returned by retrieving objects of the given type
    * for the given criteria.
    *

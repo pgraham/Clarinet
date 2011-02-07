@@ -17,6 +17,8 @@ namespace clarinet;
 
 use \SplFileObject;
 
+use \clarinet\model\Parser;
+
 /**
  * Generator for actor classes.
  *
@@ -39,7 +41,7 @@ class ActorGenerator {
    *   the actor.
    */
   public static function generate($actorType, $modelClass) {
-    $modelInfo = ModelParser::parse($modelClass);
+    $modelInfo = Parser::getModelInfo($modelClass);
 
     // Build the fully qualified name of the actor's class builder and use it
     // to invoke the class builder's static build function
@@ -50,7 +52,7 @@ class ActorGenerator {
     if (!file_exists($filePath)) {
       mkdir($filePath, 0755, true);
     }
-    $fileName = $modelInfo['actor'] . '.php';
+    $fileName = $modelInfo->getActor() . '.php';
 
     $file = new SplFileObject($filePath . '/' . $fileName, 'w');
     $file->fwrite($classBody);

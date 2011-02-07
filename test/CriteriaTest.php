@@ -35,15 +35,12 @@ class CriteriaTest  extends TestCase {
     $c = new Criteria();
     $c->addEquals('name', 'aName');
     $output = $c->__toString();
-    $expected = "WHERE name = 'aName'";
-
+    $expected = " WHERE name = :param0";
     $this->assertEquals($expected, $output);
 
-    $c = new Criteria();
-    $c->addEquals('count', 1);
-    $output = $c->__toString();
-    $expected = 'WHERE count = 1';
-
-    $this->assertEquals($expected, $output);
+    $params = $c->getParameters();
+    $this->assertInternalType('array', $params);
+    $this->assertArrayHasKey(':param0', $params);
+    $this->assertEquals('aName', $params[':param0']);
   }
 }

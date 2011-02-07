@@ -15,6 +15,7 @@
  */
 namespace clarinet\persister;
 
+use \clarinet\model\Info as ModelInfo;
 use \clarinet\TemplateLoader;
 
 /**
@@ -55,7 +56,7 @@ class ClassBuilder {
    *     which a persister will be generated.
    * @return The persister's PHP code.
    */
-  public static function build(Array $modelInfo) {
+  public static function build(ModelInfo $modelInfo) {
     $templateValues = self::_buildTemplateValues($modelInfo);
 
     // Load templates
@@ -79,37 +80,40 @@ class ClassBuilder {
    * This method uses a parsed model info array structure to create the values
    * to insert into a persister template.
    */
-  private static function _buildTemplateValues(Array $modelInfo) {
-    $persisterName = str_replace('\\', '_', $modelInfo['class']);
+  private static function _buildTemplateValues(ModelInfo $modelInfo) {
+    $persisterName = str_replace('\\', '_', $modelInfo->getClass());
 
     $populateIdParameter = "    \$params[':id'] ="
-      ." \$model->get{$modelInfo['id']['name']}();";
-    $populateIdProperty = "      \$model->set{$modelInfo['id']['name']}("
-      . "\$row['{$modelInfo['id']['column']}']);";
+      ." \$model->get{$modelInfo->getId()->getName()}();";
+    $populateIdProperty = "      \$model->set{$modelInfo->getId()->getName()}("
+      . "\$row['{$modelInfo->getId()->getColumn()}']);";
 
     $columnNames = Array();
     $valueNames = Array();
     $sqlSetters = Array();
     $populateParameters = Array();
     $populateProperties = Array();
-    foreach ($modelInfo['properties'] AS $property) {
-      $columnNames[] = $property['column'];
-      $valueNames[] = ':' . $property['column'];
-      $sqlSetters[] = $property['column'] . ' = :' . $property['column'];
+    foreach ($modelInfo->getProperties() AS $property) {
+      $prop = $property->getName();
+      $col  = $property->getColumn();
 
-      $populateParameters[] = "    \$params[':{$property['column']}'] ="
-        . " \$model->get{$property['name']}();";
-      $populateProperties[] = "      \$model->set{$property['name']}("
-        . "\$row['{$property['column']}']);";
+      $columnNames[] = $col;
+      $valueNames[] = ":$col";
+      $sqlSetters[] = "$col = :$col";
+
+      $populateParameters[] = "    \$params[':$col'] ="
+        . " \$model->get$prop();";
+      $populateProperties[] = "      \$model->set$prop("
+        . "\$row['$col']);";
     }
 
     $templateValues = Array
     (
-      '${class}'                 => $modelInfo['class'],
-      '${persisterName}'         => $persisterName,
-      '${table}'                 => $modelInfo['table'],
+      '${class}'                 => $modelInfo->getClass(),
+      '${persisterName}'         => $modelInfo->getActor(),
+      '${table}'                 => $modelInfo->getTable(),
 
-      '${id_column}'             => $modelInfo['id']['column'],
+      '${id_column}'             => $modelInfo->getId()->getColumn(),
       '${populate_id_parameter}' => $populateIdParameter,
       '${populate_id_property}'  => $populateIdProperty,
 

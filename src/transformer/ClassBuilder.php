@@ -15,6 +15,7 @@
  */
 namespace clarinet\transformer;
 
+use \clarinet\model\Info;
 use \clarinet\TemplateLoader;
 
 /**
@@ -27,11 +28,11 @@ class ClassBuilder {
   /**
    * Generate a transformer class for the given model information.
    *
-   * @param array $modelInfo The model's structure information as parsed by
-   *   ModelParser::parse(...).
+   * @param Info $modelInfo The model's structure information as parsed by
+   *   clarinet\model\Parser::getModelInfo(...).
    * @return string The model's transformer's class body.
    */
-  public static function build(Array $modelInfo) {
+  public static function build(Info $modelInfo) {
     $templateValues = self::_buildTemplateValues($modelInfo);
 
     // Load templates
@@ -51,26 +52,27 @@ class ClassBuilder {
    * This method uses a parsed model info array structure to create the values
    * to insert into a transformer template.
    */
-  private static function _buildTemplateValues(Array $modelInfo) {
+  private static function _buildTemplateValues(Info $modelInfo) {
     $arraySetters = Array();
     $modelSetters = Array();
 
-    $id = $modelInfo['id']['name'];
+    $id = $modelInfo->getId()->getName();;
     $idIdx = strtolower($id);
     $arraySetters[] = "    \$a['$idIdx'] = \$model->get$id();";
     $modelSetters[] = "    \$model->set$id(\$a['$idIdx']);";
 
-    foreach ($modelInfo['properties'] AS $property) {
-      $prop = $property['name'];
+    foreach ($modelInfo->getProperties() AS $property) {
+      $prop = $property->getName();
       $idx = strtolower($prop);
+
       $arraySetters[] = "    \$a['$idx'] = \$model->get$prop();";
       $modelSetters[] = "    \$model->set$prop(\$a['$idx']);";
     }
 
     $templateValues = Array
     (
-      '${class}'       => $modelInfo['class'],
-      '${actor}'       => $modelInfo['actor'],
+      '${class}'       => $modelInfo->getClass(),
+      '${actor}'       => $modelInfo->getActor(),
 
       '${array_setters}' => implode("\n", $arraySetters),
       '${model_setters}' => implode("\n", $modelSetters)
