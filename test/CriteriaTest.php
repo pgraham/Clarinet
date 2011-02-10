@@ -33,9 +33,10 @@ class CriteriaTest  extends TestCase {
    */
   public function testAddEquals() {
     $c = new Criteria();
+    $c->setTable('simple_entity');
     $c->addEquals('name', 'aName');
     $output = $c->__toString();
-    $expected = " WHERE name = :param0";
+    $expected = "SELECT * FROM simple_entity WHERE name = :param0";
     $this->assertEquals($expected, $output);
 
     $params = $c->getParameters();

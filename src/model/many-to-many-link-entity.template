@@ -1,0 +1,36 @@
+// -------------------------------------------------------------------
+// Populate the ${rhs}
+$c = new Criteria();
+$c->addJoin('${link_table}', '${rhs_id_column'}, '${rhs_link_column}');
+$c->addEquals('${lhs_link_column}', $id);
+
+$sql = $c->__toString();
+// TODO - Log the statment, this depends on a logging framework being added to reed
+$stmt = $this->_pdo->prepare($sql);
+$stmt->setFetchMod(PDO::FETCH_ASSOC);
+$stmt->execute($c->getParameters());
+
+$rhsIds = Array();
+$related = Array();
+
+foreach($stmt AS $row) {
+  $rhsId = $row['${rhs_id_column}'];
+  $rhsIds[] = $rhsId;
+  
+  $rel = new \${link_entity}();
+${populate_link_properties}
+  $related[$rhsId] = $rel;
+}
+
+$c = new Criteria();
+$c->addIn('${rhs_id_column}', $rhsIds);
+
+$persister = AbstractActorFactory::getActor('persister', '${rhs}');
+$rhsEntities = $persister->retrieve($c);
+foreach ($rhsEntities AS $rhsEntity) {
+  $rhsId = $rhsEntity->get${rhs_id_property}();
+  $related[$rhsId]->setEntity($rhsEntity);
+}
+
+$model->set${rel_property}($related);
+// -------------------------------------------------------------------

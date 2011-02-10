@@ -5,7 +5,7 @@
     }
 
     $params = Array();
-${populate_id_parameter}
+    $params[':id'] = $model->get${id_property}();
 ${populate_parameters}
 
     try {

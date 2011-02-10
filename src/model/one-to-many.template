@@ -1,0 +1,9 @@
+// -------------------------------------------------------------------
+// Populate the ${lhs}
+$c = new Criteria();
+$c->addEquals('${rel_column}', $id);
+
+$persister = ActorAbstractFactory::getActor('persister', ${rhs});
+$related = $persister->retrieve($c);
+$model->set${rel_property}($related);
+// -------------------------------------------------------------------

@@ -16,18 +16,19 @@
 namespace clarinet\test\mock;
 
 /**
- * Mock class that represents an entityt with no relationships to other entities
+ * Mocks an entity that declares a one-to-many relationship that is mirrored
+ * on the other side of the relationship.
  *
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/test/mock
  *
- * @Entity(table = simple_entity)
+ * @Entity(table = one_to_many_mirror)
  */
-class SimpleEntity {
+class OneToManyMirrorEntity {
 
   private $_id;
   private $_name;
-  private $_value;
+  private $_many;
 
   /**
    * @Id
@@ -44,10 +45,10 @@ class SimpleEntity {
   }
 
   /**
-   * @Column
+   * @OneToMany(entity = clarinet\test\mock\ManyToOneMirrorEntity)
    */
-  public function getValue() {
-    return $this->_value;
+  public function getMany() {
+    return $this->_many;
   }
 
   public function setId($id) {
@@ -58,7 +59,7 @@ class SimpleEntity {
     $this->_name = $name;
   }
 
-  public function setValue($value) {
-    $this->_value = $value;
+  public function setMany(Array $many) {
+    $this->_many = $many;
   }
 }

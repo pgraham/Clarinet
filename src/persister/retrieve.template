@@ -1,19 +1,38 @@
-  public function retrieve(\clarinet\Criteria $c = null) {
-    $where = ($c !== null) ? ' ' . $c->__toString() : '';
-    $params = ($c !== null) ? $c->getParameters() : null;
-    $sql = "SELECT * FROM ${table}$where";
+  public function retrieve(Criteria $c = null) {
+    if ($c->getTable() === null) {
+      $c->setTable('${table}');
+    }
+
+    $sql = $c->__toString();
+    // TODO - Log the statement, this depends on a logging framework being added to reed
     $stmt = $this->_pdo->prepare($sql);
+    $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
     try {
+      $params = ($c !== null) ? $c->getParameters() : null;
       $stmt->execute($params);
       
-      $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
       $result = Array();
-      foreach ($rows AS $row) {
-        $model = new \${class}();
+      foreach ($stmt AS $row) {
+        $id = $row['${id_column}'];
 
-${populate_id_property}
+        // Don't allow two instances for the same id to be created
+        if (isset($this->_cache[$id])) {
+          $result[] = $this->_cache[$id];
+          continue;
+        } 
+
+        $model = new \${class}();
+        $model->set${id_property}($row['${id_column}']);
 ${populate_properties}
+
+        // Cache the instance before populating any relationships in order to
+        // prevent inifinite loops when loading models that have a
+        // relationship that is declared on both sides
+        $this->_cache[$id] = $model;
+
+        // Populate any relationships
+${populate_relationships}
 
         $result[] = $model;
       }

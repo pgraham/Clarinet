@@ -28,6 +28,7 @@ class Info {
   private $_table;
   private $_id;
   private $_properties = Array();
+  private $_relationships = Array();
 
   /**
    * Create a new model Info object for the model with the given class name.
@@ -46,6 +47,15 @@ class Info {
    */
   public function addProperty(Property $property) {
     $this->_properties[] = $property;
+  }
+
+  /**
+   * Add a relationship object to the list of the model's persister properties.
+   *
+   * @param Relationship $relationship Entity relationship.
+   */
+  public function addRelationship(Relationship $relationship) {
+    $this->_relationships[] = $relationship;
   }
 
   /**
@@ -86,6 +96,15 @@ class Info {
    */
   public function getProperties() {
     return $this->_properties;
+  }
+
+  /**
+   * Getter for the model's entity relationships.
+   *
+   * @return Relationship[]
+   */
+  public function getRelationships() {
+    return $this->_relationships;
   }
 
   /** 

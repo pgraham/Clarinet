@@ -5,6 +5,7 @@ use \PDO;
 use \PDOException;
 
 use \clarinet\Clarinet;
+use \clarinet\Criteria;
 use \clarinet\Exception;
 
 /**
@@ -14,11 +15,14 @@ use \clarinet\Exception;
  */
 class ${persisterName} {
 
+  private $_cache = Array();
+
   private $_pdo = null;
 
   private $_create = null;
   private $_update = null;
   private $_delete = null;
+
 
   public function __construct() {
     $this->_pdo = Clarinet::$pdo;
@@ -31,6 +35,22 @@ class ${persisterName} {
 
     $this->_delete = $this->_pdo->prepare(
       "DELETE FROM ${table} WHERE ${id_column} = :id");
+  }
+
+  public function getById($id) {
+    if (!isset($this->_cache[$id])) {
+      $c = new Criteria();
+      $c->addEquals('${id_column}', $id);
+
+      // We don't care about the result since the retrieve method will
+      // populate the cache
+      $this->retrieve($c);
+      
+      if (!isset($this->_cache[$id])) {
+        throw new Exception("No ${class} exists with id $id");
+      }
+    }
+    return $this->_cache[$id];
   }
 
 ${create}

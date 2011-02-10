@@ -11,28 +11,43 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test
+ * @package clarinet/test/mock
  */
-namespace clarinet\test;
-
-use \PHPUnit_Framework_TestSuite as TestSuite;
-
-require_once __DIR__ . '/test-common.php';
+namespace clarinet\test\mock;
 
 /**
- * This class build a suite consisting of all tests for clarinet.
+ * Entity that is the Right hand side of a one-to-many relationship only
+ * declared on the 'one' side of the relationship.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test
+ * @package clarinet/test/mock
+ *
+ * @Entity(table = one_to_many_rhs)
  */
-class AllTests {
+class OneToManyRhs {
 
-  public static function suite() {
-    $suite = new TestSuite('All Clarinet Tests');
+  private $_id;
+  private $_name;
 
-    $suite->addTestSuite('clarinet\test\CriteriaTest');
-    $suite->addTestSuite('clarinet\test\model\ParserTest');
+  /**
+   * @Id
+   */
+  public function getId() {
+    return $this->_id;
+  }
 
-    return $suite;
+  /**
+   * @Column
+   */
+  public function getName() {
+    return $this->_name;
+  }
+
+  public function setId($id) {
+    $this->_id = $id;
+  }
+
+  public function setName($name) {
+    $this->_name = $name;
   }
 }

@@ -15,7 +15,7 @@
  */
 namespace clarinet\persister;
 
-use \clarinet\model\Info as ModelInfo;
+use \clarinet\model\Info;
 use \clarinet\TemplateLoader;
 
 /**
@@ -30,33 +30,11 @@ class ClassBuilder {
   /**
    * Generate a persister class given an entities table/class structure.
    *
-   * The structure of the given entity info array is as follows:
-   *
-   *  Array
-   *  (
-   *    [class] => The name of the model class
-   *
-   *    [table] => The name of the table in the database in which entities are
-   *               persisted
-   *
-   *    [properties] => Array -- The entity's properties
-   *      (
-   *        [idx] => Array
-   *          (
-   *            [name]   => The camel case name of the property used in its
-   *                        getters and setters.
-   *
-   *            [column] => The name of the column in the database table for the
-   *                        property
-   *          ), ...
-   *      )
-   *  )
-   *
-   * @param array $entityInfo Structure information about the the entity for
+   * @param Info $modelInfo Structure information about the the entity for
    *     which a persister will be generated.
    * @return The persister's PHP code.
    */
-  public static function build(ModelInfo $modelInfo) {
+  public static function build(Info $modelInfo) {
     $templateValues = self::_buildTemplateValues($modelInfo);
 
     // Load templates
@@ -80,13 +58,8 @@ class ClassBuilder {
    * This method uses a parsed model info array structure to create the values
    * to insert into a persister template.
    */
-  private static function _buildTemplateValues(ModelInfo $modelInfo) {
+  private static function _buildTemplateValues(Info $modelInfo) {
     $persisterName = str_replace('\\', '_', $modelInfo->getClass());
-
-    $populateIdParameter = "    \$params[':id'] ="
-      ." \$model->get{$modelInfo->getId()->getName()}();";
-    $populateIdProperty = "      \$model->set{$modelInfo->getId()->getName()}("
-      . "\$row['{$modelInfo->getId()->getColumn()}']);";
 
     $columnNames = Array();
     $valueNames = Array();
@@ -107,21 +80,26 @@ class ClassBuilder {
         . "\$row['$col']);";
     }
 
+    $populateRelationships = Array();
+    foreach ($modelInfo->getRelationships() AS $relationship) {
+      $populateRelationships[] = $relationship->getPopulateCode();
+    }
+
     $templateValues = Array
     (
-      '${class}'                 => $modelInfo->getClass(),
-      '${persisterName}'         => $modelInfo->getActor(),
-      '${table}'                 => $modelInfo->getTable(),
+      '${class}'                  => $modelInfo->getClass(),
+      '${persisterName}'          => $modelInfo->getActor(),
+      '${table}'                  => $modelInfo->getTable(),
 
-      '${id_column}'             => $modelInfo->getId()->getColumn(),
-      '${populate_id_parameter}' => $populateIdParameter,
-      '${populate_id_property}'  => $populateIdProperty,
+      '${id_property}'            => $modelInfo->getId()->getName(),
+      '${id_column}'              => $modelInfo->getId()->getColumn(),
 
-      '${column_names}'          => implode(',', $columnNames),
-      '${value_names}'           => implode(',', $valueNames),
-      '${sql_setters}'           => implode(',', $sqlSetters),
-      '${populate_parameters}'   => implode("\n", $populateParameters),
-      '${populate_properties}'   => implode("\n", $populateProperties)
+      '${column_names}'           => implode(',', $columnNames),
+      '${value_names}'            => implode(',', $valueNames),
+      '${sql_setters}'            => implode(',', $sqlSetters),
+      '${populate_parameters}'    => implode("\n", $populateParameters),
+      '${populate_properties}'    => implode("\n", $populateProperties),
+      '${populate_relationships}' => implode("\n\n", $populateRelationships)
     );
     return $templateValues;
   }

@@ -1,0 +1,10 @@
+// -------------------------------------------------------------------
+// Populate the ${rhs}
+$c = new Criteria();
+$c->addJoin('${link_table}', '${rhs_id_column}', '${rhs_link_column}');
+$c->addEquals('${lhs_link_column}', $id);
+
+$persister = AbstractActorFactory::getActor('persister', '${rhs}');
+$related = $persister->retrieve($c);
+$model->set${rel_property}($related);
+// -------------------------------------------------------------------

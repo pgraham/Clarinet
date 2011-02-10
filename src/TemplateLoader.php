@@ -23,6 +23,31 @@ namespace clarinet;
  */
 class TemplateLoader {
 
+  /* Cache of instances keyed by base path. */
+  private static $_cache = Array();
+
+  /**
+   * Get a (possible cached) instance of a template loader for the given
+   * directory.  Using this method improves the caching of loaded templates to
+   * be directory specific.  This is on top of the caching provided by the
+   * instances themselves.
+   *
+   * @param string $dir The base directory where template are to be loaded from.
+   * @return TemplateLoader
+   */
+  public static function get($dir) {
+    if (!isset(self::$_cache[$dir])) {
+      self::$_cache[$dir] = new TemplatLoader($dir);
+    }
+    return self::$_cache[$dir];
+  }
+
+  /*
+   * ===========================================================================
+   * Instance
+   * ===========================================================================
+   */
+
   /* The base path for where templates are located. */
   private $_basePath;
 

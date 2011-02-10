@@ -1,0 +1,14 @@
+// -------------------------------------------------------------------
+// Populate the ${rhs}
+$relId = $row['${rel_column}'];
+if ($relId !== null) {
+  $persister = ActorAbstractFactory::getActor('persister', '${rhs}');
+  $related = $persister->getById($relId);
+
+  if ($related === null) {
+    throw new Exception("No ${rhs} with id $relId.");
+  }
+
+  $model->set${rel_property}($related);
+}
+// -------------------------------------------------------------------

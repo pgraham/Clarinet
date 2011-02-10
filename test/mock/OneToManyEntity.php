@@ -16,18 +16,19 @@
 namespace clarinet\test\mock;
 
 /**
- * Mock class that represents an entityt with no relationships to other entities
+ * Mock class that represents an entity with a one to many relationship only
+ * declared on one side.
  *
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/test/mock
  *
- * @Entity(table = simple_entity)
+ * @Entity(table = one_to_many_entity)
  */
-class SimpleEntity {
+class OneToManyEntity {
 
   private $_id;
   private $_name;
-  private $_value;
+  private $_many;
 
   /**
    * @Id
@@ -44,21 +45,21 @@ class SimpleEntity {
   }
 
   /**
-   * @Column
+   * @OneToMany(entity = clarinet\test\mock\OneToManyRhs)
    */
-  public function getValue() {
-    return $this->_value;
+  public function getMany() {
+    return $this->_many;
   }
 
   public function setId($id) {
-    $this->_id = $id;
+    return $this->_id;
   }
 
   public function setName($name) {
     $this->_name = $name;
   }
 
-  public function setValue($value) {
-    $this->_value = $value;
+  public function setMany(Array $many) {
+    $this->_many = $many;
   }
 }

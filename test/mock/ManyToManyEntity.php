@@ -16,18 +16,19 @@
 namespace clarinet\test\mock;
 
 /**
- * Mock class that represents an entityt with no relationships to other entities
+ * Mock class that declares a many-to-many relationship with a
+ * mock\SimpleEntity.  The relationship is not declared on the other side.
  *
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/test/mock
  *
- * @Entity(table = simple_entity)
+ * @Entity(table = many_to_many_entity)
  */
-class SimpleEntity {
+class ManyToManyEntity {
 
   private $_id;
   private $_name;
-  private $_value;
+  private $_many;
 
   /**
    * @Id
@@ -37,17 +38,17 @@ class SimpleEntity {
   }
 
   /**
-   * @Column
+   * @Column(name = name)
    */
   public function getName() {
     return $this->_name;
   }
 
   /**
-   * @Column
+   * @ManyToMany(entity = clarinet\test\mock\SimpleEntity)
    */
-  public function getValue() {
-    return $this->_value;
+  public function getMany() {
+    return $this->_many;
   }
 
   public function setId($id) {
@@ -58,7 +59,7 @@ class SimpleEntity {
     $this->_name = $name;
   }
 
-  public function setValue($value) {
-    $this->_value = $value;
+  public function setMany(Array $many) {
+    $this->_many = $many;
   }
 }

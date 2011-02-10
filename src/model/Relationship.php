@@ -11,28 +11,21 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test
+ * @package clarinet/model
  */
-namespace clarinet\test;
-
-use \PHPUnit_Framework_TestSuite as TestSuite;
-
-require_once __DIR__ . '/test-common.php';
+namespace clarinet\model;
 
 /**
- * This class build a suite consisting of all tests for clarinet.
+ * Interface for relationship representations.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test
+ * @package clarinet/model
  */
-class AllTests {
+interface Relationship {
 
-  public static function suite() {
-    $suite = new TestSuite('All Clarinet Tests');
-
-    $suite->addTestSuite('clarinet\test\CriteriaTest');
-    $suite->addTestSuite('clarinet\test\model\ParserTest');
-
-    return $suite;
-  }
+  /**
+   * This method is responsible for returning the code that will populate an
+   * instance of the left hand side with the right hand side.
+   */
+  public function getPopulateCode();
 }

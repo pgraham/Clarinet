@@ -13,12 +13,12 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test
  */
-namespace clarinet\test;
+namespace clarinet\test\model;
 
 use \clarinet\model\Parser;
 use \PHPUnit_Framework_TestCase as TestCase;
 
-require_once __DIR__ . '/test-common.php';
+require_once __DIR__ . '/../test-common.php';
 
 /**
  * This class tests the ModelParser class.
@@ -26,11 +26,11 @@ require_once __DIR__ . '/test-common.php';
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/test
  */
-class ModelParserTest extends TestCase {
+class ParserTest extends TestCase {
   
   /**
-   * Tests that the static parse(...) method generates the expected array
-   * structure for a mock\SimpleEntity model.
+   * Tests that the parse(...) method generates the expected array structure for
+   * a mock\SimpleEntity model.
    */
   public function testParseSimpleEntity() {
     $parser = new Parser('clarinet\test\mock\SimpleEntity');
@@ -65,5 +65,50 @@ class ModelParserTest extends TestCase {
     $this->assertInstanceOf('clarinet\model\Property', $id, $msg);
     $this->assertEquals('Id', $id->getName(), $msg);
     $this->assertEquals('id', $id->getColumn(), $msg);
+  }
+
+  /**
+   * Tests that the parse(...) method generates the expected objects for an
+   * entity that declares a one-to-many relationship.
+   */
+  public function testParseOneToManyRelationship() {
+    $parser = new Parser('clarinet\test\mock\OneToManyEntity');
+    $info = $parser->parse();
+  }
+
+  /**
+   * Tests that the parse(...) method generates the expected object for an
+   * entity that declares a many-to-one relationship.
+   */
+  public function testParseManyToOneRelationship() {
+    $parser = new Parser('clarinet\test\mock\ManyToOneEntity');
+    $info = $parser->parse();
+  }
+
+  /**
+   * Tests that the parse(...) method gnerates the expected objects for a pair
+   * of entities that declare both sides of a one-to-many relationship.
+   */
+  public function testParseOnToManyTwoSidedRelationship() {
+    $parser = new Parser('clarinet\test\mock\OneToManyMirrorEntity');
+    $info = $parser->parse();
+  }
+
+  /**
+   * Tests that the parse(...) method generates the expected objects for an
+   * entity that declares a many-to-many relationship.
+   */
+  public function testParseManyToManyRelationship() {
+    $parser = new Parser('clarinet\test\mock\ManyToManyEntity');
+    $info = $parser->parse();
+  }
+
+  /**
+   * Tests that the parse(...) method generates the expected objects for a pair
+   * entities that declare both sides of a many-to-many relationship.
+   */
+  public function testMarseManyToManyTwoSidedRelationship() {
+    $parser = new Parser('clarinet\test\mock\ManyToManyMirrorLhsEntity');
+    $info = $parser->parse();
   }
 }

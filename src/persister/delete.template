@@ -1,6 +1,6 @@
   public function delete(\${class} $model) {
     $params = Array();
-${populate_id_parameter}
+    $params[':id'] = $model->get${id_property}();
 
     try {
       $this->_pdo->beginTransaction();
