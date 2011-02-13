@@ -16,51 +16,44 @@
 namespace clarinet\test\generated;
 
 use \PHPUnit_Framework_TestCase as TestCase;
-
-require_once __DIR__ . '/../test-common.php';
-
 /**
- * This class tests a generated persister for an entity that contains a
- * ManyToOne relationship.
+ * This class tests a generated persister for a simple entity that contains only
+ * scalar value columns.
  *
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/test/generated
  */
-class ManyToOneTest extends TestCase {
+class SimpleEntityPersisterTest extends TestCase {
+
+  /**
+   * Suite wide setUp, ensure that all Mock classes have had their actor's
+   * generated.
+   */
+  public static function setUpBeforeClass() {
+    Generator::generate();
+  }
 
   private $_pdo;
+  private $_persister;
 
   protected function setUp() {
-    // Connect to the database
+    // Database setUp, creates a clean database and returns a connection to it
     $this->_pdo = Db::setUp();
+
+    // Instantiate a persister
+    $modelName = 'clarinet\test\mock\SimpleEntity';
+    $actorName = str_replace('\\' ,'_', $modelName);
+    $className = "clarinet\\persister\\$actorName";
+
+    // This should use the factory, need to determine a way to inject the PDO
+    // connection Make sure PDO instance references are passed by reference so
+    // that it can be easily nulled
+    $this->_persister = new $className($this->_pdo);
   }
 
   protected function tearDown() {
     // Close the database connection
+    $this->_persister = null;
     Db::tearDown($this->_pdo);
-  }
-
-  public function testCreate() {
-    $stmt = $this->_pdo->prepare("INSERT INTO simple_entity (name, value)
-      VALUES (:name, :value)");
-    $stmt->execute(Array(':name' => 'myName', ':value' => 'myValue'));
-
-    $stmt = $this->_pdo->prepare("SELECT * FROM simple_entity");
-    $stmt->execute();
-    foreach ($stmt AS $row) {
-      print_r($row);
-    }
-  }
-
-  public function testCreateAgain() {
-    $stmt = $this->_pdo->prepare("INSERT INTO simple_entity (name, value)
-      VALUES (:name, :value)");
-    $stmt->execute(Array(':name' => 'myName', ':value' => 'myValue'));
-
-    $stmt = $this->_pdo->prepare("SELECT * FROM simple_entity");
-    $stmt->execute();
-    foreach ($stmt AS $row) {
-      print_r($row);
-    }
   }
 }

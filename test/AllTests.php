@@ -33,6 +33,8 @@ class AllTests {
     $suite->addTestSuite('clarinet\test\CriteriaTest');
     $suite->addTestSuite('clarinet\test\model\ParserTest');
 
+    //$suite->addTestSuite('clarinet\test\generated\ManyToOneTest');
+
     return $suite;
   }
 }

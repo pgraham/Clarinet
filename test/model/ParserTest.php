@@ -27,21 +27,27 @@ require_once __DIR__ . '/../test-common.php';
  * @package clarinet/test
  */
 class ParserTest extends TestCase {
+
+  /**
+   * Clear the cache of parsed model's before each test.
+   */
+  protected function setUp() {
+    Parser::clearCache();
+  }
   
   /**
    * Tests that the parse(...) method generates the expected array structure for
    * a mock\SimpleEntity model.
    */
   public function testParseSimpleEntity() {
-    $parser = new Parser('clarinet\test\mock\SimpleEntity');
-    $info = $parser->parse();
+    $info = Parser::getModelInfo('clarinet\test\mock\SimpleEntity');
     $msg = print_r($info, true);
 
     $this->assertInstanceOf('clarinet\model\Info', $info, $msg);
 
     $this->assertEquals('clarinet\test\mock\SimpleEntity', $info->getClass(),
       $msg);
-    $this->assertEquals('config_values', $info->getTable(), $msg);
+    $this->assertEquals('simple_entity', $info->getTable(), $msg);
 
     $properties = $info->getProperties();
     $this->assertInternalType('array', $properties, $msg);
@@ -72,8 +78,14 @@ class ParserTest extends TestCase {
    * entity that declares a one-to-many relationship.
    */
   public function testParseOneToManyRelationship() {
-    $parser = new Parser('clarinet\test\mock\OneToManyEntity');
-    $info = $parser->parse();
+    $info = Parser::getModelInfo('clarinet\test\mock\OneToManyEntity');
+
+    $relationships = $info->getRelationships();
+    $this->assertInternalType('array', $relationships);
+    $this->assertEquals(1, count($relationships));
+
+    $relationship = $relationships[0];
+    $this->assertInstanceOf('clarinet\model\OneToMany', $relationship);
   }
 
   /**
@@ -81,17 +93,42 @@ class ParserTest extends TestCase {
    * entity that declares a many-to-one relationship.
    */
   public function testParseManyToOneRelationship() {
-    $parser = new Parser('clarinet\test\mock\ManyToOneEntity');
-    $info = $parser->parse();
+    $info = Parser::getModelInfo('clarinet\test\mock\ManyToOneEntity');
+
+    $relationships = $info->getRelationships();
+    $this->assertInternalType('array', $relationships);
+    $this->assertEquals(1, count($relationships));
+
+    $relationship = $relationships[0];
+    $this->assertInstanceOf('clarinet\model\ManyToOne', $relationship);
   }
 
   /**
    * Tests that the parse(...) method gnerates the expected objects for a pair
    * of entities that declare both sides of a one-to-many relationship.
    */
-  public function testParseOnToManyTwoSidedRelationship() {
-    $parser = new Parser('clarinet\test\mock\OneToManyMirrorEntity');
-    $info = $parser->parse();
+  public function testParseOneToManyMirroredRelationship() {
+    $info = Parser::getModelInfo('clarinet\test\mock\OneToManyMirrorEntity');
+
+    // The parsing process should have parsed and cached the mirror entity.
+    $this->assertTrue(
+      Parser::isCached('clarinet\test\mock\ManyToOneMirrorEntity'));
+
+    $relationships = $info->getRelationships();
+    $this->assertInternalType('array', $relationships);
+    $this->assertEquals(1, count($relationships));
+
+    $relationship = $relationships[0];
+    $this->assertInstanceOf('clarinet\model\OneToMany', $relationship);
+
+    $info = Parser::getModelInfo('clarinet\test\mock\ManyToOneMirrorEntity');
+
+    $relationships = $info->getRelationships();
+    $this->assertInternalType('array', $relationships);
+    $this->assertEquals(1, count($relationships));
+
+    $relationship = $relationships[0];
+    $this->assertInstanceOf('clarinet\model\ManyToOne', $relationship);
   }
 
   /**
@@ -101,6 +138,16 @@ class ParserTest extends TestCase {
   public function testParseManyToManyRelationship() {
     $parser = new Parser('clarinet\test\mock\ManyToManyEntity');
     $info = $parser->parse();
+
+    $this->assertTrue(
+      Parser::isCached('clarinet\test\mock\SimpleEntity'));
+
+    $relationships = $info->getRelationships();
+    $this->assertInternalType('array', $relationships);
+    $this->assertEquals(1, count($relationships));
+
+    $relationship = $relationships[0];
+    $this->assertInstanceOf('clarinet\model\ManyToMany', $relationship);
   }
 
   /**
@@ -110,5 +157,24 @@ class ParserTest extends TestCase {
   public function testMarseManyToManyTwoSidedRelationship() {
     $parser = new Parser('clarinet\test\mock\ManyToManyMirrorLhsEntity');
     $info = $parser->parse();
+
+    $this->assertTrue(
+      Parser::isCached('clarinet\test\mock\ManyToManyMirrorRhsEntity'));
+
+    $relationships = $info->getRelationships();
+    $this->assertInternalType('array', $relationships);
+    $this->assertEquals(1, count($relationships));
+
+    $relationship = $relationships[0];
+    $this->assertInstanceOf('clarinet\model\ManyToMany', $relationship);
+
+    $info = Parser::getModelInfo('clarinet\test\mock\ManyToManyMirrorRhsEntity');
+
+    $relationships = $info->getRelationships();
+    $this->assertInternalType('array', $relationships);
+    $this->assertEquals(1, count($relationships));
+
+    $relationship = $relationships[0];
+    $this->assertInstanceOf('clarinet\model\ManyToMany', $relationship);
   }
 }
