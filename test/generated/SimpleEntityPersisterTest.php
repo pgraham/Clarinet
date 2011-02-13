@@ -75,4 +75,47 @@ class SimpleEntityPersisterTest extends TestCase {
     $retrieved->setValue('NewEntityValue');
     $this->assertEquals('NewEntityValue', $entity->getValue());
   }
+
+  public function testRetrieve() {
+    $entity1 = new SimpleEntity();
+    $entity1->setName('Entity1');
+    $entity1->setValue('Entity1Value');
+    $this->_persister->create($entity1);
+
+    $entity2 = new SimpleEntity();
+    $entity2->setName('Entity2');
+    $entity2->setValue('Entity2Value');
+    $this->_persister->create($entity2);
+
+    $entities = $this->_persister->retrieve();
+    $retrieved1 = null;
+    $retrieved2 = null;
+    foreach ($entities AS $entity) {
+      if ($entity->getName() == 'Entity1') {
+        $retrieved1 = $entity;
+      } else if ($entity->getName() == 'Entity2') {
+        $retrieved2 = $entity;
+      }
+    }
+    $this->assertNotNull($retrieved1);
+    $this->assertNotNull($retrieved2);
+  }
+
+  /**
+   * Tests that entities retrieves and then modified, without updating, will
+   * reflect those changes if retrieved a second time.
+   */
+  public function testRetrieveEditRetrieve() {
+    $entity = new SimpleEntity();
+    $entity->setName('Entity');
+    $entity->setValue('EntityValue');
+    $id = $this->_persister->create($entity);
+    $this->assertNotNull($id);
+
+    $retrieved = $this->_persister->getById($id);
+    $retrieved->setValue('NewEntityValue');
+
+    $retrievedAgain = $this->_persister->getById($id);
+    $this->assertEquals('NewEntityValue', $retrievedAgain->getValue());
+  }
 }
