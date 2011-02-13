@@ -137,6 +137,7 @@ class ${actor} {
 
   public function update(\${class} $model) {
     $validator = new Validator();
+    $e = $validator->validate($model);
     if ($e !== null) {
       throw $e;
     }
