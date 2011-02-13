@@ -1,0 +1,10 @@
+// -------------------------------------------------------------------
+// Populuate the ${rhs} parameter
+$rhs = $model->get${lhs_property}();
+if ($rhs !== null) {
+  $rhsId = $rhs->get${rhs_id_property}();
+} else {
+  $rhsId = null;
+}
+$params[':${lhs_column}'] = $rhsId;
+// -------------------------------------------------------------------

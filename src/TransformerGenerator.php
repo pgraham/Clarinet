@@ -15,8 +15,7 @@
  */
 namespace clarinet;
 
-use \SplFileObject;
-
+use \clarinet\model\Info;
 use \clarinet\transformer\ClassBuilder;
 
 /**
@@ -25,31 +24,29 @@ use \clarinet\transformer\ClassBuilder;
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet
  */
-class TransformerGenerator {
+class TransformerGenerator extends AbstractGenerator {
 
   /**
-   * Generate the transformer code for the given model class.  The code is
-   * output at the following path:
+   * Creates a new TransformerGenerator that outputs generated classes to
+   * $outputPath/clarinet/transformer
    *
-   *   Clarinet::$outputPath . '/clarinet/transformer/<transformer-class-name>
-   *
-   * where <transformer-class-name> is the fully qualified name of the model
-   * class with backslashes (\) replaced with underscores (_).
-   *
-   * @param string $className The name of the model class for which to generate
-   *   a transformer.
+   * @param string $outputPath The base output path for generated files.  Class
+   *   files will be output in sub directories of this class that will allow
+   *   the class to be namespaced, and autoloaded properly.
    */
-  public static function generate($className) {
-    $modelInfo = ModelParser::parse($className);
-    $classBody = ClassBuilder::build($modelInfo);
+  public function __construct($outputPath) {
+    parent::__construct($outputPath . '/clarinet/transformer');
+  }
 
-    $filePath = Clarinet::$outputPath . '/clarinet/transformer';
-    if (!file_exists($filePath)) {
-      mkdir($filePath, 0755, true);
-    }
-    $fileName = str_replace('\\', '_', $modelInfo['class']) . '.php';
-
-    $file = new SplFileObject($filePath . '/' . $fileName, 'w');
-    $file->fwrite($classBody);
+  /**
+   * Generates the PHP Code for a transformer actor for the given model
+   * structure.
+   *
+   * @param Info $modelInfo Information about the model for which a transformer
+   *   is to be generated.
+   * @return string The PHP code for a transformer.
+   */
+  protected function _generate(Info $modelInfo) {
+    return ClassBuilder::build($modelInfo);
   }
 }

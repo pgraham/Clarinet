@@ -15,8 +15,7 @@
  */
 namespace clarinet;
 
-use \SplFileObject;
-
+use \clarinet\model\Info;
 use \clarinet\persister\ClassBuilder;
 
 /**
@@ -26,19 +25,29 @@ use \clarinet\persister\ClassBuilder;
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet
  */
-class PersisterGenerator {
+class PersisterGenerator extends AbstractGenerator {
 
-  public static function generate($className) {
-    $entityInfo = ModelParser::parse($className);
-    $classBody = ClassBuilder::build($entityInfo);
+  /**
+   * Creates a new PersisterGenerator that outputs generated classes to
+   * $outputPath/clarinet/persister
+   *
+   * @param string $outputPath The base output path for generated files.  Class
+   *   files will be output in sub directories of this class that will allow
+   *   the class to be namespaced, and autoloaded properly.
+   */
+  public function __construct($outputPath) {
+    parent::__construct($outputPath . '/clarinet/persister');
+  }
 
-    $filePath = Clarinet::$outputPath . '/clarinet/persister';
-    if (!file_exists($filePath)) {
-      mkdir($filePath, 0755, true);
-    }
-    $fileName = str_replace('\\', '_', $entityInfo['class']) . '.php';
-
-    $file = new SplFileObject($filePath . '/' . $fileName, 'w');
-    $file->fwrite($classBody);
+  /**
+   * Generates the PHP Code for a persister actor for the given model
+   * structure.
+   *
+   * @param Info $modelInfo Information about the model for which a persister is
+   *   to be generated.
+   * @return string The PHP code for a persister.
+   */
+  protected function _generate(Info $modelInfo) {
+    return ClassBuilder::build($modelInfo);
   }
 }

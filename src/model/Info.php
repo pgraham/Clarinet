@@ -46,7 +46,7 @@ class Info {
    * @param Property $property Persisted property.
    */
   public function addProperty(Property $property) {
-    $this->_properties[] = $property;
+    $this->_properties[$property->getName()] = $property;
   }
 
   /**
@@ -95,7 +95,17 @@ class Info {
    * @return Property[]
    */
   public function getProperties() {
-    return $this->_properties;
+    return array_values($this->_properties);
+  }
+
+  /**
+   * Getter for the property object representing the property with the given
+   * name.
+   *
+   * @return Property
+   */
+  public function getProperty($name) {
+    return $this->_properties[$name];
   }
 
   /**

@@ -26,6 +26,7 @@ class Property {
 
   private $_name;
   private $_column;
+  private $_values;
 
   /**
    * Create a new persisted property representation.
@@ -56,5 +57,33 @@ class Property {
    */
   public function getColumn() {
     return $this->_column;
+  }
+
+  /**
+   * Getter for the set of possible values for the property.
+   *
+   * @return array
+   */
+  public function getValues() {
+    return $this->_values;
+  }
+
+  /**
+   * Flag for whether or not the set of values for the property is restricted by
+   * an enumeration.
+   *
+   * @return boolean
+   */
+  public function isEnumerated() {
+    return $this->_values !== null;
+  }
+
+  /**
+   * Setter for the set of accepted values for the property.
+   *
+   * @param array $values
+   */
+  public function setValues(Array $values) {
+    $this->_values = $values;
   }
 }

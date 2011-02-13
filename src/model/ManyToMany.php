@@ -15,6 +15,8 @@
  */
 namespace clarinet\model;
 
+use \clarinet\TemplateLoader;
+
 /**
  * This class encapsulates a Many-to-many relationship representation.
  *
@@ -33,8 +35,6 @@ class ManyToMany implements Relationship {
   private $_rhsIdColumn;
   private $_rhsIdProperty;
 
-  private $_linkEntity = null;
-
   /**
    * Create a new Many-to-many relationship representation.  The left side of
    * the relationship is implied by the Info object to which the relationship
@@ -51,13 +51,9 @@ class ManyToMany implements Relationship {
    *   contains the id of the entity on the left side of the relationship.
    * @param string $foreignId The name of the column in the mapping table that
    *   contains the id of the entity on the right side of the relationship.
-   * @param string $linkEntity A special entity to use to represent the
-   *   relationship.  This can be used to attach additional data to the mapping
-   *   itself.  IMPORTANT:  The class that defines the link entity MUST extend
-   *   the entity that form the right hand side of the relationship.
    */
   public function __construct($property, $rhs, $rhsIdColumn, $rhsIdProperty,
-    $linkTable, $linkLhsId, $linkRhsId, $linkEntity = null)
+    $linkTable, $linkLhsId, $linkRhsId)
   {
     $this->_property = $property;
 
@@ -68,8 +64,6 @@ class ManyToMany implements Relationship {
     $this->_rhs = $rhs;
     $this->_rhsIdColumn = $rhsIdColumn;
     $this->_rhsIdProperty = $rhsIdProperty;
-
-    $this->_linkEntity = $linkEntity;
   }
 
   /**
@@ -79,50 +73,43 @@ class ManyToMany implements Relationship {
    * @return string PHP code that will populate the model with the collection of
    *   related entities.
    */
-  public function getPopulateCode() {
-    if ($linkEntity === null) {
-      return $this->_loadBasic();
-    }  else {
-      return $this->_loadLinkEntity();
-    }
+  public function getPopulateModelCode() {
+    $templateValues = $this->_getBasicTemplateValues();
+
+    // Use the instance cache since its likely that the template has already
+    // been loaded for another relationship of the same type.
+    $templateLoader = TemplateLoader::get(__DIR__);
+    $code = $templateLoader->load('many-to-many-model', $templateValues);
+    return $code;
   }
 
-  /*
-   * Loads and populates the template for a many-to-many that does not involve a
-   * special link entity.
+  /**
+   * Since a many-to-many relationship does not store any information on the
+   * left side there is nothing to return here.
    */
-  private function _loadBasic() {
-    $templateValues = Array
+  public function getPopulateParameterCode() {
+    return null;
+  }
+
+  /**
+   * Since a many-to-many relationship does not store any information on the
+   * left side there is nothing to return here.
+   */
+  public function getLhsColumnName() {
+    return null;
+  }
+
+  private function _getBasicTemplateValues() {
+    return Array
     (
-      '${rel_property}'    => $this->_property,
       '${rhs}'             => $this->_rhs,
-      '${rhs_id_column}'   => $this->_rhsId,
+      '${rhs_id_column}'   => $this->_rhsIdColumn,
       
-      '${link_table}'      => $this->_table,
-      '${lhs_link_column}' => $this->_localId,
-      '${rhs_link_column}' => $this->_foreignId
+      '${link_table}'      => $this->_linkTable,
+      '${lhs_link_column}' => $this->_linkLhsId,
+      '${rhs_link_column}' => $this->_linkRhsId,
+
+      '${rel_property}'    => $this->_property
     );
-
-    // Use the instance cache since its likely that the template has already
-    // been loaded for another relationship of the same type.
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('many-to-many', $templateValues);
-    return $code;
-  }
-
-  /*
-   * Loads and populates the template for a many-to-many that does involves a
-   * special link entity.
-   */
-  private function loadLinkEntity() {
-    $templateValues = Array
-    (
-    );
-
-    // Use the instance cache since its likely that the template has already
-    // been loaded for another relationship of the same type.
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('many-to-many-link-entity', $templateValues);
-    return $code;
   }
 }

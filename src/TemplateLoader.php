@@ -37,7 +37,7 @@ class TemplateLoader {
    */
   public static function get($dir) {
     if (!isset(self::$_cache[$dir])) {
-      self::$_cache[$dir] = new TemplatLoader($dir);
+      self::$_cache[$dir] = new TemplateLoader($dir);
     }
     return self::$_cache[$dir];
   }
@@ -52,7 +52,7 @@ class TemplateLoader {
   private $_basePath;
 
   /* Cache of previously loaded templates */
-  private $_cache = Array();
+  private $_loaded = Array();
 
   /**
    * Create a new template loader for loading templates located in the directory
@@ -71,12 +71,12 @@ class TemplateLoader {
    * @param array $templateValues
    */
   public function load($templateName, Array $templateValues) {
-    if (!isset($this->_cache[$templateName])) {
+    if (!isset($this->_loaded[$templateName])) {
       $templatePath = $this->_basePath . "/$templateName.template";
-      $this->_cache[$templateName] = file_get_contents($templatePath);
+      $this->_loaded[$templateName] = file_get_contents($templatePath);
     }
 
-    $template = $this->_cache[$templateName];
+    $template = $this->_loaded[$templateName];
 
     $toReplace   = array_keys($templateValues);
     $replaceWith = array_values($templateValues);

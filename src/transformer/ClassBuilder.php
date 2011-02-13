@@ -36,7 +36,7 @@ class ClassBuilder {
     $templateValues = self::_buildTemplateValues($modelInfo);
 
     // Load templates
-    $templateLoader = new TemplateLoader(__DIR__);
+    $templateLoader = TemplateLoader::get(__DIR__);
     $asArray   = $templateLoader->load('asArray',   $templateValues);
     $fromArray = $templateLoader->load('fromArray', $templateValues);
 

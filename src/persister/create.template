@@ -1,11 +1,13 @@
   public function create(\${class} $model) {
-    $e = Clarinet::validate($model);
+    $validator = new Validator();
+    $e = $validator->validate($model);
     if ($e !== null) {
       throw $e;
     }
 
     $params = Array();
 ${populate_parameters}
+${populate_relationships}
 
     try {
       $this->_pdo->beginTransaction();
@@ -16,6 +18,6 @@ ${populate_parameters}
     } catch (PDOException $e) {
       $this->_pdo->rollback();
 
-      throw new Exception('Error creating ${class}', $e);
+      throw new Exception('Error creating ${class}: ' . $e->getMessage(), $e);
     }
   }

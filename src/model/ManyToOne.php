@@ -15,6 +15,8 @@
  */
 namespace clarinet\model;
 
+use \clarinet\TemplateLoader;
+
 /**
  * This class encapsulates a many-to-one relationship representation.
  *
@@ -23,6 +25,7 @@ namespace clarinet\model;
  */
 class ManyToOne implements Relationship {
 
+  private $_lhs;
   private $_rhs;
   private $_property;
   private $_column;
@@ -30,38 +33,63 @@ class ManyToOne implements Relationship {
   /**
    * Creates a new Many-to-one relationship representation.
    *
+   * @param string $lhs The name of the entity on the left side of the
+   *   relationship.
    * @param string $rhs The name of the entity on the right side of the
    *   relationship.
-   * @param string $property The name of the property in the left hand side
-   *   entity that contains the related right hand side instance.
-   * @param string $column The name of the column in the left side of the
-   *   relationship that contains the id of the right side entity to which
-   *   left side entities are related.
+   * @param string $property The name of the model's property that contains the
+   *   relationship.
+   * @param string $column The name of the model table's column that contains
+   *   the id of the related entity.
    */
-  public function __construct($rhs, $property, $column) {
-    $this->_rhs = $rhs;
+  public function __construct($lhs, $rhs, $property, $column) {
+    $this->_lhs = Parser::getModelInfo($lhs);
+    $this->_rhs = Parser::getModelInfo($rhs);
     $this->_property = $property;
     $this->_column = $column;
   }
 
   /**
-   * Returns the code for populating the left hand side of the relationship.
+   * Generates the PHP code that will populate a variable name $model, which is
+   * an instance of the relationship's left hand side, with the model from the
+   * right hand side of the relationship
    *
    * @return string PHP Code that will populate the model on the left hand side
    *   of the relationship with the model from the right hand side.
    */
-  public function getPopulateCode() {
+  public function getPopulateModelCode() {
     $templateValues = Array
     (
-      '${rhs}'          => $this->_rhs,
-      '${rel_property}' => $this->_property,
-      '${rel_column}'   => $this->_column
+      '${rhs}'             => $this->_rhs->getClass(),
+      '${rhs_id_property}' => $this->_rhs->getId()->getName(),
+      '${lhs_property}'    => $this->_property,
+      '${lhs_column}'      => $this->_column
     );
 
     // Use the instance cache since its likely that the template has already
     // been loaded for another relationship of the same type.
-    $templateLoader = TemplateLoaer::get(__DIR__);
-    $code = $templateLoader->load('many-to-one', $templateValues);
+    $templateLoader = TemplateLoader::get(__DIR__);
+    $code = $templateLoader->load('many-to-one-model', $templateValues);
     return $code;
+  }
+
+  /**
+   * Generates the PHP code that will populate an array named $param with a
+   * key value pair appropriate for use with INSERT and UPDATE statements.
+   */
+  public function getPopulateParameterCode() {
+    $templateValues = Array();
+
+    $templateLoader = TemplateLoader::get(__DIR__);
+    $code = $templateLoader->load('many-to-one-param', $templateValues);
+    return $code;
+  }
+
+  /**
+   * Returns the name of the column that represents the relationship in the
+   * database
+   */
+  public function getLhsColumnName() {
+    return $this->_column;
   }
 }

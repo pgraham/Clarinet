@@ -25,9 +25,6 @@ use \reed\util\ReflectionHelper;
  * This class parses a model class' information into an array structure that is
  * expected by the generator classes.
  *
- * TODO - Relationships that are declared in both participating entities will
- *        result in an infinite loop
- *
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/model
  */
@@ -36,58 +33,45 @@ class Parser {
   /* Cache of completely parsed models */
   private static $_cache = Array();
 
-  /*
-   * Intermediate array of model tables used to prevent infinite loops
-   * while parsing a relationship declared on both sides.
+  /**
+   * Clears the cache of parsed models.  This is used for testing.
    */
-  private static $_tables = Array();
-
-  /*
-   * Intermediate array of model ids used to prevent infinite loops
-   * while parsing a relationship declared on both sides.
-   */
-  private static $_ids = Array();
+  public static function clearCache() {
+    self::$_cache = Array();
+  }
 
   /**
    * Get the database mapping information for the specified model class.
+   *
+   * It is important to note that the instances returned by this method may not
+   * have been populated with relationship information.  This is due to the
+   * mechanism used to prevent infinite loops when parsing a relationship that
+   * is declared on both sides.
+   *
+   * Due to this fact, if an error is encountered parsing any model, the entire
+   * cache will be wiped out.
    *
    * @param string $className The name of the model class to parse.
    * @return Info
    */
   public static function getModelInfo($className) {
-    if (!isset(self::$_cache[$className])) {
-      self::$_cache[$className] = new Parser($className);
+    if (!self::isCached($className)) {
+      $parser = new Parser($className);
+      $parser->parse();
     }
 
-    return self::$_cache[$className]->parse();
+    return self::$_cache[$className];
   }
 
-  /*
-   * Used internally to get the name of an entity's table.  This is used to
-   * prevent infinite loops when parsing a relationship that is declared on both
-   * sides.
+  /**
+   * Returns a boolean indicating whether or not the model info for the given
+   * model has been loaded into the cache.  This is used for testing.
+   *
+   * @param string $className The name of the model class.
+   * @return boolean
    */
-  private static function _getTable($className) {
-    if (!isset(self::$_tables[$className])) {
-      // The parsing process with populate the table.  This is what breaks the
-      // infinite loop
-      self::getModelInfo($className);
-    }
-    return self::$_tables[$className];
-  }
-
-  /*
-   * Used internally to get the name of an entity's id column.  This is used to
-   * prevent infinite loops when parsing a relationship that is declared on both
-   * sides.
-   */
-  private static function _getId($className) {
-    if (!isset(self::$_ids[$className])) {
-      // The parsing process with populate the id.  This is what breaks the
-      // infinite loop
-      self::getModelInfo($className);
-    }
-    return self::$_ids[$className];
+  public static function isCached($className) {
+    return isset(self::$_cache[$className]);
   }
 
   /*
@@ -101,7 +85,7 @@ class Parser {
   private $_className;
   private $_methods;
 
-  private $_modelInfo;
+  private $_modelInfo = null;
 
   /**
    * Instantiate a new model parser.  This is not recommended.  Instead use the
@@ -146,13 +130,12 @@ class Parser {
       return $this->_modelInfo;
     }
 
-    $this->_modelInfo = new Info($this->_className);
+    $modelInfo = new Info($this->_className);
 
     // Order in important here as related entities may need this information for
     // their own parsing
     $table = $this->_classAnnotations['entity']['table'];
-    $this->_modelInfo->setTable($table);
-    self::$_tables[$this->_className] = $table;
+    $modelInfo->setTable($table);
 
     // Find the id column.  This is done before parsing other column types since
     // some default values rely on the id.
@@ -164,11 +147,11 @@ class Parser {
 
       if (isset($annotations['id'])) {
         if ($id !== null) {
-          throw new Exception("{$this->_className} has more than one id column"
+          $this->_fail("{$this->_className} has more than one id column"
             . " defined");
         }
         $id = $this->_parseId($methodName, $annotations);
-        $this->_modelInfo->setId($id);
+        $modelInfo->setId($id);
 
         // We continue to loop at this point to verify that only one id column
         // has be declared
@@ -176,12 +159,8 @@ class Parser {
     }
 
     if ($id === null) {
-      throw new Exception("{$this->_className} does not define an Id column."
+      $this->_fail("{$this->_className} does not define an Id column."
         . "  Use the @Id annotation to denote a column as the id column.");
-
-      $this->_modelInfo = null;
-    } else {
-      self::$_ids[$this->_className] = $id;
     }
 
     // Parse any columns and/or relationships
@@ -192,63 +171,86 @@ class Parser {
 
       if (isset($annotations['column'])) {
         $property = $this->_parseColumn($methodName, $annotations);
-        $this->_modelInfo->addProperty($property);
-
-      } else if (isset($annotations['onetomany'])) {
-        $relationship = $this->_parseOneToMany($methodName, $annotations);
-        $this->_modelInfo->addRelationship($relationship);
-
-      } else if (isset($annotations['manytoone'])) {
-        $relationship = $this->_parseManyToOne($methodName, $annotations);
-        $this->_modelInfo->addRelationship($relationship);
-
-      } else if (isset($annotations['manytomany'])) {
-        $relationship = $this->_parseManyToMany($methodName, $annotations);
-        $this->_modelInfo->addRelationship($relationship);
+        $modelInfo->addProperty($property);
       }
     }
 
-    $numProperties    = count($this->_modelInfo->getProperties());
-    $numRelationships = count($this->_modelInfo->getRelationships());
-    if ($numProperties + $numRelationships == 0) {
-      throw new Exception("{$this->_className} does not define any columns");
+    self::$_cache[$this->_className] = $modelInfo;
 
-      $this->_modelInfo = null;
+    foreach ($this->_methods AS $method) {
+      $docComment = $method->getDocComment();
+      $annotations = ReflectionHelper::getAnnotations($docComment);
+      $methodName = $method->getName();
+
+      if (isset($annotations['onetomany'])) {
+        $relationship = $this->_parseOneToMany($methodName, $annotations);
+        $modelInfo->addRelationship($relationship);
+
+      } else if (isset($annotations['manytoone'])) {
+        $relationship = $this->_parseManyToOne($methodName, $annotations);
+        $modelInfo->addRelationship($relationship);
+
+      } else if (isset($annotations['manytomany'])) {
+        $relationship = $this->_parseManyToMany($methodName, $annotations,
+          $modelInfo);
+        $modelInfo->addRelationship($relationship);
+      }
     }
 
+    $numProperties    = count($modelInfo->getProperties());
+    $numRelationships = count($modelInfo->getRelationships());
+    if ($numProperties + $numRelationships == 0) {
+      $this->_fail("{$this->_className} does not define any columns");
+    }
+
+    $this->_modelInfo = $modelInfo;
     return $this->_modelInfo;
   }
 
   /* Ensure that the model has a setter for the given getter */
   private function _ensureSetter($propertyName) {
     if (!$this->_class->hasMethod("set$propertyName")) {
-      throw new Exception("{$this->_className}: Entity getters must have a"
+      $this->_fail("{$this->_className}: Entity getters must have a"
         . " matching setter");
     }
+  }
+
+  /*
+   * Reset the instances cached Info object, clear the static cache and throw an 
+   * exception with the given message.
+   */
+  private function _fail($msg) {
+    $this->_modelInfo = null;
+    self::clearCache();
+
+    throw new Exception($msg);
   }
 
   /* Parse a method annotated with @Id */
   private function _parseId($methodName, $annotations) {
     if (substr($methodName, 0, 3) !== 'get') {
-      throw new Exception("{$this->_className}: Only a getter can be marked as"
+      $this->_fail("{$this->_className}: Only a getter can be marked as"
         . " the id");
     }
-    $propertyName = substr($methodName, 3);
-    $this->_ensureSetter($propertyName);
+    $property = substr($methodName, 3);
+    $this->_ensureSetter($property);
 
     if (isset($annotations['column'])) {
+      if (isset($annotations['enumerated'])) {
+        // TODO - Raise a warning that the annotation will be ignored.
+      }
       return $this->_parseColumn($methodName, $annotations);
     } else {
       // If no column annotation has been provided assume that the column is
       // named 'id'
-      return new Property($propertyName, 'id');
+      return new Property($property, 'id');
     }
   }
 
   /* Parse a method that is annotated with @Column */
   private function _parseColumn($methodName, $annotations) {
     if (substr($methodName, 0, 3) !== 'get') {
-      throw new Exception("{$this->_className}: Only getters can be marked as"
+      $this->_fail("{$this->_className}: Only getters can be marked as"
         . " columns");
     }
     $propertyName = substr($methodName, 3);
@@ -262,13 +264,18 @@ class Parser {
       // TODO - Update this to expand camel casing to underscores
       $column = strtolower($propertyName);
     }
-    return new Property($propertyName, $column);
+    $property = new Property($propertyName, $column);
+
+    if (isset($annotations['enumerated'])) {
+      $property->setValues($annotations['enumerated']['values']);
+    }
+    return $property;
   }
 
   /* Parse a method that is annotated with @ManyToMany */
-  private function _parseManyToMany($methodName, $annotations) {
+  private function _parseManyToMany($methodName, $annotations, $modelInfo) {
     if (substr($methodName, 0, 3) !== 'get') {
-      throw new Exception("{$this->_className}: Only getters can be marked as"
+      $this->_fail("{$this->_className}: Only getters can be marked as"
         . " a many-to-many relationship");
     }
     $property = substr($methodName, 3);
@@ -277,14 +284,17 @@ class Parser {
     // Make sure that a related entity is declared and get the model info for
     // that entity
     if (!isset($annotations['manytomany']['entity'])) {
-      throw new Exception("{$this->_className}->$methodName: Many-to-many"
+      $this->_fail("{$this->_className}->$methodName: Many-to-many"
         . " relationships must declare the related entity. "
         . " E.g. @ManyToMany(entity = <...>).");
     }
 
+    $lhs = $this->_className;
     $rhs = $annotations['manytomany']['entity'];
-    $rhsTable = self::_getTable($rhs);
-    $rhsId    = self::_getId($rhs);
+
+    $rhsInfo = self::getModelInfo($rhs);
+    $rhsTable = $rhsInfo->getTable();
+    $rhsId = $rhsInfo->getId();
     $rhsIdColumn = $rhsId->getColumn();
     $rhsIdProperty = $rhsId->getName();
 
@@ -292,14 +302,14 @@ class Parser {
     if (isset($annotations['manytomany']['table'])) {
       $linkTable = $annotations['manytomany']['table'];
     } else {
-      $linkTable = $this->_modelInfo->getTable() . '_' . $rhsTable . '_link';
+      $linkTable = $modelInfo->getTable() . '_' . $rhsTable . '_link';
     }
 
     if (isset($annotations['manytomany']['localid'])) {
       $linkLhsId = $annotations['manytomany']['localid'];
     } else {
-      $linkLhsId = $this->_modelInfo->getTable() . '_'
-        . $this->_modelInfo->getId()->getColumn();
+      $linkLhsId = $modelInfo->getTable() . '_'
+        . $modelInfo->getId()->getColumn();
     }
 
     if (isset($annotations['manytomany']['foreignid'])) {
@@ -320,55 +330,56 @@ class Parser {
   /* Parse a method that is annotated with @ManyToOne */
   private function _parseManyToOne($methodName, $annotations) {
     if (substr($methodName, 0, 3) !== 'get') {
-      throw new Exception("{$this->_className}: Only getters can be marked as"
+      $this->_fail("{$this->_className}: Only getters can be marked as"
         . " a many-to-one relationship");
     }
-    $propertyName = substr($methodName, 3);
-    $this->_ensureSetter($propertyName);
+    $property = substr($methodName, 3);
+    $this->_ensureSetter($property);
 
     if (!isset($annotations['manytoone']['entity'])) {
-      throw new Exception("{$this->_className}->$methodName: Many-to-one"
+      $this->_fail("{$this->_className}->$methodName: Many-to-one"
         . " relationships must declare the related entity. "
         . " E.g. @ManyToOne(entity = <...>).");
     }
-    $entity = $annotations['manytoone']['entity'];
-    $rhsTable = self::_getTable($entity);
-    $rhsId = self::_getId($entity);
 
+    $lhs = $this->_className;
+    $rhs = $annotations['manytoone']['entity'];
 
+    $rhsInfo = self::getModelInfo($rhs);
     if (isset($annotations['manytoone']['column'])) {
       $column = $annotations['manytoone']['column'];
     } else {
-      $column = $rhsTable . '_' . $rhsId->getColumn();
+      $column = $rhsInfo->getTable() . '_' . $rhsInfo->getId()->getColumn();
     }
 
-    return new ManyToOne($this->_className, $entity, $propertyName, $column);
+    return new ManyToOne($lhs, $rhs, $property, $column);
   }
 
   /* Parse a method that is annotated with @OneToMany */
   private function _parseOneToMany($methodName, $annotations) {
     if (substr($methodName, 0, 3) !== 'get') {
-      throw new Exception("{$this->_className}: Only getters can be marked as"
+      $this->_fail("{$this->_className}: Only getters can be marked as"
         . " a one-to-many relationship");
     }
     $property = substr($methodName, 3);
     $this->_ensureSetter($property);
 
     if (!isset($annotations['onetomany']['entity'])) {
-      throw new Exception("{$this->_className}->$methodName: One-to-many"
+      $this->_fail("{$this->_className}->$methodName: One-to-many"
         . " relationships must declare the related entity. "
         . " E.g. @OneToMany(entity = <...>).");
     }
-    $entity = $annotations['onetomany']['entity'];
-    $rhsTable = self::_getTable($entity);
-    $rhsId = self::_getId($entity);
 
+    $lhs = $this->_className;
+    $rhs = $annotations['onetomany']['entity'];
+
+    $rhsInfo = self::getModelInfo($rhs);
     if (isset($annotations['onetomany']['column'])) {
       $column = $annotations['onetomany']['column'];
     } else {
-      $column = $rhsTable . '_' . $rhsId->getColumn();
+      $column = $rhsInfo->getTable() . '_' . $rhsInfo->getId()->getColumn();
     }
 
-    return new OneToMany($entity, $property, $column);
+    return new OneToMany($lhs, $rhs, $property, $column);
   }
 }

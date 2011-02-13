@@ -15,6 +15,7 @@
  */
 namespace clarinet\test\generated;
 
+use \clarinet\test\mock\SimpleEntity;
 use \PHPUnit_Framework_TestCase as TestCase;
 /**
  * This class tests a generated persister for a simple entity that contains only
@@ -33,12 +34,11 @@ class SimpleEntityPersisterTest extends TestCase {
     Generator::generate();
   }
 
-  private $_pdo;
   private $_persister;
 
   protected function setUp() {
     // Database setUp, creates a clean database and returns a connection to it
-    $this->_pdo = Db::setUp();
+    Db::setUp();
 
     // Instantiate a persister
     $modelName = 'clarinet\test\mock\SimpleEntity';
@@ -48,12 +48,31 @@ class SimpleEntityPersisterTest extends TestCase {
     // This should use the factory, need to determine a way to inject the PDO
     // connection Make sure PDO instance references are passed by reference so
     // that it can be easily nulled
-    $this->_persister = new $className($this->_pdo);
+    $this->_persister = new $className();
   }
 
   protected function tearDown() {
     // Close the database connection
     $this->_persister = null;
-    Db::tearDown($this->_pdo);
+    Db::tearDown();
+  }
+
+  public function testCreate() {
+    $entity = new SimpleEntity();
+    $entity->setName('Entity');
+    $entity->setValue('EntityValue');
+
+    $id = $this->_persister->create($entity);
+    $this->assertNotNull($id);
+
+    $retrieved = $this->_persister->getById($id);
+
+    $this->assertEquals('Entity', $retrieved->getName());
+    $this->assertEquals('EntityValue', $retrieved->getValue());
+
+    // Make sure that the returned entity is the same instance as was originally
+    // used to create
+    $retrieved->setValue('NewEntityValue');
+    $this->assertEquals('NewEntityValue', $entity->getValue());
   }
 }

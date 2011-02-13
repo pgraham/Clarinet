@@ -27,5 +27,19 @@ interface Relationship {
    * This method is responsible for returning the code that will populate an
    * instance of the left hand side with the right hand side.
    */
-  public function getPopulateCode();
+  public function getPopulateModelCode();
+
+  /**
+   * This method is responsible for returning code that will populate a PDO
+   * parameter name with the right-hand side id.  This is for update and
+   * insert statements.
+   */
+  public function getPopulateParameterCode();
+
+  /**
+   * This method is responsible for returning the name of a column to include in
+   * SQL CREATE and UPDATE statements of the left hand side of the relationship
+   * or NULL if there is none.
+   */
+  public function getLhsColumnName();
 }

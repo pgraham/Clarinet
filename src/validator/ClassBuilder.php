@@ -15,6 +15,7 @@
  */
 namespace clarinet\validator;
 
+use \clarinet\model\Info;
 use \clarinet\TemplateLoader;
 
 /**
@@ -25,7 +26,7 @@ use \clarinet\TemplateLoader;
  */
 class ClassBuilder {
 
-  self::$_templateLoader = new TemplateLoader(__DIR__);
+  private static $_templateLoader = null;
 
   /**
    * Generate a validator actor for the given model information.
@@ -34,7 +35,10 @@ class ClassBuilder {
    *   ModelParser::parse(...).
    * @return string The model's validator's class body.
    */
-  public static function build(Array $modelInfo) {
+  public static function build(Info $modelInfo) {
+    if (self::$_templateLoader === null) {
+      self::$_templateLoader = TemplateLoader::get(__DIR__);
+    }
     $templateValues = self::_buildTemplateValues($modelInfo);
 
     // Load templates
@@ -51,17 +55,17 @@ class ClassBuilder {
    * This method uses the parsed model info to create the values to insert into
    * the validator's template.
    */
-  private static function _buildTemplateValues(Array $modelInfo) {
+  private static function _buildTemplateValues(Info $modelInfo) {
     $propertyGetters    = Array();
     $propertyCheckers   = Array();
     $propertyValidators = Array();
 
-    foreach ($modelInfo['properties'] AS $property) {
-      $prop = $property['name'];
+    foreach ($modelInfo->getProperties() AS $property) {
+      $prop = $property->getName();
       $var  = lcfirst($prop);
 
       // If the property is enumerated 
-      if (isset($property['enumerated'])) {
+      if ($property->isEnumerated()) {
         if (!isset($propertyGetters[$prop])) {
           $propertyGetters[$prop] = "    \$$var = \$model->get$prop();";
         }
@@ -72,7 +76,7 @@ class ClassBuilder {
           '${method_name}' => "_checkEnum$prop",
           '${var_name}'    => "\$$var"
         );
-        $propertyCheckers[] = self::$_templateLoader::load('checker', $values);
+        $propertyCheckers[] = self::$_templateLoader->load('checker', $values);
 
         // Load the enum check method
         $values = Array
@@ -80,16 +84,16 @@ class ClassBuilder {
           '${model}'    => $modelInfo['class'],
           '${property}' => $prop,
           '${var_name}' => "\$$var",
-          '${values}'   => implode(',', $property['enumerated']['values'])
+          '${values}'   => implode(',', $property->getValues())
         );
-        $propertyValidators[] = self::$_templateLoader::load('enum', $values);
+        $propertyValidators[] = self::$_templateLoader->load('enum', $values);
       }
     }
 
     $templateValues = Array
     (
-      '${class}'     => $modelInfo['class'],
-      '${actor}'     => $modelInfo['actor'],
+      '${class}'     => $modelInfo->getClass(),
+      '${actor}'     => $modelInfo->getActor(),
 
       '${property_getters}'    => implode("\n", $propertyGetters),
       '${property_checkers}'   => implode("\n", $propertyCheckers),

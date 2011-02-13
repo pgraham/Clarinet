@@ -37,19 +37,7 @@ class ClassBuilder {
   public static function build(Info $modelInfo) {
     $templateValues = self::_buildTemplateValues($modelInfo);
 
-    // Load templates
-    $templateLoader = new TemplateLoader(__DIR__);
-    $create   = $templateLoader->load('create',   $templateValues);
-    $retrieve = $templateLoader->load('retrieve', $templateValues);
-    $update   = $templateLoader->load('update',   $templateValues);
-    $delete   = $templateLoader->load('delete',   $templateValues);
-
-    // Put it all together
-    $templateValues['${create}']   = $create;
-    $templateValues['${retrieve}'] = $retrieve;
-    $templateValues['${update}']   = $update;
-    $templateValues['${delete}']   = $delete;
-
+    $templateLoader = TemplateLoader::get(__DIR__);
     $body = $templateLoader->load('class', $templateValues);
     return $body;
   }
@@ -82,13 +70,28 @@ class ClassBuilder {
 
     $populateRelationships = Array();
     foreach ($modelInfo->getRelationships() AS $relationship) {
-      $populateRelationships[] = $relationship->getPopulateCode();
+      $populateRelationship = $relationship->getPopulateModelCode();
+      if ($populateRelationship !== null) {
+        $populateRelationships[] = $populateRelationship;
+      }
+
+      $populateParameter = $relationship->getPopulateParameterCode();
+      if ($populateParameter !== null) {
+        $populateParameters[] = $populateParameter;
+      }
+
+      $columnName = $relationship->getLhsColumnName();
+      if ($columnName !== null) {
+        $columnNames[] = $columnName;
+        $valueNames[] = ":$columnName";
+        $sqlSetters[] = "$columnName = :$columnName";
+      }
     }
 
     $templateValues = Array
     (
       '${class}'                  => $modelInfo->getClass(),
-      '${persisterName}'          => $modelInfo->getActor(),
+      '${actor}'                  => $modelInfo->getActor(),
       '${table}'                  => $modelInfo->getTable(),
 
       '${id_property}'            => $modelInfo->getId()->getName(),

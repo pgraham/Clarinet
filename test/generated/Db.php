@@ -17,6 +17,8 @@ namespace clarinet\test\generated;
 
 use \PDO;
 
+use \clarinet\PdoWrapper;
+
 /**
  * This class provides setUp functionality common to all tests that require
  * the mock database.  The mock database is a database that contains the
@@ -38,7 +40,8 @@ class Db {
 
     $pdo = new PDO('sqlite:' . __DIR__ . '/db.sq3');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    return $pdo;
+
+    PdoWrapper::set($pdo);
   }
 
   /**
@@ -46,8 +49,8 @@ class Db {
    *
    * @param PDO PDO connection to clean up.
    */
-  public static function tearDown(&$pdo) {
-    $pdo = null;
+  public static function tearDown() {
+    PdoWrapper::get()->close();
     unlink(__DIR__ . '/db.sq3');
   }
 }

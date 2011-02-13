@@ -15,8 +15,7 @@
  */
 namespace clarinet;
 
-use \SplFileObject;
-
+use \clarinet\model\Info;
 use \clarinet\validator\ClassBuilder;
 
 /**
@@ -25,31 +24,30 @@ use \clarinet\validator\ClassBuilder;
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet
  */
-class ValidatorGenerator {
+class ValidatorGenerator extends AbstractGenerator {
 
   /**
-   * Generate the validation code for the given model class.  The code is output
-   * at the following path:
+   * Creates a new ValidatorGenerator that outputs generated classes to
+   * $outputPath/clarinet/validator
    *
-   *   Clarinet::$outputPath . '/clarinet/validator/<validator-class-name>
-   *
-   * where <validator-class-name> is the fully qualified name of the model class
-   * with backslashes (\) replaced with underscores (_).
-   *
-   * @param string $className The name of the model class for which to generate
-   *   a validator.
+   * @param string $outputPath The base output path for generated files.  Class
+   *   files will be output in sub directories of this class that will allow
+   *   the class to be namespaced, and autoloaded properly.
    */
-  public static function generate($className) {
-    $modelInfo = ModelParser::parse($className);
-    $classBody = ClassBuilder::build($modelInfo);
+  public function __construct($outputPath) {
+    parent::__construct($outputPath . '/clarinet/validator');
+  }
 
-    $filePath = Clarinet::$outputPath . '/clarinet/transformer';
-    if (!file_exists($filePath)) {
-      mkdir($filePath, 0755, true);
-    }
-    $fileName = str_replace('\\', '_', $modelInfo['class']) . '.php';
 
-    $file = new SplFileObject($filePath . '/' . $fileName, 'w');
-    $file->fwrite($classBody);
+  /**
+   * Generates the PHP Code for a validator actor for the given model
+   * structure.
+   *
+   * @param Info $modelInfo Information about the model for which a validator
+   *   is to be generated.
+   * @return string The PHP code for a validator.
+   */
+  protected function _generate(Info $modelInfo) {
+    return ClassBuilder::build($modelInfo);
   }
 }

@@ -9,10 +9,9 @@ use \clarinet\Exception;
  * DO NOT modify this file.  Instead, modify the model class of this validator,
  * then run the Clarinet generator to re-generate this file.
  */
-class ${validator} {
+class ${actor} {
 
 ${validate}
 
-${validators}
-
+${property_validators} 
 }

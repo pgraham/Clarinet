@@ -41,20 +41,9 @@ class ActorGenerator {
    *   the actor.
    */
   public static function generate($actorType, $modelClass) {
-    $modelInfo = Parser::getModelInfo($modelClass);
-
-    // Build the fully qualified name of the actor's class builder and use it
-    // to invoke the class builder's static build function
-    $classBuilder = "clarinet\\$actorType\\ClassBuilder";
-    $classBody = call_user_func("$classBuilder::build", $modelInfo);
-
-    $filePath = Clarinet::$outputPath . '/clarinet/' . $actorType;
-    if (!file_exists($filePath)) {
-      mkdir($filePath, 0755, true);
-    }
-    $fileName = $modelInfo->getActor() . '.php';
-
-    $file = new SplFileObject($filePath . '/' . $fileName, 'w');
-    $file->fwrite($classBody);
+    $generatorType = "clarinet\\{$actorType}Generator";
+    $outputPath = Clarinet::$outputPath . '/clarinet/' . $actorType;
+    $generator = new $generatorType($outputPath);
+    $generator->generate($modelClass);
   }
 }

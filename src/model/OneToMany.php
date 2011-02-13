@@ -15,6 +15,8 @@
  */
 namespace clarinet\model;
 
+use \clarinet\TemplateLoader;
+
 /**
  * This class encapsulates a one-to-many relationship representation.
  *
@@ -23,25 +25,29 @@ namespace clarinet\model;
  */
 class OneToMany implements Relationship {
 
+  private $_lhs;
+  private $_lhsProperty;
   private $_rhs;
-  private $_property;
-  private $_column;
+  private $_rhsColumn;
 
   /**
    * Creates a new one-to-many relationship representation.
    *
+   * @param string $lhs The name of the entity on the left side of the
+   *   relationship.
    * @param string $rhs The name of the entity on the right side of the
    *   relationship.
    * @param string $property The name of the property in the left hand side
    *   entity that contains the related right hand side instances.
    * @param string $column The name of the column in the right side of the
-   *   relationship that contains the id of the right side entity to which
-   *   left side entities are related.
+   *   relationship that contains the id of the left side entity to which
+   *   right side entities are related.
    */
-  public function __construct($rhs, $property, $column) {
+  public function __construct($lhs, $rhs, $lhsProperty, $rhsColumn) {
+    $this->_lhs = $lhs;
+    $this->_lhsProperty = $lhsProperty;
     $this->_rhs = $rhs;
-    $this->_property = $property;
-    $this->_column = $column;
+    $this->_rhsColumn = $rhsColumn;
   }
 
   /**
@@ -51,18 +57,34 @@ class OneToMany implements Relationship {
    * @return string PHP Code that will populate the model with the collection of
    *   related entities.
    */
-  public function getPopulateCode() {
+  public function getPopulateModelCode() {
     $templateValues = Array
     (
       '${rhs}'          => $this->_rhs,
-      '${rel_property}' => $this->_property,
-      '${rel_column}'   => $this->_column
+      '${rhs_column}'   => $this->_rhsColumn,
+      '${lhs_property}' => $this->_lhsProperty
     );
 
     // Use the instance cache since its likely that the template has already
     // been loaded for another relationship of the same type.
     $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('one-to-many', $templateValues);
+    $code = $templateLoader->load('one-to-many-model', $templateValues);
     return $code;
+  }
+
+  /**
+   * A one-to-many relationship does not store any information in the left hand
+   * side so that there is nothing to do here.
+   */
+  public function getPopulateParameterCode() {
+    return null;
+  }
+
+  /**
+   * A one-to-many relationship does not store any information in the left hand
+   * side so there is nothing to do here.
+   */
+  public function getLhsColumnName() {
+    return null;
   }
 }

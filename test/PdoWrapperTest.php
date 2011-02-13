@@ -15,28 +15,30 @@
  */
 namespace clarinet\test;
 
-use \PHPUnit_Framework_TestSuite as TestSuite;
+use \PDO;
+
+use \clarinet\PdoWrapper;
+
+use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/test-common.php';
 
 /**
- * This class build a suite consisting of all tests for clarinet.
+ * This class test the PdoWrapper class.
  *
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/test
  */
-class AllTests {
+class PdoWrapperTest extends TestCase {
 
-  public static function suite() {
-    $suite = new TestSuite('All Clarinet Tests');
+  public function testLifeCycle() {
+    $pdo = new PDO('sqlite::memory:');
 
-    $suite->addTestSuite('clarinet\test\CriteriaTest');
-    $suite->addTestSuite('clarinet\test\PdoWrapperTest');
-    $suite->addTestSuite('clarinet\test\model\ParserTest');
+    PdoWrapper::set($pdo);
 
-    $suite->addTestSuite('clarinet\test\generated\SimpleEntityPersisterTest');
-    //$suite->addTestSuite('clarinet\test\generated\ManyToOneTest');
+    $wrapper = PdoWrapper::get();
+    $wrapper->close();
 
-    return $suite;
+    $this->assertNull($pdo);
   }
 }
