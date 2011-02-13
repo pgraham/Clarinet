@@ -18,6 +18,10 @@ use \clarinet\validator\${actor} as Validator;
  */
 class ${actor} {
 
+  /*
+   * Delete entities will have an index in the cache but the value will be
+   * null.
+   */
   private $_cache = Array();
 
   private $_pdo = null;
@@ -50,7 +54,7 @@ class ${actor} {
       $this->retrieve($c);
       
       if (!isset($this->_cache[$id])) {
-        throw new Exception("No ${class_str} exists with id $id");
+        return null;
       }
     }
     return $this->_cache[$id];
@@ -181,7 +185,9 @@ class ${actor} {
       $rowCount = $this->_delete->rowCount();
       $this->_pdo->commit();
 
-      return $rowCount();
+      $this->_cache[$id] = null;
+
+      return $rowCount;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
 

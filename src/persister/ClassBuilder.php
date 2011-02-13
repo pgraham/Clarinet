@@ -102,7 +102,10 @@ class ClassBuilder {
       '${sql_setters}'            => implode(',', $sqlSetters),
       '${populate_parameters}'    => implode("\n", $populateParameters),
       '${populate_properties}'    => implode("\n", $populateProperties),
-      '${populate_relationships}' => implode("\n\n", $populateRelationships)
+      '${populate_relationships}' => implode("\n\n", $populateRelationships),
+
+      '${class_str}'              => str_replace('\\', '\\\\',
+                                       $modelInfo->getClass())
     );
     return $templateValues;
   }

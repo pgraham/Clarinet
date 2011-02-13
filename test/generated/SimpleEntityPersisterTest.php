@@ -64,6 +64,7 @@ class SimpleEntityPersisterTest extends TestCase {
 
     $id = $this->_persister->create($entity);
     $this->assertNotNull($id);
+    $this->assertEquals($id, $entity->getId());
 
     $retrieved = $this->_persister->getById($id);
 
@@ -158,5 +159,29 @@ class SimpleEntityPersisterTest extends TestCase {
     $retrieved = $persister->getById($id);
     $this->assertEquals('Entity', $retrieved->getName());
     $this->assertEquals('NewEntityValue', $retrieved->getValue());
+  }
+
+  /**
+   * Tests that the delete method properly deletes an entity from the database
+   * and the cache.
+   */
+  public function testDelete() {
+    $entity = new SimpleEntity();
+    $entity->setName('Entity');
+    $entity->setValue('EntityValue');
+    $id = $this->_persister->create($entity);
+    $this->assertNotNull($id);
+
+    $this->_persister->delete($entity);
+    $retrieved = $this->_persister->getById($id);
+    $this->assertNull($retrieved);
+
+    // Use a new persister to ensure that the delete was actually done in the
+    // database
+    $className = get_class($this->_persister);
+    $persister = new $className();
+
+    $retrieved = $persister->getById($id);
+    $this->assertNull($retrieved);
   }
 }
