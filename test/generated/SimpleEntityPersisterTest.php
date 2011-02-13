@@ -118,4 +118,45 @@ class SimpleEntityPersisterTest extends TestCase {
     $retrievedAgain = $this->_persister->getById($id);
     $this->assertEquals('NewEntityValue', $retrievedAgain->getValue());
   }
+
+  /**
+   * Test retrieving a non-cached object.
+   */
+  public function testRetrieveNoCache() {
+    $entity = new SimpleEntity();
+    $entity->setName('Entity');
+    $entity->setValue('EntityValue');
+    $id = $this->_persister->create($entity);
+    $this->assertNotNull($id);
+
+    // Use a new persister to ensure that there are no cached models
+    $className = get_class($this->_persister);
+    $persister = new $className();
+
+    $retrieved = $persister->getById($id);
+    $this->assertEquals('Entity', $retrieved->getName());
+    $this->assertEquals('EntityValue', $retrieved->getValue());
+  }
+
+  /**
+   * Tests that the update method properly saves changes in the database.
+   */
+  public function testUpdate() {
+    $entity = new SimpleEntity();
+    $entity->setName('Entity');
+    $entity->setValue('EntityValue');
+    $id = $this->_persister->create($entity);
+    $this->assertNotNull($id);
+
+    $entity->setValue('NewEntityValue');
+    $this->_persister->update($entity);
+
+    // Use a new persister to ensure that there are no cached models
+    $className = get_class($this->_persister);
+    $persister = new $className();
+
+    $retrieved = $persister->getById($id);
+    $this->assertEquals('Entity', $retrieved->getName());
+    $this->assertEquals('NewEntityValue', $retrieved->getValue());
+  }
 }
