@@ -4,7 +4,7 @@ namespace clarinet\persister;
 use \PDO;
 use \PDOException;
 
-use \clarinet\Clarinet;
+use \clarinet\ActorAbstractFactory;
 use \clarinet\Criteria;
 use \clarinet\Exception;
 use \clarinet\PDOWrapper;
@@ -68,14 +68,17 @@ class ${actor} {
     }
 
     try {
-      $this->_pdo->beginTransaction();
+      $startTransaction = $this->_pdo->beginTransaction();
 
       $params = Array();
       ${populate_parameters}
 
       $this->_create->execute($params);
       $id = $this->_pdo->lastInsertId();
-      $this->_pdo->commit();
+
+      if ($startTransaction) {
+        $this->_pdo->commit();
+      }
 
       $model->set${id_property}($id);
       $this->_cache[$id] = $model;
@@ -152,7 +155,7 @@ class ${actor} {
     }
 
     try {
-      $this->_pdo->beginTransaction();
+      $startTransaction = $this->_pdo->beginTransaction();
 
       $params = Array();
       $params[':id'] = $id;
@@ -161,7 +164,9 @@ class ${actor} {
       $this->_update->execute($params);
       $rowCount = $this->_update->rowCount();
 
-      $this->_pdo->commit();
+      if ($startTransaction) {
+        $this->_pdo->commit();
+      }
       return $rowCount;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
@@ -180,10 +185,14 @@ class ${actor} {
     $params[':id'] = $id;
 
     try {
-      $this->_pdo->beginTransaction();
+      $startTransaction = $this->_pdo->beginTransaction();
+
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
-      $this->_pdo->commit();
+
+      if ($startTransaction) {
+        $this->_pdo->commit();
+      }
 
       $this->_cache[$id] = null;
 

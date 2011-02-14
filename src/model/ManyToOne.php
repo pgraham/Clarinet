@@ -58,13 +58,7 @@ class ManyToOne implements Relationship {
    *   of the relationship with the model from the right hand side.
    */
   public function getPopulateModelCode() {
-    $templateValues = Array
-    (
-      '${rhs}'             => $this->_rhs->getClass(),
-      '${rhs_id_property}' => $this->_rhs->getId()->getName(),
-      '${lhs_property}'    => $this->_property,
-      '${lhs_column}'      => $this->_column
-    );
+    $templateValues = $this->_getTemplateValues();
 
     // Use the instance cache since its likely that the template has already
     // been loaded for another relationship of the same type.
@@ -78,7 +72,7 @@ class ManyToOne implements Relationship {
    * key value pair appropriate for use with INSERT and UPDATE statements.
    */
   public function getPopulateParameterCode() {
-    $templateValues = Array();
+    $templateValues = $this->_getTemplateValues();
 
     $templateLoader = TemplateLoader::get(__DIR__);
     $code = $templateLoader->load('many-to-one-param', $templateValues);
@@ -91,5 +85,16 @@ class ManyToOne implements Relationship {
    */
   public function getLhsColumnName() {
     return $this->_column;
+  }
+
+  /* Create an array of template values for the relationship's templates. */
+  private function _getTemplateValues() {
+    return Array
+    (
+      '${rhs}'             => $this->_rhs->getClass(),
+      '${rhs_id_property}' => $this->_rhs->getId()->getName(),
+      '${lhs_property}'    => $this->_property,
+      '${lhs_column}'      => $this->_column
+    );
   }
 }

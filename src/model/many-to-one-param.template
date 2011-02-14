@@ -3,6 +3,10 @@
 $rhs = $model->get${lhs_property}();
 if ($rhs !== null) {
   $rhsId = $rhs->get${rhs_id_property}();
+  if ($rhsId === null) {
+    $persister = ActorAbstractFactory::getActor('persister', '${rhs}');
+    $rhsId = $persister->create($rhs);
+  }
 } else {
   $rhsId = null;
 }

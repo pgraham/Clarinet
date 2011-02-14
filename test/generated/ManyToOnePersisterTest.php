@@ -29,7 +29,7 @@ require_once __DIR__ . '/../test-common.php';
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/test/generated
  */
-class ManyToOneTest extends TestCase {
+class ManyToOnePersisterTest extends TestCase {
   
   /*
    * Suite wide setUp, ensures all Mock classes have had their actor's
@@ -39,27 +39,21 @@ class ManyToOneTest extends TestCase {
     Generator::generate();
   }
 
-  private $_pdo;
   private $_persister;
 
   protected function setUp() {
-    // Connect to the database
-    $this->_pdo = Db::setUp();
+    Db::setUp();
 
     // Instantiate a generated persister to test
     $modelName = 'clarinet\test\mock\ManyToOneEntity';
     $actorName = str_replace('\\', '_', $modelName);
     $className = "clarinet\\persister\\" . $actorName;
-
-    // This should use the factory, need to determine a way to inject the PDO
-    // connection
-    $this->_persister = new $className($this->_pdo);
+    $this->_persister = new $className();
   }
 
   protected function tearDown() {
-    // Close the database connection
     $this->_persister = null;
-    Db::tearDown($this->_pdo);
+    Db::tearDown();
   }
 
   public function testCreate() {
@@ -71,26 +65,45 @@ class ManyToOneTest extends TestCase {
     $manyToOne->setName('manyToOneEntity1');
     $manyToOne->setOne($one);
 
-    $this->_persister->create($manyToOne);
+    $id = $this->_persister->create($manyToOne);
+    $this->assertNotNull($id);
+    $this->assertEquals($id, $manyToOne->getId());
 
-    $c = new Criteria();
-    $c->addEquals('name', 'manyToOneEntity1');
-    $entities = $this->_persister->retrieve($c);
-    $msg = print_r($entities, true);
+    $retrieved = $this->_persister->getById($id);
+    $this->assertNotNull($retrieved);
+    $this->assertInstanceOf('clarinet\test\mock\ManyToOneEntity', $retrieved);
+    $this->assertEquals('manyToOneEntity1', $retrieved->getName());
 
-    $this->assertInternalType('array', $entities, $msg);
-    $this->assertEquals(1, count($entities), $msg);
+    $retrievedOne = $retrieved->getOne();
+    $this->assertNotNull($retrievedOne);
+    $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $retrievedOne);
+    $this->assertNotNull($retrievedOne->getId());
+    $this->assertEquals($one->getId(), $retrievedOne->getId());
+    $this->assertEquals('entity1', $retrievedOne->getName());
+    $this->assertEquals('entity1value', $retrievedOne->getValue());
+  }
 
-    $entity = $entities[0];
-    $msg = print_r($entity, true);
-    $this->assertInstanceOf('clarinet\test\mock\ManyToOneEntity', $entity,
-      $msg);
+  public function testRetrieve() {
+    $one = new SimpleEntity();
+    $one->setName('SimpleEntity');
+    $one->setValue('SimpleEntityValue');
 
-    $retrievedOne = $entity->getOne();
-    $msg = print_r($retrievedOne, true);
-    $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $retrievedOne,
-      $msg);
-    $this->assertEquals('entity1', $retrievedOne->getName(), $msg);
-    $this->assertEquals('entity1value', $retrievedOne->getValue(), $msg);
+    $many = new ManyToOneEntity();
+    $many->setName('ManyEntity');
+    $many->setOne($one);
+
+    $manyId = $this->_persister->create($many);
+
+    // Use a new persister to avoid the cache
+    $className = get_class($this->_persister);
+    $persister = new $className();
+
+    $retrieved = $persister->getById($manyId);
+    $this->assertEquals('ManyEntity', $retrieved->getName());
+    
+    $retrievedOne = $retrieved->getOne();
+    $this->assertNotNull($retrievedOne);
+    $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $retrievedOne);
+    $this->assertEquals($one->getId(), $retrievedOne->getId());
   }
 }

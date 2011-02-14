@@ -21,12 +21,27 @@ namespace clarinet;
  * returned by this class can be used to instantiate actors of their specified
  * type for specific model classes
  *
+ * TODO - Merge this class into the ActorFactory class.
+ *
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet
  */
 class ActorAbstractFactory {
 
+  /* Loaded factories, indexed by actor type */
   private static $_factories = Array();
+
+  /**
+   * Clears the cache of each loaded factory and then clears the cache of loaded
+   * factories.  This is generally run as part of the tearDown method of a unit
+   * test.
+   */
+  public static function clearFactories() {
+    foreach (self::$_factories AS $factory) {
+      $factory->clearCache();
+    }
+    self::$_factories = Array();
+  }
 
   /**
    * This methods first loads a factory for the given type of actor which is

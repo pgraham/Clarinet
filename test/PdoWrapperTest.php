@@ -38,7 +38,5 @@ class PdoWrapperTest extends TestCase {
 
     $wrapper = PdoWrapper::get();
     $wrapper->close();
-
-    $this->assertNull($pdo);
   }
 }

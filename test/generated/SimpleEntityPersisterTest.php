@@ -37,22 +37,16 @@ class SimpleEntityPersisterTest extends TestCase {
   private $_persister;
 
   protected function setUp() {
-    // Database setUp, creates a clean database and returns a connection to it
     Db::setUp();
 
     // Instantiate a persister
     $modelName = 'clarinet\test\mock\SimpleEntity';
     $actorName = str_replace('\\' ,'_', $modelName);
     $className = "clarinet\\persister\\$actorName";
-
-    // This should use the factory, need to determine a way to inject the PDO
-    // connection Make sure PDO instance references are passed by reference so
-    // that it can be easily nulled
     $this->_persister = new $className();
   }
 
   protected function tearDown() {
-    // Close the database connection
     $this->_persister = null;
     Db::tearDown();
   }
@@ -67,7 +61,8 @@ class SimpleEntityPersisterTest extends TestCase {
     $this->assertEquals($id, $entity->getId());
 
     $retrieved = $this->_persister->getById($id);
-
+    $this->assertNotNull($retrieved);
+    $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $retrieved);
     $this->assertEquals('Entity', $retrieved->getName());
     $this->assertEquals('EntityValue', $retrieved->getValue());
 

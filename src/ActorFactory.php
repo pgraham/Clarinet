@@ -20,6 +20,7 @@ namespace clarinet;
  * model classes.
  *
  * @author Philip Graham <philip@zeptech.ca>
+ * @package clarinet
  */
 class ActorFactory {
 
@@ -29,10 +30,32 @@ class ActorFactory {
   /* Cache of already loaded actors indexed by model class */
   private $_cache = Array();
 
+  /**
+   * Create a new ActorFactory for actors of the given type.
+   *
+   * @param string $actorType The type of actor created by this factory.
+   */
   public function __construct($actorType) {
     $this->_actorType = $actorType;
   }
 
+  /**
+   * Clears the cache of actors.  This is mostly used to clear out the cache of
+   * persisters between unit tests since the PDO connection is nullified at the
+   * end of a test.
+   */
+  public function clearCache() {
+    $this->_cache = Array();
+  }
+
+  /**
+   * Get an actor for the given class.  If this is the first time that the actor
+   * has been accessed for the class and DEBUG is defined and set to true then
+   * the actor will be regenerated.
+   *
+   * @param string $modelClass The name of the model that the actor acts upon.
+   * @return object
+   */
   public function getActor($modelClass) {
     if (!isset($this->_cache[$modelClass])) {
       $this->_cache[$modelClass] = $this->_load($modelClass);
@@ -40,6 +63,10 @@ class ActorFactory {
     return $this->_cache[$modelClass];
   }
 
+  /*
+   * Generate if in DEBUG and return an instance of the actor for the specified
+   * model class.
+   */
   private function _load($modelClass) {
     if (defined('DEBUG') && DEBUG === true) {
       ActorGenerator::generate($this->_actorType, $modelClass);

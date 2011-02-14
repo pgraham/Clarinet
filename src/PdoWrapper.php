@@ -49,10 +49,6 @@ class PdoWrapper {
    * @param PDO The PDO connection to decorate.
    */
   public static function set(PDO &$pdo) {
-    if (self::$_instance !== null) {
-      self::$_instance->close();
-      self::$_instance = null;
-    }
     self::$_instance = new PdoWrapper($pdo);
   }
 
@@ -64,6 +60,9 @@ class PdoWrapper {
 
   /* The wrapped PDO connection */
   private $_pdo;
+
+  /* Whether or not a transaction is in progress */
+  private $_inTransaction = false;
 
   /**
    * Create a new PdoWrapper.
@@ -80,7 +79,12 @@ class PdoWrapper {
    * @return boolean
    */
   public function beginTransaction() {
-    return $this->_pdo->beginTransaction();
+    if ($this->_inTransaction) {
+      return false;
+    }
+    
+    $this->_inTransaction = $this->_pdo->beginTransaction();
+    return $this->_inTransaction;
   }
 
   /**
@@ -101,6 +105,11 @@ class PdoWrapper {
    * @return boolean
    */
   public function commit() {
+    if (!$this->_inTransaction) {
+      return false;
+    }
+
+    $this->_inTransaction = false;
     return $this->_pdo->commit();
   }
 
@@ -134,6 +143,11 @@ class PdoWrapper {
    * @return boolean
    */
   public function rollback() {
+    if (!$this->_inTransaction) {
+      return false;
+    }
+
+    $this->_inTransaction = false;
     return $this->_pdo->rollback();
   }
 }
