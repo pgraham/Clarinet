@@ -106,4 +106,42 @@ class ManyToOnePersisterTest extends TestCase {
     $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $retrievedOne);
     $this->assertEquals($one->getId(), $retrievedOne->getId());
   }
+
+  public function testUpdate() {
+    $one = new SimpleEntity();
+    $one->setName('Entity');
+    $one->setValue('EntityValue');
+
+    $many = new ManyToOneEntity();
+    $many->setName('Many');
+    $many->setOne($one);
+
+    $manyId = $this->_persister->create($many);
+
+    $newOne = new SimpleEntity();
+    $newOne->setName('NewEntity');
+    $newOne->setValue('NewValue');
+    $many->setOne($newOne);
+    $this->_persister->update($many);
+
+    $this->assertNotNull($newOne->getId());
+
+    $retrieved = $this->_persister->getById($manyId);
+    $retrievedOne = $retrieved->getOne();
+    $this->assertNotNull($retrievedOne);
+    $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $retrievedOne);
+    $this->assertNotNull($retrievedOne->getId());
+    $this->assertEquals($newOne->getId(), $retrievedOne->getId());
+
+    // Retrieve with a new persister to avoid any cached models
+    $className = get_class($this->_persister);
+    $persister = new $className();
+
+    $retrieved = $persister->getById($manyId);
+    $retrievedOne = $retrieved->getOne();
+    $this->assertNotNull($retrievedOne);
+    $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $retrievedOne);
+    $this->assertNotNull($retrievedOne->getId());
+    $this->assertEquals($newOne->getId(), $retrievedOne->getId());
+  }
 }
