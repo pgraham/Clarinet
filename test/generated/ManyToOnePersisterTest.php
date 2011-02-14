@@ -144,4 +144,28 @@ class ManyToOnePersisterTest extends TestCase {
     $this->assertNotNull($retrievedOne->getId());
     $this->assertEquals($newOne->getId(), $retrievedOne->getId());
   }
+
+  public function testDelete() {
+    $one = new SimpleEntity();
+    $one->setName('Entity');
+    $one->setValue('EntityValue');
+
+    $many = new ManyToOneEntity();
+    $many->setName('Many');
+    $many->setOne($one);
+    $manyId = $this->_persister->create($many);
+    $this->assertNotNull($manyId);
+
+    $this->_persister->delete($many);
+    $retrieved = $this->_persister->getById($manyId);
+    $this->assertNull($retrieved);
+
+    // Use a new persister to ensure that the delete was actually done in the
+    // database
+    $className = get_class($this->_persister);
+    $persister = new $className();
+
+    $retrieved = $persister->getById($manyId);
+    $this->assertNull($retrieved);
+  }
 }
