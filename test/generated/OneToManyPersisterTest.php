@@ -132,7 +132,44 @@ class OneToManyPersisterTest extends TestCase {
     $c->addEquals('one_to_many_entity_id', $id);
     $retrieved = $manyPersister->retrieve($c);
     foreach ($retrieved AS $e) {
-      $this->assertRegExp('/NewEntity\d+/', $e->getName());
+      $this->assertRegExp('/^NewEntity\d+$/', $e->getName());
+    }
+  }
+
+  /**
+   * Test that retrieving an entity with a one-to-many relationship retrieves
+   * its related entities as well.
+   */
+  public function testRetrieve() {
+    $one = new OneToManyEntity();
+    $one->setName('One');
+
+    $many = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new OneToManyRhs();
+      $e->setName("Entity$i");
+      $many[] = $e;
+    }
+    $one->setMany($many);
+    $id = $this->_persister->create($one);
+
+    // Use a clean persister to retrieve so that the entity isn't retrieved from
+    // cache
+    $className = get_class($this->_persister);
+    $persister = new $className();
+
+    $retrieved = $persister->getById($id);
+    $this->assertNotNull($retrieved);
+    $this->assertInstanceOf('clarinet\test\mock\OneToManyEntity', $retrieved);
+
+    $many = $retrieved->getMany();
+    $this->assertInternalType('array', $many);
+    $this->assertEquals(10, count($many));
+
+    foreach ($many AS $e) {
+      $this->assertNotNull($e->getId());
+      $this->assertEquals($id, $e->getOneToManyEntityId());
+      $this->assertRegExp('/^Entity\d+$/', $e->getName());
     }
   }
 }
