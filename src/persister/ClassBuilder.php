@@ -69,6 +69,8 @@ class ClassBuilder {
     }
 
     $populateRelationships = Array();
+    $saveRelationships = Array();
+    $deleteRelationships = Array();
     foreach ($modelInfo->getRelationships() AS $relationship) {
       $populateRelationship = $relationship->getPopulateModelCode();
       if ($populateRelationship !== null) {
@@ -78,6 +80,16 @@ class ClassBuilder {
       $populateParameter = $relationship->getPopulateParameterCode();
       if ($populateParameter !== null) {
         $populateParameters[] = $populateParameter;
+      }
+
+      $saveRelationship = $relationship->getSaveCode();
+      if ($saveRelationship !== null) {
+        $saveRelationships[] = $saveRelationship;
+      }
+
+      $deleteRelationship = $relationship->getDeleteCode();
+      if ($deleteRelationship !== null) {
+        $deleteRelationships[] = $deleteRelationship;
       }
 
       $columnName = $relationship->getLhsColumnName();
@@ -103,6 +115,8 @@ class ClassBuilder {
       '${populate_parameters}'    => implode("\n", $populateParameters),
       '${populate_properties}'    => implode("\n", $populateProperties),
       '${populate_relationships}' => implode("\n\n", $populateRelationships),
+      '${save_relationships}'     => implode("\n\n", $saveRelationships),
+      '${delete_relationships}'   => implode("\n\n", $deleteRelationships),
 
       '${class_str}'              => str_replace('\\', '\\\\',
                                        $modelInfo->getClass())

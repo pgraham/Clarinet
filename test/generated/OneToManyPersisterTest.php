@@ -69,7 +69,7 @@ class OneToManyPersisterTest extends TestCase {
   /**
    * Test creating an entity with many related entities, all of which are new.
    */
-  public function testCreateWithNewRelated() {
+  public function testCreate() {
     $one = new OneToManyEntity();
     $one->setName('One');
 
@@ -88,51 +88,6 @@ class OneToManyPersisterTest extends TestCase {
       $this->assertNotNull($o);
       $this->assertInstanceOf('clarinet\test\mock\OneToManyRhs', $o);
       $this->assertNotNull($o->getId());
-    }
-  }
-
-  /**
-   * Test create an entity with many related entities, all of which have already
-   * been created but need updating.
-   */
-  public function testCreateWithExistingRelated() {
-    $originalOne = new OneToManyEntity();
-    $originalOne->setName('OriginalOne');
-
-    $many = Array();
-    for ($i = 1; $i <= 10; $i++) {
-      $e = new OneToManyRhs();
-      $e->setName("Entity$i");
-      $many[] = $e;
-    }
-    $originalOne->setMany($many);
-    $this->_persister->create($originalOne);
-
-    foreach ($many AS $e) {
-      $e->setName("New{$e->getName()}");
-    }
-
-    $one = new OneToManyEntity();
-    $one->setName('One');
-    $one->setMany($many);
-
-    $id = $this->_persister->create($one);
-
-    $this->assertNotNull($id);
-    $this->assertEquals($id, $one->getId());
-
-    // Retrieve the entities using their persister and ensure that the returned
-    // object's have updated values
-    $modelName = 'clarinet\test\mock\OneToManyRhs';
-    $actorName = str_replace('\\', '_', $modelName);
-    $className = "clarinet\\persister\\" . $actorName;
-    $manyPersister = new $className();
-    
-    $c = new Criteria();
-    $c->addEquals('one_to_many_entity_id', $id);
-    $retrieved = $manyPersister->retrieve($c);
-    foreach ($retrieved AS $e) {
-      $this->assertRegExp('/^NewEntity\d+$/', $e->getName());
     }
   }
 
@@ -171,5 +126,84 @@ class OneToManyPersisterTest extends TestCase {
       $this->assertEquals($id, $e->getOneToManyEntityId());
       $this->assertRegExp('/^Entity\d+$/', $e->getName());
     }
+  }
+
+  /**
+   * Test that updating a one-to-many relationship works as expected.
+   */
+  public function testUpdate() {
+    $one = new OneToManyEntity();
+    $one->setName('One');
+
+    $many = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new OneToManyRhs();
+      $e->setName("Entity$i");
+      $many[] = $e;
+    }
+    $one->setMany($many);
+    $id = $this->_persister->create($one);
+
+    unset($many[9]);
+    unset($many[8]);
+
+    $one->setMany($many);
+    $this->_persister->update($one);
+
+    // Retrieve with a new persister to ensure that the orphaned entities were
+    // deleted
+    $className = get_class($this->_persister);
+    $persister = new $className();
+
+    $retrieved = $persister->getById($id);
+    $retrievedMany = $retrieved->getMany();
+    $this->assertEquals(8, count($retrievedMany));
+
+    for ($i = 9; $i <= 10; $i++) {
+      $e = new OneToManyRhs();
+      $e->setName("Entity$i");
+      $many[] = $e;
+    }
+    $one->setMany($many);
+    $this->_persister->update($one);
+
+    $persister = new $className();
+    $retrieved = $persister->getById($id);
+    $retrievedMany = $retrieved->getMany();
+    $this->assertEquals(10, count($retrievedMany));
+  }
+
+  /**
+   * Test that deleting an entity with a one-to-many relationship works as
+   * expected.
+   */
+  public function testDelete() {
+    $one = new OneToManyEntity();
+    $one->setName('One');
+
+    $many = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new OneToManyRhs();
+      $e->setName("Entity$i");
+      $many[] = $e;
+    }
+    $one->setMany($many);
+    $id = $this->_persister->create($one);
+    $this->assertNotNull($id);
+
+    $this->_persister->delete($one);
+    $retrieved = $this->_persister->getById($id);
+    $this->assertNull($retrieved);
+
+    $modelName = 'clarinet\test\mock\OneToManyRhs';
+    $actorName = str_replace('\\', '_', $modelName);
+    $className = "clarinet\\persister\\" . $actorName;
+    $rhsPersister = new $className();
+
+    $c = new Criteria();
+    $c->addEquals('one_to_many_entity_id', $id);
+    $retrieved = $rhsPersister->retrieve($c);
+    $this->assertInternalType('array', $retrieved);
+    $this->assertEquals(0, count($retrieved));
   }
 }

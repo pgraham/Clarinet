@@ -30,7 +30,6 @@ class ${actor} {
   private $_update = null;
   private $_delete = null;
 
-
   public function __construct() {
     $this->_pdo = PDOWrapper::get();
 
@@ -75,6 +74,8 @@ class ${actor} {
 
       $this->_create->execute($params);
       $id = $this->_pdo->lastInsertId();
+
+      ${save_relationships}
 
       if ($startTransaction) {
         $this->_pdo->commit();
@@ -164,6 +165,8 @@ class ${actor} {
       $this->_update->execute($params);
       $rowCount = $this->_update->rowCount();
 
+      ${save_relationships}
+
       if ($startTransaction) {
         $this->_pdo->commit();
       }
@@ -189,6 +192,8 @@ class ${actor} {
 
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
+
+      ${delete_relationships}
 
       if ($startTransaction) {
         $this->_pdo->commit();

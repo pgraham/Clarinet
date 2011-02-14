@@ -50,6 +50,22 @@ class ManyToOne implements Relationship {
   }
 
   /**
+   * It is generally not desired to cascade the delete in a many-to-one
+   * relationship so there is nothing to do here
+   */
+  public function getDeleteCode() {
+    return null;
+  }
+
+  /**
+   * Returns the name of the column that represents the relationship in the
+   * database
+   */
+  public function getLhsColumnName() {
+    return $this->_column;
+  }
+
+  /**
    * Generates the PHP code that will populate a variable name $model, which is
    * an instance of the relationship's left hand side, with the model from the
    * right hand side of the relationship
@@ -80,11 +96,11 @@ class ManyToOne implements Relationship {
   }
 
   /**
-   * Returns the name of the column that represents the relationship in the
-   * database
+   * A many to one relationship does not need to set any data on the right side
+   * so there is nothing to do here.
    */
-  public function getLhsColumnName() {
-    return $this->_column;
+  public function getSaveCode() {
+    return null;
   }
 
   /* Create an array of template values for the relationship's templates. */

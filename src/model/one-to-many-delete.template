@@ -1,9 +1,10 @@
 // -------------------------------------------------------------------
-// Populate the ${lhs}
-$c = new Criteria();
-$c->addEquals('${rhs_column}', $id);
-
+// Delete related ${rhs} entities
 $persister = ActorFactory::getActor('persister', '${rhs}');
-$related = $persister->retrieve($c);
-$model->set${lhs_property}($related);
+$related = $model->get${lhs_property}();
+
+foreach ($related AS $rel) {
+  $persister->delete($rel);
+}
 // -------------------------------------------------------------------
+

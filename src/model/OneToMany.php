@@ -26,9 +26,10 @@ use \clarinet\TemplateLoader;
 class OneToMany implements Relationship {
 
   private $_lhs;
-  private $_lhsProperty;
   private $_rhs;
+  private $_lhsProperty;
   private $_rhsColumn;
+  private $_rhsProperty;
 
   /**
    * Creates a new one-to-many relationship representation.
@@ -37,17 +38,49 @@ class OneToMany implements Relationship {
    *   relationship.
    * @param string $rhs The name of the entity on the right side of the
    *   relationship.
-   * @param string $property The name of the property in the left hand side
+   * @param string $lhsProperty The name of the property in the left hand side
    *   entity that contains the related right hand side instances.
-   * @param string $column The name of the column in the right side of the
+   * @param string $rhsColumn The name of the column in the right side of the
+   *   relationship that contains the id of the left side entity to which
+   *   right side entities are related.
+   * @param string $rhsProperty The name of the column in the right side of the
    *   relationship that contains the id of the left side entity to which
    *   right side entities are related.
    */
-  public function __construct($lhs, $rhs, $lhsProperty, $rhsColumn) {
-    $this->_lhs = $lhs;
+  public function __construct($lhs, $rhs, $lhsProperty, $rhsColumn,
+    $rhsProperty)
+  {
+    $this->_lhs = Parser::getModelInfo($lhs);
+    $this->_rhs = Parser::getModelInfo($rhs);
     $this->_lhsProperty = $lhsProperty;
-    $this->_rhs = $rhs;
     $this->_rhsColumn = $rhsColumn;
+    $this->_rhsProperty = $rhsProperty;
+  }
+
+  /**
+   * Returns the code for deleting all of the owned right side entities that are
+   * part of the relationship.
+   */
+  public function getDeleteCode() {
+    $templateValues = Array
+    (
+      '${rhs}'          => $this->_rhs->getClass(),
+      '${lhs_property}' => $this->_lhsProperty
+    );
+
+    // Use the instance cache since its likely that the template has already
+    // been loaded for another relationship of the same type.
+    $templateLoader = TemplateLoader::get(__DIR__);
+    $code = $templateLoader->load('one-to-many-delete', $templateValues);
+    return $code;
+  }
+
+  /**
+   * A one-to-many relationship does not store any information in the left hand
+   * side so there is nothing to do here.
+   */
+  public function getLhsColumnName() {
+    return null;
   }
 
   /**
@@ -60,7 +93,7 @@ class OneToMany implements Relationship {
   public function getPopulateModelCode() {
     $templateValues = Array
     (
-      '${rhs}'          => $this->_rhs,
+      '${rhs}'          => $this->_rhs->getClass(),
       '${rhs_column}'   => $this->_rhsColumn,
       '${lhs_property}' => $this->_lhsProperty
     );
@@ -73,18 +106,32 @@ class OneToMany implements Relationship {
   }
 
   /**
-   * A one-to-many relationship does not store any information in the left hand
-   * side so that there is nothing to do here.
+   * The left side doesn't contain any persisted information about the
+   * relationship so there is nothing to do here.
    */
   public function getPopulateParameterCode() {
     return null;
   }
 
   /**
-   * A one-to-many relationship does not store any information in the left hand
-   * side so there is nothing to do here.
+   * Returns the PHP code that either sets the id of the left side in the
+   * right side or sets the left side itself in the right side.
+   *
+   * @return string PHP code that will create/update the entities on the right
+   *   side of the relationship.
    */
-  public function getLhsColumnName() {
-    return null;
+  public function getSaveCode() {
+    $templateValues = Array
+    (
+      '${rhs}'             => $this->_rhs->getClass(),
+      '${lhs_property}'    => $this->_lhsProperty,
+      '${rhs_id_property}' => $this->_rhs->getId()->getName(),
+      '${rhs_property}'    => $this->_rhsProperty,
+      '${rhs_column}'      => $this->_rhsColumn
+    );
+
+    $templateLoader = TemplateLoader::get(__DIR__);
+    $code = $templateLoader->load('one-to-many-save', $templateValues);
+    return $code;
   }
 }

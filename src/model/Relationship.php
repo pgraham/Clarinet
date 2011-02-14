@@ -24,8 +24,27 @@ namespace clarinet\model;
 interface Relationship {
 
   /**
+   * This method is responsible for returning the PHP code that will delete the
+   * relationship.
+   *
+   * @return string PHP code
+   */
+  public function getDeleteCode();
+
+  /**
+   * This method is responsible for returning the name of a column to include in
+   * SQL CREATE and UPDATE statements of the left hand side of the relationship
+   * or NULL if there is none.
+   *
+   * @return string Column name.
+   */
+  public function getLhsColumnName();
+
+  /**
    * This method is responsible for returning the code that will populate an
    * instance of the left hand side with the right hand side.
+   *
+   * @return string PHP code.
    */
   public function getPopulateModelCode();
 
@@ -33,13 +52,16 @@ interface Relationship {
    * This method is responsible for returning code that will populate a PDO
    * parameter name with the right-hand side id.  This is for update and
    * insert statements.
+   *
+   * @return string PHP code.
    */
   public function getPopulateParameterCode();
 
   /**
-   * This method is responsible for returning the name of a column to include in
-   * SQL CREATE and UPDATE statements of the left hand side of the relationship
-   * or NULL if there is none.
+   * This method is responsible for returning the PHP code that will create the
+   * relationship.
+   *
+   * @return string PHP code.
    */
-  public function getLhsColumnName();
+  public function getSaveCode();
 }

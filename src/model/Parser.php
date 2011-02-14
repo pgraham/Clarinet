@@ -318,13 +318,8 @@ class Parser {
       $linkRhsId = $rhsTable . '_' .$rhsId->getColumn();
     }
 
-    $linkEntity = null;
-    if (isset($annotations['manytomany']['linkentity'])) {
-      $linkEntity = $annotations['manytomany']['linkentity'];
-    }
-
     return new ManyToMany($property, $rhs, $rhsIdColumn, $rhsIdProperty,
-      $linkTable, $linkLhsId, $linkRhsId, $linkEntity);
+      $linkTable, $linkLhsId, $linkRhsId);
   }
 
   /* Parse a method that is annotated with @ManyToOne */
@@ -373,13 +368,29 @@ class Parser {
     $lhs = $this->_className;
     $rhs = $annotations['onetomany']['entity'];
 
-    $rhsInfo = self::getModelInfo($rhs);
+    $lhsInfo = self::getModelInfo($lhs);
+
+    // Parse the column on the right side that stores the id of the entity on
+    // the left side
     if (isset($annotations['onetomany']['column'])) {
-      $column = $annotations['onetomany']['column'];
+      $rhsColumn = $annotations['onetomany']['column'];
     } else {
-      $column = $rhsInfo->getTable() . '_' . $rhsInfo->getId()->getColumn();
+      $rhsColumn = $lhsInfo->getTable() . '_' . $lhsInfo->getId()->getColumn();
     }
 
-    return new OneToMany($lhs, $rhs, $property, $column);
+    // Parse the property on the right side that stores the id of the entity on
+    // the left side.
+    // TODO If the no property is specified and the default property does not
+    //      exist, search the right hand side model for a relationship that
+    //      mirrors this relationship and use that property in the persister to
+    //      maintain the persisted relationship
+    if (isset($annotations['onetomany']['property'])) {
+      $rhsProperty = $annotations['onetomany']['property'];
+    } else {
+      $lhsBaseName = array_pop(explode('\\', $lhsInfo->getClass()));
+      $rhsProperty = $lhsBaseName . 'Id';
+    }
+
+    return new OneToMany($lhs, $rhs, $property, $rhsColumn, $rhsProperty);
   }
 }

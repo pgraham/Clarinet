@@ -67,6 +67,23 @@ class ManyToMany implements Relationship {
   }
 
   /**
+   * Generates and returns the code for deleting the left side of the
+   * relationship.
+   */
+  public function getDeleteCode() {
+    // TODO
+    return null;
+  }
+
+  /**
+   * Since a many-to-many relationship does not store any information on the
+   * left side there is nothing to return here.
+   */
+  public function getLhsColumnName() {
+    return null;
+  }
+
+  /**
    * Returns the code for populating the left hand side of the relationship with
    * the collection of entities from the 'many' side.
    *
@@ -92,10 +109,10 @@ class ManyToMany implements Relationship {
   }
 
   /**
-   * Since a many-to-many relationship does not store any information on the
-   * left side there is nothing to return here.
+   * Return the PHP code that creates the relationship.
    */
-  public function getLhsColumnName() {
+  public function getSaveCode() {
+    // TODO
     return null;
   }
 
