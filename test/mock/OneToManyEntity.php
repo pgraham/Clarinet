@@ -52,7 +52,7 @@ class OneToManyEntity {
   }
 
   public function setId($id) {
-    return $this->_id;
+    $this->_id = $id;
   }
 
   public function setName($name) {

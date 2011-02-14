@@ -36,6 +36,7 @@ class AllTests {
 
     $suite->addTestSuite('clarinet\test\generated\SimpleEntityPersisterTest');
     $suite->addTestSuite('clarinet\test\generated\ManyToOnePersisterTest');
+    $suite->addTestSuite('clarinet\test\generated\OneToManyPersisterTest');
 
     return $suite;
   }

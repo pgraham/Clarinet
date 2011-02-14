@@ -28,6 +28,7 @@ class OneToManyRhs {
 
   private $_id;
   private $_name;
+  private $_oneToManyEntityId;
 
   /**
    * @Id
@@ -43,11 +44,22 @@ class OneToManyRhs {
     return $this->_name;
   }
 
+  /**
+   * @Column(name = one_to_many_entity_id)
+   */
+  public function getOneToManyEntityId() {
+    return $this->_oneToManyEntityId;
+  }
+
   public function setId($id) {
     $this->_id = $id;
   }
 
   public function setName($name) {
     $this->_name = $name;
+  }
+
+  public function setOneToManyEntityId($oneToManyEntityId) {
+    $this->_oneToManyEntityId = $oneToManyEntityId;
   }
 }

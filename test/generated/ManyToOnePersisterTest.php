@@ -39,8 +39,12 @@ class ManyToOnePersisterTest extends TestCase {
     Generator::generate();
   }
 
+  /* The object under test */
   private $_persister;
 
+  /**
+   * Prepare a clean database and the object under test.
+   */
   protected function setUp() {
     Db::setUp();
 
@@ -51,11 +55,20 @@ class ManyToOnePersisterTest extends TestCase {
     $this->_persister = new $className();
   }
 
+  /**
+   * Clean up the database and nullify the persister.  Database cleanup involves
+   * closing this connection, cleaning any caches that reference the connection
+   * and removing the sqlite database file that was used for the test.
+   */
   protected function tearDown() {
     $this->_persister = null;
     Db::tearDown();
   }
 
+  /**
+   * Tests that ManyToOne relationships are handled correctly by the persisters
+   * create method.
+   */
   public function testCreate() {
     $one = new SimpleEntity();
     $one->setName('entity1');
