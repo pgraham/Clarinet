@@ -2,7 +2,7 @@
 // Populate the ${rhs}
 $relId = $row['${lhs_column}'];
 if ($relId !== null) {
-  $persister = ActorAbstractFactory::getActor('persister', '${rhs}');
+  $persister = ActorFactory::getActor('persister', '${rhs}');
   $related = $persister->getById($relId);
 
   if ($related === null) {

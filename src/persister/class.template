@@ -4,7 +4,7 @@ namespace clarinet\persister;
 use \PDO;
 use \PDOException;
 
-use \clarinet\ActorAbstractFactory;
+use \clarinet\ActorFactory;
 use \clarinet\Criteria;
 use \clarinet\Exception;
 use \clarinet\PDOWrapper;

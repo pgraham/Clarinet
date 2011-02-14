@@ -17,7 +17,7 @@ namespace clarinet\test\generated;
 
 use \PDO;
 
-use \clarinet\ActorAbstractFactory;
+use \clarinet\ActorFactory;
 use \clarinet\PdoWrapper;
 
 /**
@@ -52,9 +52,9 @@ class Db {
    */
   public static function tearDown() {
     // Since some persisters load other persisters through the
-    // ActorAbstractFactory class, we need to ensure that it's cache it cleaned
-    // as well otherwise their PDO connections will be set to null.
-    ActorAbstractFactory::clearFactories();
+    // ActorFactory class, we need to ensure that it's cache it cleaned as well
+    // otherwise their PDO connections will be set to null.
+    ActorFactory::clearFactories();
 
     PdoWrapper::get()->close();
     unlink(__DIR__ . '/db.sq3');

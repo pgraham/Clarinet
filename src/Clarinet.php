@@ -48,7 +48,7 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $transformer = ActorAbstractFactory::getActor('transformer', $modelClass);
+    $transformer = ActorFactory::getActor('transformer', $modelClass);
     return $transformer->asArray($obj);
   }
 
@@ -59,7 +59,7 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $persister = ActorAbstractFactory::getAction('persister', $modelClass);
+    $persister = ActorFactory::getAction('persister', $modelClass);
 
     $rows = $persister->delete($obj);
     if ($rows != 1) {
@@ -81,7 +81,7 @@ class Clarinet {
   public static function get($modelClass, Criteria $c = null) {
     self::_ensureInitialized();
 
-    $persister = ActorAbstractFactory::getActor('persister', $modelClass);
+    $persister = ActorFactory::getActor('persister', $modelClass);
 
     $rows = $persister->retrieve($c);
     return $rows;
@@ -172,7 +172,7 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $persister = ActorAbstractFactory::getAction('persister', $modelClass);
+    $persister = ActorFactory::getAction('persister', $modelClass);
 
     // TODO - Determine if the obj has an id or not and take the necessary
     //        action
@@ -189,7 +189,7 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $validator = ActorAbstractFactory::getActor('validator', $modelClass);
+    $validator = ActorFactory::getActor('validator', $modelClass);
 
     $e = $validator->validate($obj);
     return $e;

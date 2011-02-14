@@ -3,7 +3,7 @@
 $c = new Criteria();
 $c->addEquals('${rhs_column}', $id);
 
-$persister = ActorAbstractFactory::getActor('persister', ${rhs});
+$persister = ActorFactory::getActor('persister', ${rhs});
 $related = $persister->retrieve($c);
 $model->set${lhs_property}($related);
 // -------------------------------------------------------------------
