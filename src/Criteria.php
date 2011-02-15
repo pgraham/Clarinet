@@ -133,6 +133,18 @@ class Criteria {
   }
 
   /**
+   * Add a select column.
+   *
+   * @param string $select The name of the column to select.
+   */
+  public function addSelect($select) {
+    if ($this->_selectColumns === null) {
+      $this->_selectColumns = Array();
+    }
+    $this->_selectColumns[] = $select;
+  }
+
+  /**
    * Getter for the values for any parameterized values in the criteria's
    * SQL representation.
    *

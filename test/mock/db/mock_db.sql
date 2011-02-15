@@ -31,9 +31,10 @@ CREATE TABLE many_to_many_entity(
 );
 
 CREATE TABLE many_to_many_entity_simple_entity_link(
-  id integer PRIMARY KEY AUTOINCREMENT,
   simple_entity_id integer NOT NULL REFERENCES simple_entity (id),
-  many_to_many_entity_id integer NOT NULL REFERENCES many_to_many_entity (id)
+  many_to_many_entity_id integer NOT NULL REFERENCES many_to_many_entity (id),
+
+  PRIMARY KEY (simple_entity_id, many_to_many_entity_id)
 );
 
 -- ManyToMany relationship - Mirrored

@@ -294,9 +294,6 @@ class Parser {
 
     $rhsInfo = self::getModelInfo($rhs);
     $rhsTable = $rhsInfo->getTable();
-    $rhsId = $rhsInfo->getId();
-    $rhsIdColumn = $rhsId->getColumn();
-    $rhsIdProperty = $rhsId->getName();
 
     // Grab optional parameters or set defaults
     if (isset($annotations['manytomany']['table'])) {
@@ -315,11 +312,11 @@ class Parser {
     if (isset($annotations['manytomany']['foreignid'])) {
       $linkRhsId = $annotations['manytomany']['foreignid'];
     } else {
-      $linkRhsId = $rhsTable . '_' .$rhsId->getColumn();
+      $linkRhsId = $rhsTable . '_' .$rhsInfo->getId()->getColumn();
     }
 
-    return new ManyToMany($property, $rhs, $rhsIdColumn, $rhsIdProperty,
-      $linkTable, $linkLhsId, $linkRhsId);
+    return new ManyToMany($lhs, $rhs, $property, $linkTable, $linkLhsId,
+      $linkRhsId);
   }
 
   /* Parse a method that is annotated with @ManyToOne */

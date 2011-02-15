@@ -25,45 +25,41 @@ use \clarinet\TemplateLoader;
  */
 class ManyToMany implements Relationship {
 
+  private $_lhs;
+  private $_rhs;
   private $_property;
 
   private $_linkTable;
   private $_linkLhsId;
   private $_linkRhsId;
 
-  private $_rhs;
-  private $_rhsIdColumn;
-  private $_rhsIdProperty;
-
   /**
    * Create a new Many-to-many relationship representation.  The left side of
    * the relationship is implied by the Info object to which the relationship
    * belongs.
    *
+   * @param string $lhs The name of the entity on the left side of the
+   *   relationship.
    * @param string $rhs The name of the entity on the right side of the
    *   relationship.
    * @param string $property The name of the property that contains the related
    *   entity.
-   * @param string $rhsIdColumn The name of the right hand side entity's id
-   *   column.
-   * @param string $table The name of the table that contains the mapping.
-   * @param string $localId The name of the column in the mapping table that
+   * @param string $linkTable The name of the table that contains the mapping.
+   * @param string $linkLhsId The name of the column in the mapping table that
    *   contains the id of the entity on the left side of the relationship.
-   * @param string $foreignId The name of the column in the mapping table that
+   * @param string $linkRhsId The name of the column in the mapping table that
    *   contains the id of the entity on the right side of the relationship.
    */
-  public function __construct($property, $rhs, $rhsIdColumn, $rhsIdProperty,
-    $linkTable, $linkLhsId, $linkRhsId)
+  public function __construct($lhs, $rhs, $property, $linkTable, $linkLhsId,
+    $linkRhsId)
   {
+    $this->_lhs = Parser::getModelInfo($lhs);
+    $this->_rhs = Parser::getModelInfo($rhs);
     $this->_property = $property;
 
     $this->_linkTable = $linkTable;
     $this->_linkLhsId = $linkLhsId;
     $this->_linkRhsId = $linkRhsId;
-
-    $this->_rhs = $rhs;
-    $this->_rhsIdColumn = $rhsIdColumn;
-    $this->_rhsIdProperty = $rhsIdProperty;
   }
 
   /**
@@ -71,8 +67,18 @@ class ManyToMany implements Relationship {
    * relationship.
    */
   public function getDeleteCode() {
-    // TODO
-    return null;
+    $templateValues = Array
+    (
+      '${rhs}'             => $this->_rhs->getClass(),
+      '${link_table}'      => $this->_linkTable,
+      '${lhs_link_column}' => $this->_linkLhsId,
+    );
+
+    // Use the instance cache since its likely that the template has already
+    // been loaded for another relationship of the same type.
+    $templateLoader = TemplateLoader::get(__DIR__);
+    $code = $templateLoader->load('many-to-many-delete', $templateValues);
+    return $code;
   }
 
   /**
@@ -91,7 +97,18 @@ class ManyToMany implements Relationship {
    *   related entities.
    */
   public function getPopulateModelCode() {
-    $templateValues = $this->_getBasicTemplateValues();
+    $templateValues = Array
+    (
+      '${rhs}'             => $this->_rhs->getClass(),
+      '${rhs_table}'       => $this->_rhs->getTable(),
+      '${rhs_id_column}'   => $this->_rhs->getId()->getColumn(),
+      
+      '${link_table}'      => $this->_linkTable,
+      '${lhs_link_column}' => $this->_linkLhsId,
+      '${rhs_link_column}' => $this->_linkRhsId,
+
+      '${lhs_property}'    => $this->_property
+    );
 
     // Use the instance cache since its likely that the template has already
     // been loaded for another relationship of the same type.
@@ -112,21 +129,22 @@ class ManyToMany implements Relationship {
    * Return the PHP code that creates the relationship.
    */
   public function getSaveCode() {
-    // TODO
-    return null;
-  }
-
-  private function _getBasicTemplateValues() {
-    return Array
+    $templateValues = Array
     (
-      '${rhs}'             => $this->_rhs,
-      '${rhs_id_column}'   => $this->_rhsIdColumn,
+      '${rhs}'             => $this->_rhs->getClass(),
+      '${rhs_id_property}' => $this->_rhs->getId()->getName(),
       
       '${link_table}'      => $this->_linkTable,
       '${lhs_link_column}' => $this->_linkLhsId,
       '${rhs_link_column}' => $this->_linkRhsId,
 
-      '${rel_property}'    => $this->_property
+      '${lhs_property}'    => $this->_property
     );
+
+    // Use the instance cache since its likely that the template has already
+    // been loaded for another relationship of the same type.
+    $templateLoader = TemplateLoader::get(__DIR__);
+    $code = $templateLoader->load('many-to-many-save', $templateValues);
+    return $code;
   }
 }
