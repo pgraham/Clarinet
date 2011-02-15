@@ -1,1 +1,2 @@
 - Support migrating a right side entity in a one-to-many relationship to a new left side entity.
+- Support cache updates for mirrored many-to-many relationships.
