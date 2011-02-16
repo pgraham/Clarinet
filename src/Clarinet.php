@@ -29,9 +29,6 @@ use \clarinet\model\ConfigValue;
  */
 class Clarinet {
 
-  /** PDO Connection object. */
-  public static $pdo = null;
-
   /** Path to generated class files. */
   public static $outputPath = null;
 
@@ -145,10 +142,10 @@ class Clarinet {
       throw new Exception('Clarinet needs a PDO connection in order to be able'
         . ' to do anything.');
     }
-    self::$pdo = $config['pdo'];
+    $config['pdo']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    PdoWrapper::set($config['pdo']);
 
     // Turn on exceptions for the PDO connection
-    self::$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     if (!isset($config['outputPath'])) {
       throw new Exception('Clarinet needs to know where generated classes are'

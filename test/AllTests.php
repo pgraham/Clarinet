@@ -38,6 +38,7 @@ class AllTests {
     $suite->addTestSuite('clarinet\test\generated\ManyToOnePersisterTest');
     $suite->addTestSuite('clarinet\test\generated\OneToManyPersisterTest');
     $suite->addTestSuite('clarinet\test\generated\ManyToManyPersisterTest');
+    $suite->addTestSuite('clarinet\test\generated\OneToManyMirrorPersisterTest');
 
     return $suite;
   }

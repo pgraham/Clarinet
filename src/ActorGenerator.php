@@ -41,9 +41,8 @@ class ActorGenerator {
    *   the actor.
    */
   public static function generate($actorType, $modelClass) {
-    $generatorType = "clarinet\\{$actorType}Generator";
-    $outputPath = Clarinet::$outputPath . '/clarinet/' . $actorType;
-    $generator = new $generatorType($outputPath);
+    $generatorType = "clarinet\\" . ucfirst($actorType) . "Generator";
+    $generator = new $generatorType(Clarinet::$outputPath);
     $generator->generate($modelClass);
   }
 }

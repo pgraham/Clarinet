@@ -23,11 +23,8 @@ use \clarinet\TemplateLoader;
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/model
  */
-class OneToMany implements Relationship {
+class OneToMany extends AbstractRelationship {
 
-  private $_lhs;
-  private $_rhs;
-  private $_lhsProperty;
   private $_rhsColumn;
   private $_rhsProperty;
 
@@ -50,9 +47,7 @@ class OneToMany implements Relationship {
   public function __construct($lhs, $rhs, $lhsProperty, $rhsColumn,
     $rhsProperty)
   {
-    $this->_lhs = Parser::getModelInfo($lhs);
-    $this->_rhs = Parser::getModelInfo($rhs);
-    $this->_lhsProperty = $lhsProperty;
+    parent::__construct($lhs, $rhs, $lhsProperty);
     $this->_rhsColumn = $rhsColumn;
     $this->_rhsProperty = $rhsProperty;
   }
@@ -73,14 +68,6 @@ class OneToMany implements Relationship {
     $templateLoader = TemplateLoader::get(__DIR__);
     $code = $templateLoader->load('one-to-many-delete', $templateValues);
     return $code;
-  }
-
-  /**
-   * A one-to-many relationship does not store any information in the left hand
-   * side so there is nothing to do here.
-   */
-  public function getLhsColumnName() {
-    return null;
   }
 
   /**
@@ -106,14 +93,6 @@ class OneToMany implements Relationship {
   }
 
   /**
-   * The left side doesn't contain any persisted information about the
-   * relationship so there is nothing to do here.
-   */
-  public function getPopulateParameterCode() {
-    return null;
-  }
-
-  /**
    * Returns the PHP code that either sets the id of the left side in the
    * right side or sets the left side itself in the right side.
    *
@@ -121,17 +100,33 @@ class OneToMany implements Relationship {
    *   side of the relationship.
    */
   public function getSaveCode() {
-    $templateValues = Array
-    (
-      '${rhs}'             => $this->_rhs->getClass(),
-      '${lhs_property}'    => $this->_lhsProperty,
-      '${rhs_id_property}' => $this->_rhs->getId()->getName(),
-      '${rhs_property}'    => $this->_rhsProperty,
-      '${rhs_column}'      => $this->_rhsColumn
-    );
+    // Determine if this is mirrored relationship and output the appropriate
+    // code
+    /*
+    if ($this->_rhs->hasRelationship('many-to-one', $this->_lhs->getClass())) {
+      $templateValues = Array
+      (
+        '${rhs}'          => $this->_rhs->getClass(),
+        '${rhs_property}' => $this->_rhs->getRelationship('many-to-one', $this->_lhs->getClass())->getProperty(),
+
+      );
+      $templateName = 'one-to-many-save-mirror';
+
+    } else {
+      */
+      $templateValues = Array
+      (
+        '${rhs}'             => $this->_rhs->getClass(),
+        '${lhs_property}'    => $this->_lhsProperty,
+        '${rhs_id_property}' => $this->_rhs->getId()->getName(),
+        '${rhs_property}'    => $this->_rhsProperty,
+        '${rhs_column}'      => $this->_rhsColumn
+      );
+      $templateName = 'one-to-many-save';
+    //}
 
     $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('one-to-many-save', $templateValues);
+    $code = $templateLoader->load($templateName, $templateValues);
     return $code;
   }
 }

@@ -23,11 +23,8 @@ use \clarinet\TemplateLoader;
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/model
  */
-class ManyToOne implements Relationship {
+class ManyToOne extends AbstractRelationship {
 
-  private $_lhs;
-  private $_rhs;
-  private $_property;
   private $_column;
 
   /**
@@ -43,18 +40,8 @@ class ManyToOne implements Relationship {
    *   the id of the related entity.
    */
   public function __construct($lhs, $rhs, $property, $column) {
-    $this->_lhs = Parser::getModelInfo($lhs);
-    $this->_rhs = Parser::getModelInfo($rhs);
-    $this->_property = $property;
+    parent::__construct($lhs, $rhs, $property);
     $this->_column = $column;
-  }
-
-  /**
-   * It is generally not desired to cascade the delete in a many-to-one
-   * relationship so there is nothing to do here
-   */
-  public function getDeleteCode() {
-    return null;
   }
 
   /**
@@ -95,21 +82,13 @@ class ManyToOne implements Relationship {
     return $code;
   }
 
-  /**
-   * A many to one relationship does not need to set any data on the right side
-   * so there is nothing to do here.
-   */
-  public function getSaveCode() {
-    return null;
-  }
-
   /* Create an array of template values for the relationship's templates. */
   private function _getTemplateValues() {
     return Array
     (
       '${rhs}'             => $this->_rhs->getClass(),
       '${rhs_id_property}' => $this->_rhs->getId()->getName(),
-      '${lhs_property}'    => $this->_property,
+      '${lhs_property}'    => $this->_lhsProperty,
       '${lhs_column}'      => $this->_column
     );
   }

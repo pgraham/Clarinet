@@ -7,7 +7,7 @@ use \PDOException;
 use \clarinet\ActorFactory;
 use \clarinet\Criteria;
 use \clarinet\Exception;
-use \clarinet\PDOWrapper;
+use \clarinet\PdoWrapper;
 
 use \clarinet\validator\${actor} as Validator;
 
@@ -31,7 +31,7 @@ class ${actor} {
   private $_delete = null;
 
   public function __construct() {
-    $this->_pdo = PDOWrapper::get();
+    $this->_pdo = PdoWrapper::get();
 
     $this->_create = $this->_pdo->prepare(
       "INSERT INTO ${table} (${column_names}) VALUES (${value_names})");
@@ -74,15 +74,14 @@ class ${actor} {
 
       $this->_create->execute($params);
       $id = $this->_pdo->lastInsertId();
+      $model->set${id_property}($id);
+      $this->_cache[$id] = $model;
 
       ${save_relationships}
 
       if ($startTransaction) {
         $this->_pdo->commit();
       }
-
-      $model->set${id_property}($id);
-      $this->_cache[$id] = $model;
 
       return $id;
     } catch (PDOException $e) {

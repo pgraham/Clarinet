@@ -41,6 +41,14 @@ interface Relationship {
   public function getLhsColumnName();
 
   /**
+   * This method is responsible for returning the name of the property on the
+   * left side that contains this relationship.
+   *
+   * @return string Property name.
+   */
+  public function getLhsPropertyName();
+
+  /**
    * This method is responsible for returning the code that will populate an
    * instance of the left hand side with the right hand side.
    *

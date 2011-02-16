@@ -23,11 +23,7 @@ use \clarinet\TemplateLoader;
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/model
  */
-class ManyToMany implements Relationship {
-
-  private $_lhs;
-  private $_rhs;
-  private $_property;
+class ManyToMany extends AbstractRelationship {
 
   private $_linkTable;
   private $_linkLhsId;
@@ -53,10 +49,7 @@ class ManyToMany implements Relationship {
   public function __construct($lhs, $rhs, $property, $linkTable, $linkLhsId,
     $linkRhsId)
   {
-    $this->_lhs = Parser::getModelInfo($lhs);
-    $this->_rhs = Parser::getModelInfo($rhs);
-    $this->_property = $property;
-
+    parent::__construct($lhs, $rhs, $property);
     $this->_linkTable = $linkTable;
     $this->_linkLhsId = $linkLhsId;
     $this->_linkRhsId = $linkRhsId;
@@ -82,14 +75,6 @@ class ManyToMany implements Relationship {
   }
 
   /**
-   * Since a many-to-many relationship does not store any information on the
-   * left side there is nothing to return here.
-   */
-  public function getLhsColumnName() {
-    return null;
-  }
-
-  /**
    * Returns the code for populating the left hand side of the relationship with
    * the collection of entities from the 'many' side.
    *
@@ -107,7 +92,7 @@ class ManyToMany implements Relationship {
       '${lhs_link_column}' => $this->_linkLhsId,
       '${rhs_link_column}' => $this->_linkRhsId,
 
-      '${lhs_property}'    => $this->_property
+      '${lhs_property}'    => $this->_lhsProperty
     );
 
     // Use the instance cache since its likely that the template has already
@@ -115,14 +100,6 @@ class ManyToMany implements Relationship {
     $templateLoader = TemplateLoader::get(__DIR__);
     $code = $templateLoader->load('many-to-many-model', $templateValues);
     return $code;
-  }
-
-  /**
-   * Since a many-to-many relationship does not store any information on the
-   * left side there is nothing to return here.
-   */
-  public function getPopulateParameterCode() {
-    return null;
   }
 
   /**
@@ -138,7 +115,7 @@ class ManyToMany implements Relationship {
       '${lhs_link_column}' => $this->_linkLhsId,
       '${rhs_link_column}' => $this->_linkRhsId,
 
-      '${lhs_property}'    => $this->_property
+      '${lhs_property}'    => $this->_lhsProperty
     );
 
     // Use the instance cache since its likely that the template has already
