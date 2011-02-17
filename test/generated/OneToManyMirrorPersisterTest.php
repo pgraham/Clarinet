@@ -18,6 +18,7 @@ namespace clarinet\test\generated;
 use \clarinet\test\mock\ManyToOneMirrorEntity;
 use \clarinet\test\mock\OneToManyMirrorEntity;
 use \clarinet\ActorFactory;
+use \clarinet\Criteria;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/../test-common.php';
@@ -92,6 +93,10 @@ class OneToManyMirrorPersisterTest extends TestCase {
       'clarinet\test\mock\ManyToOneMirrorEntity');
     $rhs = $persister->retrieve();
     $this->assertEquals(10, count($rhs));
+
+    foreach ($rhs AS $e) {
+      $this->assertEquals($id, $e->getOne()->getId());
+    }
   }
 
   /**
@@ -110,5 +115,101 @@ class OneToManyMirrorPersisterTest extends TestCase {
     $one->setMany($many);
 
     $id = $this->_persister->create($one);
+    $this->assertNotNull($e->getId());
+
+    $oldIds = Array();
+    foreach ($many AS $e) {
+      $oldIds[] = $e->getId();
+    }
+
+    $newMany = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new ManyToOneMirrorEntity();
+      $e->setName("NewMany$i");
+      $newMany[] = $e;
+    }
+    $one->setMany($newMany);
+    $this->_persister->update($one);
+
+    foreach ($newMany AS $e) {
+      $this->assertNotNull($e->getId());
+    }
+  }
+
+  /**
+   * Test retrieving a one-to-many mirrored relationship.
+   */
+  public function testRetrieve() {
+    $one = new OneToManyMirrorEntity();
+    $one->setName('One');
+
+    $many = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new ManyToOneMirrorEntity();
+      $e->setName("Many$i");
+      $many[] = $e;
+    }
+    $one->setMany($many);
+
+    $id = $this->_persister->create($one);
+    $this->assertNotNull($id);
+
+    $ids = Array();
+    foreach ($many AS $e) {
+      $this->assertNotNull($e->getId());
+      $ids[] = $e->getId();
+    }
+
+    $className = get_class($this->_persister);
+    $persister = new $className();
+    $retrieved = $persister->getById($id);
+    $this->assertNotNull($retrieved);
+    
+    $retrievedMany = $retrieved->getMany();
+    $this->assertNotNull($retrievedMany);
+    $this->assertInternalType('array', $retrievedMany);
+    $this->assertEquals(10, count($retrievedMany));
+
+    foreach ($retrievedMany AS $e) {
+      $this->assertNotNull($e);
+      $this->assertNotNull($e->getId());
+      $this->assertContains($e->getId(), $ids);
+    }
+  }
+
+  /**
+   * Tests deleting a one to many relationship.
+   */
+  public function testDelete() {
+    $one = new OneToManyMirrorEntity();
+    $one->setName('One');
+    
+    $many = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new ManyToOneMirrorEntity();
+      $e->setName("Many$i");
+      $many[] = $e;
+    }
+    $one->setMany($many);
+
+    $id = $this->_persister->create($one);
+    $this->assertNotNull($id);
+
+    $this->_persister->delete($one);
+    $this->assertNull($one->getId());
+    $this->assertNull($this->_persister->getById($id));
+
+    $className = get_class($this->_persister);
+    $persister = new $className();
+    $this->assertNull($persister->getById($id));
+
+    $className = get_class($many[0]);
+    $persister = ActorFactory::getActor('persister', $className);
+
+    $c = new Criteria();
+    $c->addEquals('one_to_many_mirror_id', $id);
+    $retrieved = $persister->retrieve($c);
+    $this->assertInternalType('array', $retrieved);
+    $this->assertEmpty($retrieved);
   }
 }
