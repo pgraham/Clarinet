@@ -198,6 +198,9 @@ class OneToManyMirrorPersisterTest extends TestCase {
     $this->_persister->delete($one);
     $this->assertNull($one->getId());
     $this->assertNull($this->_persister->getById($id));
+    foreach ($many AS $e) {
+      $this->assertNull($e->getId());
+    }
 
     $className = get_class($this->_persister);
     $persister = new $className();

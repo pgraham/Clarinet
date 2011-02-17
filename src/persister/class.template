@@ -37,12 +37,21 @@ class ${actor} {
    */
   private $_cache = Array();
 
+  /* PDO Connection to the database in which entities are to be persisted. */
   private $_pdo = null;
 
+  /* PDOStatement for inserting new entities into the database */
   private $_create = null;
+
+  /* PDOStatement for updating existing entities. */
   private $_update = null;
+
+  /* PDOStatement for deleting existing entities. */
   private $_delete = null;
 
+  /**
+   * Create a new persister for ${class} entities.
+   */
   public function __construct() {
     $this->_pdo = PdoWrapper::get();
 
@@ -56,6 +65,19 @@ class ${actor} {
       "DELETE FROM ${table} WHERE ${id_column} = :id");
   }
 
+  /**
+   * Clear the cache.  This is generally only used for testing.
+   */
+  public function clearCache() {
+    $this->_cache = Array();
+  }
+
+  /**
+   * Get the entity with the given id.  If no entity with the given id exists
+   * then null is returned.
+   *
+   * @param integer $id
+   */
   public function getById($id) {
     if (!isset($this->_cache[$id])) {
       $c = new Criteria();
@@ -72,11 +94,20 @@ class ${actor} {
     return $this->_cache[$id];
   }
 
+  /**
+   * Insert the given entity into the database.
+   *
+   * @param ${class} $model
+   */
   public function create(\${class} $model) {
     $validator = new Validator();
     $e = $validator->validate($model);
     if ($e !== null) {
       throw $e;
+    }
+
+    if ($model->get${id_property}() !== null) {
+      return $model->get${id_property}();
     }
 
     try {
@@ -107,6 +138,13 @@ class ${actor} {
     }
   }
 
+  /**
+   * Retrieve entities that match the given criteria.  If no criteria then all
+   * entities are returned.  If no entities exist or match the criteria then an
+   * empty array is returned.
+   *
+   * @param Criteria $c
+   */
   public function retrieve(Criteria $c = null) {
     if ($c === null) {
       $c = new Criteria();
@@ -158,6 +196,11 @@ class ${actor} {
     }
   }
 
+  /**
+   * Update the given entity.
+   *
+   * @param ${class} $model
+   */
   public function update(\${class} $model) {
     $validator = new Validator();
     $e = $validator->validate($model);
@@ -193,6 +236,11 @@ class ${actor} {
     }
   }
 
+  /**
+   * Delete the given entity.
+   *
+   * @param ${class} $model
+   */
   public function delete(\${class} $model) {
     $id = $model->get${id_property}();
     if ($id === null) {
@@ -215,6 +263,7 @@ class ${actor} {
       }
 
       $this->_cache[$id] = null;
+      $model->set${id_property}(null);
 
       return $rowCount;
     } catch (PDOException $e) {

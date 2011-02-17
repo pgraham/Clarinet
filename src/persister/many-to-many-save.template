@@ -9,7 +9,7 @@ foreach ($related AS $rel) {
   if ($rel->get${rhs_id_property}() === null) {
     $persister->create($rel);
   } else {
-    $persister->update($rel);
+    //$persister->update($rel);
   }
 }
 

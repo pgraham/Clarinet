@@ -38,7 +38,7 @@ class ManyToManyPersisterTest extends TestCase {
     Generator::generate();
   }
 
-  /* The object user test */
+  /* The object under test */
   private $_persister;
 
   /**
@@ -51,7 +51,7 @@ class ManyToManyPersisterTest extends TestCase {
     // Instantiate a generated persister to test
     $modelName = 'clarinet\test\mock\ManyToManyEntity';
     $actorName = str_replace('\\', '_', $modelName);
-    $className = "clarinet\\persister\\" . $actorName;
+    $className = "clarinet\\persister\\$actorName";
     $this->_persister = new $className();
   }
 
