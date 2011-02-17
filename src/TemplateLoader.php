@@ -73,6 +73,10 @@ class TemplateLoader {
   public function load($templateName, Array $templateValues) {
     if (!isset($this->_loaded[$templateName])) {
       $templatePath = $this->_basePath . "/$templateName.template";
+      if (!file_exists($templatePath)) {
+        throw new Exception(
+          "Unable to load template: $templatePath does not exist");
+      }
       $this->_loaded[$templateName] = file_get_contents($templatePath);
     }
 

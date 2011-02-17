@@ -6,7 +6,7 @@ if ($relId !== null) {
   $related = $persister->getById($relId);
 
   if ($related === null) {
-    throw new Exception("No ${rhs} with id $relId.");
+    throw new Exception("No ${rhs_str} with id $relId.");
   }
 
   $model->set${lhs_property}($related);

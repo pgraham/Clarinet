@@ -56,72 +56,31 @@ class ManyToMany extends AbstractRelationship {
   }
 
   /**
-   * Generates and returns the code for deleting the left side of the
-   * relationship.
-   */
-  public function getDeleteCode() {
-    $templateValues = Array
-    (
-      '${rhs}'             => $this->_rhs->getClass(),
-      '${link_table}'      => $this->_linkTable,
-      '${lhs_link_column}' => $this->_linkLhsId,
-    );
-
-    // Use the instance cache since its likely that the template has already
-    // been loaded for another relationship of the same type.
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('many-to-many-delete', $templateValues);
-    return $code;
-  }
-
-  /**
-   * Returns the code for populating the left hand side of the relationship with
-   * the collection of entities from the 'many' side.
+   * Get the name of the column in the link table that contains the left side
+   * entity id.
    *
-   * @return string PHP code that will populate the model with the collection of
-   *   related entities.
+   * @return string Link table left side id column.
    */
-  public function getPopulateModelCode() {
-    $templateValues = Array
-    (
-      '${rhs}'             => $this->_rhs->getClass(),
-      '${rhs_table}'       => $this->_rhs->getTable(),
-      '${rhs_id_column}'   => $this->_rhs->getId()->getColumn(),
-      
-      '${link_table}'      => $this->_linkTable,
-      '${lhs_link_column}' => $this->_linkLhsId,
-      '${rhs_link_column}' => $this->_linkRhsId,
-
-      '${lhs_property}'    => $this->_lhsProperty
-    );
-
-    // Use the instance cache since its likely that the template has already
-    // been loaded for another relationship of the same type.
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('many-to-many-model', $templateValues);
-    return $code;
+  public function getLinkLhsId() {
+    return $this->_linkLhsId;
   }
 
   /**
-   * Return the PHP code that creates the relationship.
+   * Get the name of the column in the link table that contains the right side
+   * entity id.
+   *
+   * @return string Link table right side id column.
    */
-  public function getSaveCode() {
-    $templateValues = Array
-    (
-      '${rhs}'             => $this->_rhs->getClass(),
-      '${rhs_id_property}' => $this->_rhs->getId()->getName(),
-      
-      '${link_table}'      => $this->_linkTable,
-      '${lhs_link_column}' => $this->_linkLhsId,
-      '${rhs_link_column}' => $this->_linkRhsId,
+  public function getLinkRhsId() {
+    return $this->_linkRhsId;
+  }
 
-      '${lhs_property}'    => $this->_lhsProperty
-    );
-
-    // Use the instance cache since its likely that the template has already
-    // been loaded for another relationship of the same type.
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('many-to-many-save', $templateValues);
-    return $code;
+  /**
+   * Get the name of the relationship's link table.
+   *
+   * @return string Link table name.
+   */
+  public function getLinkTable() {
+    return $this->_linkTable;
   }
 }

@@ -17,6 +17,7 @@ namespace clarinet\test\generated;
 
 use \clarinet\test\mock\ManyToOneMirrorEntity;
 use \clarinet\test\mock\OneToManyMirrorEntity;
+use \clarinet\ActorFactory;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/../test-common.php';
@@ -68,7 +69,35 @@ class OneToManyMirrorPersisterTest extends TestCase {
    * Test creating an entity with many related entities, all of which are new.
    */
   public function testCreate() {
-    $this->markTestSkipped();
+    $one = new OneToManyMirrorEntity();
+    $one->setName('One');
+
+    $many = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new ManyToOneMirrorEntity();
+      $e->setName("Many$i");
+      $many[] = $e;
+    }
+    $one->setMany($many);
+
+    $id = $this->_persister->create($one);
+    $this->assertNotNull($id);
+    
+    foreach ($many AS $e) {
+      $this->assertNotNull($e->getId());
+    }
+
+    // Ensure that only 10 rhs entities have been created
+    $persister = ActorFactory::getActor('persister',
+      'clarinet\test\mock\ManyToOneMirrorEntity');
+    $rhs = $persister->retrieve();
+    $this->assertEquals(10, count($rhs));
+  }
+
+  /**
+   * Test updating an entity with new related entities.
+   */
+  public function testUpdateWithNew() {
     $one = new OneToManyMirrorEntity();
     $one->setName('One');
 

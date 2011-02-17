@@ -19,12 +19,13 @@ foreach ($related AS $rel) {
 }
 
 // Delete any orphans
+// TODO This doesn't need to happen in the create method
 $c = new Criteria();
 $c->addEquals('${rhs_column}', $id);
 $current = $persister->retrieve($c);
 foreach ($current AS $cur) {
   if (!isset($idMap[$cur->get${rhs_id_property}()])) {
-    if ($cur->get${rhs_property}() == $id) {
+    if ($cur->get${rhs_id_property}() == $id) {
       $persister->delete($cur);
     }
   }
@@ -35,7 +36,7 @@ foreach ($related AS $rel) {
   $relId = $rel->get${rhs_id_property}();
   if ($relId === null) {
     $persister->create($rel);
-  } else {
+  } else if ($relId !== self::CREATE_MARKER) {
     $persister->update($rel);
   }
 }

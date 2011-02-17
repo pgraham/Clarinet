@@ -49,18 +49,23 @@ abstract class AbstractRelationship implements Relationship {
   }
 
   /**
-   * Base implementation so that Relationship implementations that don't have
-   * any special delete code don't need to declare this method.
+   * Getter for the clarinet\model\Info object for the left side of the
+   * relationship.
+   *
+   * @return Info
    */
-  public function getDeleteCode() {
-    return null;
+  public function getLhs() {
+    return $this->_lhs;
   }
 
   /**
-   * Base implementation so that Relationship implementations that don't have
-   * a left side column don't need to declare this method.
+   * Getter for the column on the left side that contains this relationship.
+   * One the ManyToOne relationship returns a value for this method so the
+   * default is to return null
+   *
+   * @return null
    */
-  public function getLhsColumnName() {
+  public function getLhsColumn() {
     return null;
   }
 
@@ -69,25 +74,17 @@ abstract class AbstractRelationship implements Relationship {
    *
    * @return string Property name.
    */
-  public function getLhsPropertyName() {
+  public function getLhsProperty() {
     return $this->_lhsProperty;
   }
 
   /**
-   * Base implementation so that Relationship implementations that don't need to
-   * send a parameter in INSERT and UPDATE statements don't need to declare this
-   * method.  If a relationship returns a value for {#getLhsColumnName()} this
-   * method will probably need to be implemented.
+   * Getter for the clarinet\model\Info object for the right side of the
+   * relationship.
+   *
+   * @return Info
    */
-  public function getPopulateParameterCode() {
-    return null;
-  }
-
-  /**
-   * Base implementation so that Relationship implementations that don't need
-   * special delete code don't need to implement this method.
-   */
-  public function getSaveCode() {
-    return null;
+  public function getRhs() {
+    return $this->_rhs;
   }
 }

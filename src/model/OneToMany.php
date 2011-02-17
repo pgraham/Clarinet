@@ -53,80 +53,21 @@ class OneToMany extends AbstractRelationship {
   }
 
   /**
-   * Returns the code for deleting all of the owned right side entities that are
-   * part of the relationship.
+   * Getter for the relationship's right side column.
+   *
+   * @return string The name of the column on the right side of the relationship
    */
-  public function getDeleteCode() {
-    $templateValues = Array
-    (
-      '${rhs}'          => $this->_rhs->getClass(),
-      '${lhs_property}' => $this->_lhsProperty
-    );
-
-    // Use the instance cache since its likely that the template has already
-    // been loaded for another relationship of the same type.
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('one-to-many-delete', $templateValues);
-    return $code;
+  public function getRhsColumn() {
+    return $this->_rhsColumn;
   }
 
   /**
-   * Returns the code for populating the left hand side of the relationship with
-   * the collection of entities from the 'many' side.
+   * Getter for the relationship's right side property.
    *
-   * @return string PHP Code that will populate the model with the collection of
-   *   related entities.
+   * @return string The name of the property on the right side of the
+   *   relationship
    */
-  public function getPopulateModelCode() {
-    $templateValues = Array
-    (
-      '${rhs}'          => $this->_rhs->getClass(),
-      '${rhs_column}'   => $this->_rhsColumn,
-      '${lhs_property}' => $this->_lhsProperty
-    );
-
-    // Use the instance cache since its likely that the template has already
-    // been loaded for another relationship of the same type.
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('one-to-many-model', $templateValues);
-    return $code;
-  }
-
-  /**
-   * Returns the PHP code that either sets the id of the left side in the
-   * right side or sets the left side itself in the right side.
-   *
-   * @return string PHP code that will create/update the entities on the right
-   *   side of the relationship.
-   */
-  public function getSaveCode() {
-    // Determine if this is mirrored relationship and output the appropriate
-    // code
-    /*
-    if ($this->_rhs->hasRelationship('many-to-one', $this->_lhs->getClass())) {
-      $templateValues = Array
-      (
-        '${rhs}'          => $this->_rhs->getClass(),
-        '${rhs_property}' => $this->_rhs->getRelationship('many-to-one', $this->_lhs->getClass())->getProperty(),
-
-      );
-      $templateName = 'one-to-many-save-mirror';
-
-    } else {
-      */
-      $templateValues = Array
-      (
-        '${rhs}'             => $this->_rhs->getClass(),
-        '${lhs_property}'    => $this->_lhsProperty,
-        '${rhs_id_property}' => $this->_rhs->getId()->getName(),
-        '${rhs_property}'    => $this->_rhsProperty,
-        '${rhs_column}'      => $this->_rhsColumn
-      );
-      $templateName = 'one-to-many-save';
-    //}
-
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load($templateName, $templateValues);
-    return $code;
+  public function getRhsProperty() {
+    return $this->_rhsProperty;
   }
 }

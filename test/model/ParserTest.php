@@ -168,7 +168,8 @@ class ParserTest extends TestCase {
     $relationship = $relationships[0];
     $this->assertInstanceOf('clarinet\model\ManyToMany', $relationship);
 
-    $info = Parser::getModelInfo('clarinet\test\mock\ManyToManyMirrorRhsEntity');
+    $info = Parser::getModelInfo(
+      'clarinet\test\mock\ManyToManyMirrorRhsEntity');
 
     $relationships = $info->getRelationships();
     $this->assertInternalType('array', $relationships);

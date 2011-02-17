@@ -18,6 +18,19 @@ use \clarinet\validator\${actor} as Validator;
  */
 class ${actor} {
 
+  /**
+   * Entities that in the process of being created are marked with this id so
+   * that any right side relationships won't call the create method for the
+   * entity a second time.  In particular this will help prevent double creation
+   * when saving a mirrored ManyToOneEntity.  This happens because the left side
+   * (many side) of the relationship will attempt to create the right side, if
+   * it doesn't have an id, before the left side entity has been assigned an id.
+   * So the right side persister will see that the left side has a null id and
+   * will create it a second time.  So setting an entities id to this marker
+   * will let a right side persister know not to re-create or update the entity.
+   */
+  const CREATE_MARKER = 0;
+
   /*
    * Delete entities will have an index in the cache but the value will be
    * null.
@@ -69,6 +82,8 @@ class ${actor} {
     try {
       $startTransaction = $this->_pdo->beginTransaction();
 
+      $model->set${id_property}(self::CREATE_MARKER);
+
       $params = Array();
       ${populate_parameters}
 
@@ -86,6 +101,7 @@ class ${actor} {
       return $id;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
+      $model->set{$id_property}(null);
 
       throw new Exception('Error creating ${class_str}: ' . $e->getMessage(), $e);
     }

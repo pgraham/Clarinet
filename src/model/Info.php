@@ -109,6 +109,45 @@ class Info {
   }
 
   /**
+   * Getter for the model's relationship with the given type and right side
+   * model class.
+   *
+   * @param string $type The type of relationship to fetch.
+   * @param string $model The model on the right side of the relationship.
+   * @return Relationship The requested relationship representation or null if
+   *   it does not exist.
+   */
+  public function getRelationship($type, $model) {
+    $className = null;
+    switch ($type) {
+      case 'many-to-one':
+      $className = 'clarinet\model\ManyToOne';
+      break;
+
+      case 'one-to-many':
+      $className = 'clarinet\model\OneToMany';
+      break;
+
+      case 'many-to-many':
+      $className = 'clarinet\model\ManyToMany';
+      break;
+
+      default:
+      throw new Exception("Unrecognized relationship type : $type");
+    }
+
+    foreach ($this->_relationships AS $relationship) {
+      $isType = get_class($relationship) == $className;
+      $isModel = $relationship->getRhs()->getClass() == $model;
+
+      if ($isType && $isModel) {
+        return $relationship;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Getter for the model's entity relationships.
    *
    * @return Relationship[]
@@ -125,6 +164,18 @@ class Info {
    */
   public function getTable() {
     return $this->_table;
+  }
+
+  /**
+   * Determines if the model has a relationship of the give type to the
+   * specified model class.
+   *
+   * @param string $type The type of relationship to check for
+   * @param string $model The type of model to check for
+   * @return boolean
+   */
+  public function hasRelationship($type, $model) {
+    return $this->getRelationship($type, $model) !== null;
   }
 
   /**

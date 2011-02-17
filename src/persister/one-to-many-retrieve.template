@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Populate the ${lhs}
+// Populate the ${rhs}
 $c = new Criteria();
 $c->addEquals('${rhs_column}', $id);
 

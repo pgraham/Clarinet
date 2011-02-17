@@ -48,48 +48,7 @@ class ManyToOne extends AbstractRelationship {
    * Returns the name of the column that represents the relationship in the
    * database
    */
-  public function getLhsColumnName() {
+  public function getLhsColumn() {
     return $this->_column;
-  }
-
-  /**
-   * Generates the PHP code that will populate a variable name $model, which is
-   * an instance of the relationship's left hand side, with the model from the
-   * right hand side of the relationship
-   *
-   * @return string PHP Code that will populate the model on the left hand side
-   *   of the relationship with the model from the right hand side.
-   */
-  public function getPopulateModelCode() {
-    $templateValues = $this->_getTemplateValues();
-
-    // Use the instance cache since its likely that the template has already
-    // been loaded for another relationship of the same type.
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('many-to-one-model', $templateValues);
-    return $code;
-  }
-
-  /**
-   * Generates the PHP code that will populate an array named $param with a
-   * key value pair appropriate for use with INSERT and UPDATE statements.
-   */
-  public function getPopulateParameterCode() {
-    $templateValues = $this->_getTemplateValues();
-
-    $templateLoader = TemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('many-to-one-param', $templateValues);
-    return $code;
-  }
-
-  /* Create an array of template values for the relationship's templates. */
-  private function _getTemplateValues() {
-    return Array
-    (
-      '${rhs}'             => $this->_rhs->getClass(),
-      '${rhs_id_property}' => $this->_rhs->getId()->getName(),
-      '${lhs_property}'    => $this->_lhsProperty,
-      '${lhs_column}'      => $this->_column
-    );
   }
 }

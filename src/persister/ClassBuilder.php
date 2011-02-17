@@ -11,7 +11,7 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/generator
+ * @package clarinet/persister
  */
 namespace clarinet\persister;
 
@@ -23,7 +23,7 @@ use \clarinet\TemplateLoader;
  * structure for the persisted class.
  *
  * @author Philip Graham
- * @package clarinet/generator
+ * @package clarinet/persister
  */
 class ClassBuilder {
 
@@ -72,27 +72,28 @@ class ClassBuilder {
     $saveRelationships = Array();
     $deleteRelationships = Array();
     foreach ($modelInfo->getRelationships() AS $relationship) {
-      $populateRelationship = $relationship->getPopulateModelCode();
+      $relationshipBuilder = new RelationshipBuilder($relationship);
+      $populateRelationship = $relationshipBuilder->getRetrieveCode();
       if ($populateRelationship !== null) {
         $populateRelationships[] = $populateRelationship;
       }
 
-      $populateParameter = $relationship->getPopulateParameterCode();
+      $populateParameter = $relationshipBuilder->getSaveLhsCode();
       if ($populateParameter !== null) {
         $populateParameters[] = $populateParameter;
       }
 
-      $saveRelationship = $relationship->getSaveCode();
+      $saveRelationship = $relationshipBuilder->getSaveRhsCode();
       if ($saveRelationship !== null) {
         $saveRelationships[] = $saveRelationship;
       }
 
-      $deleteRelationship = $relationship->getDeleteCode();
+      $deleteRelationship = $relationshipBuilder->getDeleteCode();
       if ($deleteRelationship !== null) {
         $deleteRelationships[] = $deleteRelationship;
       }
 
-      $columnName = $relationship->getLhsColumnName();
+      $columnName = $relationship->getLhsColumn();
       if ($columnName !== null) {
         $columnNames[] = $columnName;
         $valueNames[] = ":$columnName";
