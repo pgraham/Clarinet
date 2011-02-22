@@ -1,11 +1,11 @@
-Clarinet is a PHP ORM loosed with a syntax loosely based on JPA/Hibernate.
-
 Clarinet is licensed under the 3-clause BSD license, the text of which can be
 found in the file LICENSE.txt in the same directory as this file.
 
-Clarinet is nowhere near as feature rich as Hibernate.  It is intended for use
-on small websites and for prototyping.  Be warned, it is a sludgehammer and will
-not scale.  That said, it is easy to and fast to get working.
+Clarinet is a PHP ORM with a syntax loosely based on JPA/Hibernate.  However,
+Clarinet is nowhere near as feature rich as Hibernate.  It is intended to be
+easy and fast to build with.   This makes it ideal for small websites and
+prototyping.  Be warned, it is a sludgehammer and will not scale.  That said,
+it is easy to and fast to get working.
 
 First a couple of definitions.  Throughout this guide and the code, you will see
 the terms model and entity used interchangeably, sorry about that.  Model is
