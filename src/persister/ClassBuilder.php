@@ -16,7 +16,7 @@
 namespace clarinet\persister;
 
 use \clarinet\model\Info;
-use \clarinet\TemplateLoader;
+use \reed\generator\CodeTemplateLoader;
 
 /**
  * This class generates the PHP code for a persister class given the table
@@ -37,7 +37,7 @@ class ClassBuilder {
   public static function build(Info $modelInfo) {
     $templateValues = self::_buildTemplateValues($modelInfo);
 
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $body = $templateLoader->load('class', $templateValues);
     return $body;
   }

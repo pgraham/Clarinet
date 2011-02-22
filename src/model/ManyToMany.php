@@ -15,8 +15,6 @@
  */
 namespace clarinet\model;
 
-use \clarinet\TemplateLoader;
-
 /**
  * This class encapsulates a Many-to-many relationship representation.
  *

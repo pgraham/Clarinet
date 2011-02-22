@@ -16,7 +16,7 @@
 namespace clarinet\transformer;
 
 use \clarinet\model\Info;
-use \clarinet\TemplateLoader;
+use \reed\generator\CodeTemplateLoader;
 
 /**
  * This class generates the PHP code for a transformer class for model classes.
@@ -36,7 +36,7 @@ class ClassBuilder {
     $templateValues = self::_buildTemplateValues($modelInfo);
 
     // Load templates
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $asArray   = $templateLoader->load('asArray',   $templateValues);
     $fromArray = $templateLoader->load('fromArray', $templateValues);
 

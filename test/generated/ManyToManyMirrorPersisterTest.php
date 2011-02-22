@@ -17,6 +17,7 @@ namespace clarinet\test\generated;
 
 use \clarinet\test\mock\ManyToManyMirrorLhsEntity;
 use \clarinet\test\mock\ManyToManyMirrorRhsEntity;
+use \clarinet\ActorFactory;
 
 use \PHPUnit_Framework_TestCase as TestCase;
 
@@ -51,9 +52,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
 
     // Instantiate a generated persister to test
     $modelName = 'clarinet\test\mock\ManyToManyMirrorLhsEntity';
-    $actorName = str_replace('\\', '_', $modelName);
-    $className = "clarinet\\persister\\$actorName";
-    $this->_persister = new $className();
+    $this->_persister = ActorFactory::getActor('persister', $modelName);
   }
 
   /**
@@ -171,13 +170,135 @@ class ManyToManyMirrorPersisterTest extends TestCase {
    * Test updating.
    */
   public function testUpdate() {
-    $this->markTestIncomplete();
+    $lhs = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new ManyToManyMirrorLhsEntity();
+      $e->setName("Lhs$i");
+      $lhs[] = $e;
+    }
+
+    $rhs = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new ManyToManyMirrorRhsEntity();
+      $e->setName("Rhs$i");
+      $rhs[] = $e;
+    }
+
+    foreach ($lhs AS $e) {
+      $e->setMany($rhs);
+    }
+    foreach ($rhs AS $e) {
+      $e->setMany($lhs);
+    }
+
+    $lhsIds = Array();
+    foreach ($lhs AS $e) {
+      $id = $this->_persister->create($e);
+      $this->assertNotNull($id);
+      $this->assertEquals($id, $e->getId());
+      $lhsIds[] = $id;
+    }
+
+    $newRhs = Array();
+    for ($i = 1; $i <= 5; $i++) {
+      $e = new ManyToManyMirrorRhsEntity();
+      $e->setName("NewRhs$i");
+      $e->setMany($lhs);
+      $newRhs[] = $e;
+    }
+
+    foreach ($lhs AS $e) {
+      $e->setMany($newRhs);
+      $updated = $this->_persister->update($e);
+      $this->assertEquals(1, $updated);
+    }
+
+    $newRhsIds = Array();
+    foreach ($newRhs AS $e) {
+      $newRhsIds[] = $e->getId();
+    }
+
+    $this->_persister->clearCache();
+    foreach ($lhs AS $lhsE) {
+      $retrieved = $this->_persister->getById($lhsE->getId());
+      $this->assertNotNull($retrieved);
+      $this->assertNotNull($retrieved->getId());
+      $this->assertEquals($lhsE->getId(), $retrieved->getId());
+
+      $retrievedRhs = $retrieved->getMany();
+      $this->assertNotNull($retrievedRhs);
+      $this->assertInternalType('array', $retrievedRhs);
+      $this->assertEquals(5, count($retrievedRhs));
+
+      foreach ($retrievedRhs AS $rhsE) {
+        $this->assertContains($rhsE->getId(), $newRhsIds);
+      }
+    }
   }
 
   /**
    * Test deleting.
    */
   public function testDelete() {
-    $this->markTestIncomplete();
+    $lhs = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new ManyToManyMirrorLhsEntity();
+      $e->setName("Lhs$i");
+      $lhs[] = $e;
+    }
+
+    $rhs = Array();
+    for ($i = 1; $i <= 10; $i++) {
+      $e = new ManyToManyMirrorRhsEntity();
+      $e->setName("Rhs$i");
+      $rhs[] = $e;
+    }
+
+    foreach ($lhs AS $e) {
+      $e->setMany($rhs);
+    }
+    foreach ($rhs AS $e) {
+      $e->setMany($lhs);
+    }
+
+    $lhsIds = Array();
+    foreach ($lhs AS $e) {
+      $id = $this->_persister->create($e);
+      $this->assertNotNull($id);
+      $this->assertEquals($id, $e->getId());
+      $lhsIds[] = $id;
+    }
+
+    $rhsIds = Array();
+    foreach ($rhs AS $e) {
+      $this->assertNotNull($e->getId());
+      $rhsIds[] = $e->getId();
+    }
+
+    $deletedId = $lhs[0]->getId();
+    $this->_persister->delete($lhs[0]);
+
+    $this->_persister->clearCache();
+    $lhs = Array();
+    $rhs = Array();
+
+    $lhs = $this->_persister->retrieve();
+    $this->assertInternalType('array', $lhs);
+    $this->assertEquals(9, count($lhs));
+
+    foreach ($lhs AS $lhsE) {
+      $this->assertNotEquals($deletedId, $lhsE->getId());
+      $this->assertContains($lhsE->getId(), $lhsIds);
+      
+      $rhs = $lhsE->getMany();
+      $this->assertInternalType('array', $rhs);
+      $this->assertEquals(10, count($rhs));
+
+      foreach ($rhs AS $rhsE) {
+        $this->assertNotNull($rhsE);
+        $this->assertNotNull($rhsE->getId());
+        $this->assertContains($rhsE->getId(), $rhsIds);
+      }
+    }
   }
 }

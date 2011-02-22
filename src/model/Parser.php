@@ -267,6 +267,11 @@ class Parser {
     $property = new Property($propertyName, $column);
 
     if (isset($annotations['enumerated'])) {
+      if (!is_array($annotations['enumerated']['values'])) {
+        $this->_fail("{$this->_className}::$methodName: "
+          . " Enumerated annotation must contain a parameter 'values' that is"
+          . " defined as an array.");
+      }
       $property->setValues($annotations['enumerated']['values']);
     }
     return $property;
@@ -284,7 +289,7 @@ class Parser {
     // Make sure that a related entity is declared and get the model info for
     // that entity
     if (!isset($annotations['manytomany']['entity'])) {
-      $this->_fail("{$this->_className}->$methodName: Many-to-many"
+      $this->_fail("{$this->_className}::$methodName: Many-to-many"
         . " relationships must declare the related entity. "
         . " E.g. @ManyToMany(entity = <...>).");
     }
@@ -329,7 +334,7 @@ class Parser {
     $this->_ensureSetter($property);
 
     if (!isset($annotations['manytoone']['entity'])) {
-      $this->_fail("{$this->_className}->$methodName: Many-to-one"
+      $this->_fail("{$this->_className}::$methodName: Many-to-one"
         . " relationships must declare the related entity. "
         . " E.g. @ManyToOne(entity = <...>).");
     }
@@ -357,7 +362,7 @@ class Parser {
     $this->_ensureSetter($property);
 
     if (!isset($annotations['onetomany']['entity'])) {
-      $this->_fail("{$this->_className}->$methodName: One-to-many"
+      $this->_fail("{$this->_className}::$methodName: One-to-many"
         . " relationships must declare the related entity. "
         . " E.g. @OneToMany(entity = <...>).");
     }
@@ -384,7 +389,8 @@ class Parser {
     if (isset($annotations['onetomany']['property'])) {
       $rhsProperty = $annotations['onetomany']['property'];
     } else {
-      $lhsBaseName = array_pop(explode('\\', $lhsInfo->getClass()));
+      $lhsNameParts = explode('\\', $lhsInfo->getClass());
+      $lhsBaseName = array_pop($lhsNameParts);
       $rhsProperty = $lhsBaseName . 'Id';
     }
 

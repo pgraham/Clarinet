@@ -73,6 +73,97 @@ class ${actor} {
   }
 
   /**
+   * Insert the given entity into the database.
+   *
+   * @param ${class} $model
+   */
+  public function create(\${class} $model) {
+    $validator = new Validator();
+    $e = $validator->validate($model);
+    if ($e !== null) {
+      throw $e;
+    }
+
+    if ($model->get${id_property}() !== null) {
+      return $model->get${id_property}();
+    }
+
+
+    try {
+      $startTransaction = $this->_pdo->beginTransaction();
+
+      $model->set${id_property}(self::CREATE_MARKER);
+
+      $params = Array();
+      ${populate_parameters}
+
+      $this->_create->execute($params);
+      $id = $this->_pdo->lastInsertId();
+      $model->set${id_property}($id);
+      $this->_cache[$id] = $model;
+
+      $saveLock = SaveLock::acquire();
+      $saveLock->lock($model);
+
+      ${save_relationships}
+
+      if ($startTransaction) {
+        $this->_pdo->commit();
+      }
+
+      $saveLock->release();
+
+      return $id;
+    } catch (PDOException $e) {
+      $this->_pdo->rollback();
+      $model->set${id_property}(null);
+
+      if (isset($saveLock)) {
+        $saveLock->forceRelease();
+      }
+
+      throw new Exception('Error creating ${class_str}: ' . $e->getMessage(), $e);
+    }
+  }
+
+  /**
+   * Delete the given entity.
+   *
+   * @param ${class} $model
+   */
+  public function delete(\${class} $model) {
+    $id = $model->get${id_property}();
+    if ($id === null) {
+      throw new Exception("Can't delete ${class_str} because it does not have an id");
+    }
+
+    $params = Array();
+    $params[':id'] = $id;
+
+    try {
+      $startTransaction = $this->_pdo->beginTransaction();
+
+      $this->_delete->execute($params);
+      $rowCount = $this->_delete->rowCount();
+
+      ${delete_relationships}
+
+      if ($startTransaction) {
+        $this->_pdo->commit();
+      }
+
+      $this->_cache[$id] = null;
+      $model->set${id_property}(null);
+
+      return $rowCount;
+    } catch (PDOException $e) {
+      $this->_pdo->rollback();
+
+      throw new Exception("Error deleting ${class_str}: {$e->getMessage()}", $e);
+    }
+  }
+
+  /**
    * Get the entity with the given id.  If no entity with the given id exists
    * then null is returned.
    *
@@ -92,50 +183,6 @@ class ${actor} {
       }
     }
     return $this->_cache[$id];
-  }
-
-  /**
-   * Insert the given entity into the database.
-   *
-   * @param ${class} $model
-   */
-  public function create(\${class} $model) {
-    $validator = new Validator();
-    $e = $validator->validate($model);
-    if ($e !== null) {
-      throw $e;
-    }
-
-    if ($model->get${id_property}() !== null) {
-      return $model->get${id_property}();
-    }
-
-    try {
-      $startTransaction = $this->_pdo->beginTransaction();
-
-      $model->set${id_property}(self::CREATE_MARKER);
-
-      $params = Array();
-      ${populate_parameters}
-
-      $this->_create->execute($params);
-      $id = $this->_pdo->lastInsertId();
-      $model->set${id_property}($id);
-      $this->_cache[$id] = $model;
-
-      ${save_relationships}
-
-      if ($startTransaction) {
-        $this->_pdo->commit();
-      }
-
-      return $id;
-    } catch (PDOException $e) {
-      $this->_pdo->rollback();
-      $model->set{$id_property}(null);
-
-      throw new Exception('Error creating ${class_str}: ' . $e->getMessage(), $e);
-    }
   }
 
   /**
@@ -197,24 +244,46 @@ class ${actor} {
   }
 
   /**
+   * Saves the given instance by either creating it if it does not have an ID or
+   * updating if it does.
+   *
+   * @param ${class} $model
+   */
+  public function save(\${class} $model) {
+    $id = $model->get${id_property}();
+    if ($id === null) {
+      $this->create($model);
+    } else {
+      $this->update($model);
+    }
+  }
+
+  /**
    * Update the given entity.
    *
    * @param ${class} $model
    */
   public function update(\${class} $model) {
+    $id = $model->get${id_property}();
+    if ($id === null) {
+      throw new Exception("Can't update ${class_str} because it does not have an id");
+    }
+
+    if (SaveLock::isLocked($model)) {
+      return;
+    }
+
     $validator = new Validator();
     $e = $validator->validate($model);
     if ($e !== null) {
       throw $e;
     }
 
-    $id = $model->get${id_property}();
-    if ($id === null) {
-      throw new Exception("Can't update ${class_str} because it does not have an id");
-    }
-
     try {
       $startTransaction = $this->_pdo->beginTransaction();
+
+      $saveLock = SaveLock::acquire();
+      $saveLock->lock($model);
 
       $params = Array();
       $params[':id'] = $id;
@@ -225,51 +294,19 @@ class ${actor} {
 
       ${save_relationships}
 
+      $saveLock->release();
+
       if ($startTransaction) {
         $this->_pdo->commit();
       }
+
+      
       return $rowCount;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
+      $saveLock->forceRelease();
 
       throw new Exception("Error updating ${class_str}: {$e->getMessage()}", $e);
-    }
-  }
-
-  /**
-   * Delete the given entity.
-   *
-   * @param ${class} $model
-   */
-  public function delete(\${class} $model) {
-    $id = $model->get${id_property}();
-    if ($id === null) {
-      throw new Exception("Can't delete ${class_str} because it does not have an id");
-    }
-
-    $params = Array();
-    $params[':id'] = $id;
-
-    try {
-      $startTransaction = $this->_pdo->beginTransaction();
-
-      $this->_delete->execute($params);
-      $rowCount = $this->_delete->rowCount();
-
-      ${delete_relationships}
-
-      if ($startTransaction) {
-        $this->_pdo->commit();
-      }
-
-      $this->_cache[$id] = null;
-      $model->set${id_property}(null);
-
-      return $rowCount;
-    } catch (PDOException $e) {
-      $this->_pdo->rollback();
-
-      throw new Exception("Error deleting ${class_str}: {$e->getMessage()}", $e);
     }
   }
 }

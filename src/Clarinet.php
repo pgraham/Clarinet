@@ -169,10 +169,8 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $persister = ActorFactory::getAction('persister', $modelClass);
-
-    // TODO - Determine if the obj has an id or not and take the necessary
-    //        action
+    $persister = ActorFactory::getActor('persister', $modelClass);
+    $persister->save($obj);
   }
 
   /**

@@ -16,7 +16,7 @@
 namespace clarinet\persister;
 
 use \clarinet\model\ManyToOne;
-use \clarinet\TemplateLoader;
+use \reed\generator\CodeTemplateLoader;
 
 /**
  * This class generates the persister code for a many-to-one relationship.
@@ -54,7 +54,7 @@ class ManyToOneBuilder implements RelationshipBuilderI {
       '${rhs_str}'         => str_replace('\\', '\\\\', $rhs->getClass())
     );
 
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $code = $templateLoader->load('many-to-one-retrieve', $templateValues);
     return $code;
   }
@@ -68,7 +68,7 @@ class ManyToOneBuilder implements RelationshipBuilderI {
       '${lhs_column}'      => $this->_manyToOne->getLhsColumn()
     );
 
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $code = $templateLoader->load('many-to-one-save', $templateValues);
     return $code;
   }

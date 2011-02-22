@@ -48,6 +48,9 @@ class PersisterGenerator extends AbstractGenerator {
    * @return string The PHP code for a persister.
    */
   protected function _generate(Info $modelInfo) {
+    if (defined('DEBUG') && DEBUG === true) {
+      ActorGenerator::generate('validator', $modelInfo->getClass());
+    }
     return ClassBuilder::build($modelInfo);
   }
 }

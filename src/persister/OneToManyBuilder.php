@@ -16,7 +16,7 @@
 namespace clarinet\persister;
 
 use \clarinet\model\OneToMany;
-use \clarinet\TemplateLoader;
+use \reed\generator\CodeTemplateLoader;
 
 /**
  * This class generates the persister code for a one-to-many relationship.
@@ -45,7 +45,7 @@ class OneToManyBuilder implements RelationshipBuilderI {
       '${lhs_property}' => $this->_oneToMany->getLhsProperty()
     );
 
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $code = $templateLoader->load('one-to-many-delete', $templateValues);
     return $code;
   }
@@ -58,7 +58,7 @@ class OneToManyBuilder implements RelationshipBuilderI {
       '${lhs_property}' => $this->_oneToMany->getLhsProperty()
     );
 
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $code = $templateLoader->load('one-to-many-retrieve', $templateValues);
     return $code;
   }
@@ -101,7 +101,7 @@ class OneToManyBuilder implements RelationshipBuilderI {
       $templateName = 'one-to-many-save';
     }
 
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $code = $templateLoader->load($templateName, $templateValues);
     return $code;
   }

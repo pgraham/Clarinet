@@ -16,7 +16,7 @@
 namespace clarinet\persister;
 
 use \clarinet\model\ManyToMany;
-use \clarinet\TemplateLoader;
+use \reed\generator\CodeTemplateLoader;
 
 /**
  * This class generates the persister code for a many-to-many relationship.
@@ -46,7 +46,7 @@ class ManyToManyBuilder implements RelationshipBuilderI {
       '${lhs_link_column}' => $this->_manyToMany->getLinkLhsId(),
     );
 
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $code = $templateLoader->load('many-to-many-delete', $templateValues);
     return $code;
   }
@@ -66,7 +66,7 @@ class ManyToManyBuilder implements RelationshipBuilderI {
       '${lhs_property}'    => $this->_manyToMany->getLhsProperty()
     );
 
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $code = $templateLoader->load('many-to-many-retrieve', $templateValues);
     return $code;
   }
@@ -76,6 +76,7 @@ class ManyToManyBuilder implements RelationshipBuilderI {
   }
 
   public function getSaveRhsCode() {
+    $lhs = $this->_manyToMany->getLhs();
     $rhs = $this->_manyToMany->getRhs();
     $templateValues = Array
     (
@@ -86,10 +87,12 @@ class ManyToManyBuilder implements RelationshipBuilderI {
       '${lhs_link_column}' => $this->_manyToMany->getLinkLhsId(),
       '${rhs_link_column}' => $this->_manyToMany->getLinkRhsId(),
 
-      '${lhs_property}'    => $this->_manyToMany->getLhsProperty()
+      '${lhs_property}'    => $this->_manyToMany->getLhsProperty(),
+
+      '${class_str}'         => str_replace('\\', '\\\\', $lhs->getClass())
     );
 
-    $templateLoader = TemplateLoader::get(__DIR__);
+    $templateLoader = CodeTemplateLoader::get(__DIR__);
     $code = $templateLoader->load('many-to-many-save', $templateValues);
     return $code;
   }

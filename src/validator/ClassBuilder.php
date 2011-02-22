@@ -16,7 +16,7 @@
 namespace clarinet\validator;
 
 use \clarinet\model\Info;
-use \clarinet\TemplateLoader;
+use \reed\generator\CodeTemplateLoader;
 
 /**
  * This class generates the PHP code for a validator actor for a specific model
@@ -37,7 +37,7 @@ class ClassBuilder {
    */
   public static function build(Info $modelInfo) {
     if (self::$_templateLoader === null) {
-      self::$_templateLoader = TemplateLoader::get(__DIR__);
+      self::$_templateLoader = CodeTemplateLoader::get(__DIR__);
     }
     $templateValues = self::_buildTemplateValues($modelInfo);
 
@@ -81,7 +81,7 @@ class ClassBuilder {
         // Load the enum check method
         $values = Array
         (
-          '${model}'    => $modelInfo['class'],
+          '${model}'    => $modelInfo->getClass(),
           '${property}' => $prop,
           '${var_name}' => "\$$var",
           '${values}'   => implode(',', $property->getValues())
