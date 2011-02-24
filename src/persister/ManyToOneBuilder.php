@@ -46,12 +46,12 @@ class ManyToOneBuilder implements RelationshipBuilderI {
     $rhs = $this->_manyToOne->getRhs();
     $templateValues = Array
     (
-      '${rhs}'             => $rhs->getClass(),
-      '${rhs_id_property}' => $rhs->getId()->getName(),
-      '${lhs_property}'    => $this->_manyToOne->getLhsProperty(),
-      '${lhs_column}'      => $this->_manyToOne->getLhsColumn(),
+      'rhs'             => $rhs->getClass(),
+      'rhs_id_property' => $rhs->getId()->getName(),
+      'lhs_property'    => $this->_manyToOne->getLhsProperty(),
+      'lhs_column'      => $this->_manyToOne->getLhsColumn(),
 
-      '${rhs_str}'         => str_replace('\\', '\\\\', $rhs->getClass())
+      'rhs_str'         => str_replace('\\', '\\\\', $rhs->getClass())
     );
 
     $templateLoader = CodeTemplateLoader::get(__DIR__);
@@ -62,10 +62,10 @@ class ManyToOneBuilder implements RelationshipBuilderI {
   public function getSaveLhsCode() {
     $templateValues = Array
     (
-      '${rhs}'             => $this->_manyToOne->getRhs()->getClass(),
-      '${rhs_id_property}' => $this->_manyToOne->getRhs()->getId()->getName(),
-      '${lhs_property}'    => $this->_manyToOne->getLhsProperty(),
-      '${lhs_column}'      => $this->_manyToOne->getLhsColumn()
+      'rhs'             => $this->_manyToOne->getRhs()->getClass(),
+      'rhs_id_property' => $this->_manyToOne->getRhs()->getId()->getName(),
+      'lhs_property'    => $this->_manyToOne->getLhsProperty(),
+      'lhs_column'      => $this->_manyToOne->getLhsColumn()
     );
 
     $templateLoader = CodeTemplateLoader::get(__DIR__);

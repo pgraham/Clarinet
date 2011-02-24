@@ -41,8 +41,8 @@ class OneToManyBuilder implements RelationshipBuilderI {
   public function getDeleteCode() {
     $templateValues = Array
     (
-      '${rhs}'          => $this->_oneToMany->getRhs()->getClass(),
-      '${lhs_property}' => $this->_oneToMany->getLhsProperty()
+      'rhs'          => $this->_oneToMany->getRhs()->getClass(),
+      'lhs_property' => $this->_oneToMany->getLhsProperty()
     );
 
     $templateLoader = CodeTemplateLoader::get(__DIR__);
@@ -53,9 +53,9 @@ class OneToManyBuilder implements RelationshipBuilderI {
   public function getRetrieveCode() {
     $templateValues = Array
     (
-      '${rhs}'          => $this->_oneToMany->getRhs()->getClass(),
-      '${rhs_column}'   => $this->_oneToMany->getRhsColumn(),
-      '${lhs_property}' => $this->_oneToMany->getLhsProperty()
+      'rhs'          => $this->_oneToMany->getRhs()->getClass(),
+      'rhs_column'   => $this->_oneToMany->getRhsColumn(),
+      'lhs_property' => $this->_oneToMany->getLhsProperty()
     );
 
     $templateLoader = CodeTemplateLoader::get(__DIR__);
@@ -82,21 +82,21 @@ class OneToManyBuilder implements RelationshipBuilderI {
 
       $templateValues = Array
       (
-        '${rhs}'             => $rhs->getClass(),
-        '${lhs_property}'    => $this->_oneToMany->getLhsProperty(),
-        '${rhs_id_property}' => $rhs->getId()->getName(),
-        '${rhs_property}'    => $mirrorProp,
-        '${rhs_column}'      => $mirrorCol
+        'rhs'             => $rhs->getClass(),
+        'lhs_property'    => $this->_oneToMany->getLhsProperty(),
+        'rhs_id_property' => $rhs->getId()->getName(),
+        'rhs_property'    => $mirrorProp,
+        'rhs_column'      => $mirrorCol
       );
       $templateName = 'one-to-many-save-mirror';
     } else {
       $templateValues = Array
       (
-        '${rhs}'             => $rhs->getClass(),
-        '${lhs_property}'    => $this->_oneToMany->getLhsProperty(),
-        '${rhs_id_property}' => $rhs->getId()->getName(),
-        '${rhs_property}'    => $this->_oneToMany->getRhsProperty(),
-        '${rhs_column}'      => $this->_oneToMany->getRhsColumn()
+        'rhs'             => $rhs->getClass(),
+        'lhs_property'    => $this->_oneToMany->getLhsProperty(),
+        'rhs_id_property' => $rhs->getId()->getName(),
+        'rhs_property'    => $this->_oneToMany->getRhsProperty(),
+        'rhs_column'      => $this->_oneToMany->getRhsColumn()
       );
       $templateName = 'one-to-many-save';
     }

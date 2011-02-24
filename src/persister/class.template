@@ -56,10 +56,10 @@ class ${actor} {
     $this->_pdo = PdoWrapper::get();
 
     $this->_create = $this->_pdo->prepare(
-      "INSERT INTO ${table} (${column_names}) VALUES (${value_names})");
+      "INSERT INTO ${table} (${join:column_names:,}) VALUES (${join:value_names:,})");
 
     $this->_update = $this->_pdo->prepare(
-      "UPDATE ${table} SET ${sql_setters} WHERE ${id_column} = :id");
+      "UPDATE ${table} SET ${join:sql_setters:,} WHERE ${id_column} = :id");
 
     $this->_delete = $this->_pdo->prepare(
       "DELETE FROM ${table} WHERE ${id_column} = :id");
@@ -95,7 +95,7 @@ class ${actor} {
       $model->set${id_property}(self::CREATE_MARKER);
 
       $params = Array();
-      ${populate_parameters}
+      ${each:populate_parameters}
 
       $this->_create->execute($params);
       $id = $this->_pdo->lastInsertId();
@@ -105,7 +105,7 @@ class ${actor} {
       $saveLock = SaveLock::acquire();
       $saveLock->lock($model);
 
-      ${save_relationships}
+      ${each:save_relationships}
 
       if ($startTransaction) {
         $this->_pdo->commit();
@@ -146,7 +146,7 @@ class ${actor} {
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
 
-      ${delete_relationships}
+      ${each:delete_relationships}
 
       if ($startTransaction) {
         $this->_pdo->commit();
@@ -229,10 +229,10 @@ class ${actor} {
         $this->_cache[$id] = $model;
 
         // Populate the model's properties
-        ${populate_properties}
+        ${each:populate_properties}
 
         // Populate any relationships
-        ${populate_relationships}
+        ${each:populate_relationships}
 
         $result[] = $model;
       }
@@ -287,12 +287,12 @@ class ${actor} {
 
       $params = Array();
       $params[':id'] = $id;
-      ${populate_parameters}
+      ${each:populate_parameters}
 
       $this->_update->execute($params);
       $rowCount = $this->_update->rowCount();
 
-      ${save_relationships}
+      ${each:save_relationships}
 
       $saveLock->release();
 

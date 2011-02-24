@@ -41,9 +41,9 @@ class ManyToManyBuilder implements RelationshipBuilderI {
   public function getDeleteCode() {
     $templateValues = Array
     (
-      '${rhs}'             => $this->_manyToMany->getRhs()->getClass(),
-      '${link_table}'      => $this->_manyToMany->getLinkTable(),
-      '${lhs_link_column}' => $this->_manyToMany->getLinkLhsId(),
+      'rhs'             => $this->_manyToMany->getRhs()->getClass(),
+      'link_table'      => $this->_manyToMany->getLinkTable(),
+      'lhs_link_column' => $this->_manyToMany->getLinkLhsId(),
     );
 
     $templateLoader = CodeTemplateLoader::get(__DIR__);
@@ -55,15 +55,15 @@ class ManyToManyBuilder implements RelationshipBuilderI {
     $rhs = $this->_manyToMany->getRhs();
     $templateValues = Array
     (
-      '${rhs}'             => $rhs->getClass(),
-      '${rhs_table}'       => $rhs->getTable(),
-      '${rhs_id_column}'   => $rhs->getId()->getColumn(),
+      'rhs'             => $rhs->getClass(),
+      'rhs_table'       => $rhs->getTable(),
+      'rhs_id_column'   => $rhs->getId()->getColumn(),
       
-      '${link_table}'      => $this->_manyToMany->getLinkTable(),
-      '${lhs_link_column}' => $this->_manyToMany->getLinkLhsId(),
-      '${rhs_link_column}' => $this->_manyToMany->getLinkRhsId(),
+      'link_table'      => $this->_manyToMany->getLinkTable(),
+      'lhs_link_column' => $this->_manyToMany->getLinkLhsId(),
+      'rhs_link_column' => $this->_manyToMany->getLinkRhsId(),
 
-      '${lhs_property}'    => $this->_manyToMany->getLhsProperty()
+      'lhs_property'    => $this->_manyToMany->getLhsProperty()
     );
 
     $templateLoader = CodeTemplateLoader::get(__DIR__);
@@ -80,16 +80,16 @@ class ManyToManyBuilder implements RelationshipBuilderI {
     $rhs = $this->_manyToMany->getRhs();
     $templateValues = Array
     (
-      '${rhs}'             => $rhs->getClass(),
-      '${rhs_id_property}' => $rhs->getId()->getName(),
+      'rhs'             => $rhs->getClass(),
+      'rhs_id_property' => $rhs->getId()->getName(),
       
-      '${link_table}'      => $this->_manyToMany->getLinkTable(),
-      '${lhs_link_column}' => $this->_manyToMany->getLinkLhsId(),
-      '${rhs_link_column}' => $this->_manyToMany->getLinkRhsId(),
+      'link_table'      => $this->_manyToMany->getLinkTable(),
+      'lhs_link_column' => $this->_manyToMany->getLinkLhsId(),
+      'rhs_link_column' => $this->_manyToMany->getLinkRhsId(),
 
-      '${lhs_property}'    => $this->_manyToMany->getLhsProperty(),
+      'lhs_property'    => $this->_manyToMany->getLhsProperty(),
 
-      '${class_str}'         => str_replace('\\', '\\\\', $lhs->getClass())
+      'class_str'         => str_replace('\\', '\\\\', $lhs->getClass())
     );
 
     $templateLoader = CodeTemplateLoader::get(__DIR__);

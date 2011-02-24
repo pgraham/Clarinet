@@ -47,7 +47,8 @@ class ClassBuilder {
    * to insert into a persister template.
    */
   private static function _buildTemplateValues(Info $modelInfo) {
-    $persisterName = str_replace('\\', '_', $modelInfo->getClass());
+    $className = $modelInfo->getClass();
+    $persisterName = str_replace('\\', '_', $className);
 
     $columnNames = Array();
     $valueNames = Array();
@@ -62,10 +63,8 @@ class ClassBuilder {
       $valueNames[] = ":$col";
       $sqlSetters[] = "$col = :$col";
 
-      $populateParameters[] = "    \$params[':$col'] ="
-        . " \$model->get$prop();";
-      $populateProperties[] = "      \$model->set$prop("
-        . "\$row['$col']);";
+      $populateParameters[] = "\$params[':$col'] = \$model->get$prop();";
+      $populateProperties[] = "\$model->set$prop(\$row['$col']);";
     }
 
     $populateRelationships = Array();
@@ -103,24 +102,23 @@ class ClassBuilder {
 
     $templateValues = Array
     (
-      '${class}'                  => $modelInfo->getClass(),
-      '${actor}'                  => $modelInfo->getActor(),
-      '${table}'                  => $modelInfo->getTable(),
+      'class'                  => $className,
+      'class_str'              => str_replace('\\', '\\\\', $className),
 
-      '${id_property}'            => $modelInfo->getId()->getName(),
-      '${id_column}'              => $modelInfo->getId()->getColumn(),
+      'actor'                  => $modelInfo->getActor(),
+      'table'                  => $modelInfo->getTable(),
 
-      '${column_names}'           => implode(',', $columnNames),
-      '${value_names}'            => implode(',', $valueNames),
-      '${sql_setters}'            => implode(',', $sqlSetters),
-      '${populate_parameters}'    => implode("\n", $populateParameters),
-      '${populate_properties}'    => implode("\n", $populateProperties),
-      '${populate_relationships}' => implode("\n\n", $populateRelationships),
-      '${save_relationships}'     => implode("\n\n", $saveRelationships),
-      '${delete_relationships}'   => implode("\n\n", $deleteRelationships),
+      'id_property'            => $modelInfo->getId()->getName(),
+      'id_column'              => $modelInfo->getId()->getColumn(),
 
-      '${class_str}'              => str_replace('\\', '\\\\',
-                                       $modelInfo->getClass())
+      'column_names'           => $columnNames,
+      'value_names'            => $valueNames,
+      'sql_setters'            => $sqlSetters,
+      'populate_parameters'    => $populateParameters,
+      'populate_properties'    => $populateProperties,
+      'populate_relationships' => $populateRelationships,
+      'save_relationships'     => $saveRelationships,
+      'delete_relationships'   => $deleteRelationships
     );
     return $templateValues;
   }
