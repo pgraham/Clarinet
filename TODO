@@ -6,3 +6,5 @@
   a boolean type they are stored as integers and need translation.  This will
   mean creating a PropertyBuilder class that generates custom code for boolean
   properties.
+ 
+- Add support for one-to-one relationships
