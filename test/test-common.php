@@ -23,8 +23,10 @@
  * PATH POINTS TO THE SOURCE DIRECTORY OR A REED INSTALLATION.
  * -----------------------------------------------------------------------------
  */
-define('REED_PATH', __DIR__ . '/../../reed/src');
-require_once REED_PATH . '/Autoloader.php';
+if (!defined('REED_PATH')) {
+  define('REED_PATH', __DIR__ . '/../../reed');
+}
 
+require_once REED_PATH . '/src/Autoloader.php';
 require_once __DIR__ . '/../src/Autoloader.php';
 require_once __DIR__ . '/Autoloader.php';
