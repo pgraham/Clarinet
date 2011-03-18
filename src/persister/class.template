@@ -95,7 +95,9 @@ class ${actor} {
       $model->set${id_property}(self::CREATE_MARKER);
 
       $params = Array();
-      ${each:populate_parameters}
+      ${each:populate_parameters AS populate_param}
+        ${populate_param}
+      ${done}
 
       $this->_create->execute($params);
       $id = $this->_pdo->lastInsertId();
@@ -105,7 +107,9 @@ class ${actor} {
       $saveLock = SaveLock::acquire();
       $saveLock->lock($model);
 
-      ${each:save_relationships}
+      ${each:save_relationships as save}
+        ${save}
+      ${done}
 
       if ($startTransaction) {
         $this->_pdo->commit();
@@ -146,7 +150,9 @@ class ${actor} {
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
 
-      ${each:delete_relationships}
+      ${each:delete_relationships as delete}
+        ${delete}
+      ${done}
 
       if ($startTransaction) {
         $this->_pdo->commit();
@@ -229,10 +235,14 @@ class ${actor} {
         $this->_cache[$id] = $model;
 
         // Populate the model's properties
-        ${each:populate_properties}
+        ${each:populate_properties as populate_prop}
+          ${populate_prop}
+        ${done}
 
         // Populate any relationships
-        ${each:populate_relationships}
+        ${each:populate_relationships as populate_rel}
+          ${populate_rel}
+        ${done}
 
         $result[] = $model;
       }
@@ -287,12 +297,16 @@ class ${actor} {
 
       $params = Array();
       $params[':id'] = $id;
-      ${each:populate_parameters}
+      ${each:populate_parameters as populate_param}
+        ${populate_param}
+      ${done}
 
       $this->_update->execute($params);
       $rowCount = $this->_update->rowCount();
 
-      ${each:save_relationships}
+      ${each:save_relationships as save_rel}
+        ${save_rel}
+      ${done}
 
       $saveLock->release();
 
