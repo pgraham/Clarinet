@@ -8,3 +8,6 @@
   properties.
  
 - Add support for one-to-one relationships
+
+- Move Model structure representation classes (contained in model package) into
+  Reed

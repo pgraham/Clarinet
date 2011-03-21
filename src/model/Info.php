@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/model
  */
 namespace clarinet\model;
 
@@ -19,7 +18,6 @@ namespace clarinet\model;
  * This class encapsulates entity information for a model class.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/model
  */
 class Info {
 
