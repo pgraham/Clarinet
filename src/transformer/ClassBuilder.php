@@ -15,7 +15,7 @@
  */
 namespace clarinet\transformer;
 
-use \clarinet\model\Info;
+use \clarinet\model\Model;
 use \reed\generator\CodeTemplateLoader;
 
 /**
@@ -28,12 +28,12 @@ class ClassBuilder {
   /**
    * Generate a transformer class for the given model information.
    *
-   * @param Info $modelInfo The model's structure information as parsed by
-   *   clarinet\model\Parser::getModelInfo(...).
+   * @param Model $model The model's structure information as parsed by
+   *   clarinet\model\Parser::getModel(...).
    * @return string The model's transformer's class body.
    */
-  public static function build(Info $modelInfo) {
-    $templateValues = self::_buildTemplateValues($modelInfo);
+  public static function build(Model $model) {
+    $templateValues = self::_buildTemplateValues($model);
 
     // Load templates
     $templateLoader = CodeTemplateLoader::get(__DIR__);
@@ -52,16 +52,16 @@ class ClassBuilder {
    * This method uses a parsed model info array structure to create the values
    * to insert into a transformer template.
    */
-  private static function _buildTemplateValues(Info $modelInfo) {
+  private static function _buildTemplateValues(Model $model) {
     $arraySetters = Array();
     $modelSetters = Array();
 
-    $id = $modelInfo->getId()->getName();;
+    $id = $model->getId()->getName();;
     $idIdx = strtolower($id);
     $arraySetters[] = "    \$a['$idIdx'] = \$model->get$id();";
     $modelSetters[] = "    \$model->set$id(\$a['$idIdx']);";
 
-    foreach ($modelInfo->getProperties() AS $property) {
+    foreach ($model->getProperties() AS $property) {
       $prop = $property->getName();
       $idx = strtolower($prop);
 
@@ -71,8 +71,8 @@ class ClassBuilder {
 
     $templateValues = Array
     (
-      '${class}'       => $modelInfo->getClass(),
-      '${actor}'       => $modelInfo->getActor(),
+      '${class}'       => $model->getClass(),
+      '${actor}'       => $model->getActor(),
 
       '${array_setters}' => implode("\n", $arraySetters),
       '${model_setters}' => implode("\n", $modelSetters)

@@ -23,36 +23,36 @@ namespace clarinet\model;
  */
 abstract class AbstractRelationship implements Relationship {
 
-  /* Info for the entity on the left side of the relationship */
+  /* Model for the entity on the left side of the relationship */
   protected $_lhs;
 
   /* Property in the left side entity that contains this relationship */
   protected $_lhsPropery;
 
-  /* Info for the entity on the right side of the relationship */
+  /* Model for the entity on the right side of the relationship */
   protected $_rhs;
 
   /**
    * Initiate a new relationship.
    *
-   * @param string $lhs The name of the entity on the left side of the
+   * @param Model $lhs The model entity on the left side of the
    *   relationship.
-   * @param string $rhs The name of the entity on the right side of the
+   * @param Model $rhs The model entity on the right side of the
    *   relationship.
    * @param string $lhsProperty The property  on the left side that contains the
    *   relationship
    */
-  protected function __construct($lhs, $rhs, $lhsProperty) {
-    $this->_lhs = Parser::getModelInfo($lhs);
-    $this->_rhs = Parser::getModelInfo($rhs);
+  protected function __construct(Model $lhs, Model $rhs, $lhsProperty) {
+    $this->_lhs = $lhs;
+    $this->_rhs = $rhs;
     $this->_lhsProperty = $lhsProperty;
   }
 
   /**
-   * Getter for the clarinet\model\Info object for the left side of the
+   * Getter for the clarinet\model\Model object for the left side of the
    * relationship.
    *
-   * @return Info
+   * @return Model
    */
   public function getLhs() {
     return $this->_lhs;
@@ -79,10 +79,10 @@ abstract class AbstractRelationship implements Relationship {
   }
 
   /**
-   * Getter for the clarinet\model\Info object for the right side of the
+   * Getter for the clarinet\model\Model object for the right side of the
    * relationship.
    *
-   * @return Info
+   * @return Model
    */
   public function getRhs() {
     return $this->_rhs;

@@ -19,7 +19,7 @@ namespace clarinet\model;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class Info {
+class Model {
 
   private $_class;
   private $_actor;

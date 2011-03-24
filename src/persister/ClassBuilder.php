@@ -15,7 +15,7 @@
  */
 namespace clarinet\persister;
 
-use \clarinet\model\Info;
+use \clarinet\model\Model;
 use \reed\generator\CodeTemplateLoader;
 
 /**
@@ -30,12 +30,12 @@ class ClassBuilder {
   /**
    * Generate a persister class given an entities table/class structure.
    *
-   * @param Info $modelInfo Structure information about the the entity for
+   * @param Model $model Structure information about the the entity for
    *     which a persister will be generated.
    * @return The persister's PHP code.
    */
-  public static function build(Info $modelInfo) {
-    $templateValues = self::_buildTemplateValues($modelInfo);
+  public static function build(Model $model) {
+    $templateValues = self::_buildTemplateValues($model);
 
     $templateLoader = CodeTemplateLoader::get(__DIR__);
     $body = $templateLoader->load('class', $templateValues);
@@ -46,8 +46,8 @@ class ClassBuilder {
    * This method uses a parsed model info array structure to create the values
    * to insert into a persister template.
    */
-  private static function _buildTemplateValues(Info $modelInfo) {
-    $className = $modelInfo->getClass();
+  private static function _buildTemplateValues(Model $model) {
+    $className = $model->getClass();
     $persisterName = str_replace('\\', '_', $className);
 
     $columnNames = Array();
@@ -55,7 +55,7 @@ class ClassBuilder {
     $sqlSetters = Array();
     $populateParameters = Array();
     $populateProperties = Array();
-    foreach ($modelInfo->getProperties() AS $property) {
+    foreach ($model->getProperties() AS $property) {
       $prop = $property->getName();
       $col  = $property->getColumn();
 
@@ -70,7 +70,7 @@ class ClassBuilder {
     $populateRelationships = Array();
     $saveRelationships = Array();
     $deleteRelationships = Array();
-    foreach ($modelInfo->getRelationships() AS $relationship) {
+    foreach ($model->getRelationships() AS $relationship) {
       $relationshipBuilder = new RelationshipBuilder($relationship);
       $populateRelationship = $relationshipBuilder->getRetrieveCode();
       if ($populateRelationship !== null) {
@@ -105,11 +105,11 @@ class ClassBuilder {
       'class'                  => $className,
       'class_str'              => str_replace('\\', '\\\\', $className),
 
-      'actor'                  => $modelInfo->getActor(),
-      'table'                  => $modelInfo->getTable(),
+      'actor'                  => $model->getActor(),
+      'table'                  => $model->getTable(),
 
-      'id_property'            => $modelInfo->getId()->getName(),
-      'id_column'              => $modelInfo->getId()->getColumn(),
+      'id_property'            => $model->getId()->getName(),
+      'id_column'              => $model->getId()->getColumn(),
 
       'column_names'           => $columnNames,
       'value_names'            => $valueNames,

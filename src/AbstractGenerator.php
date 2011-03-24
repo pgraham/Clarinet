@@ -17,7 +17,7 @@ namespace clarinet;
 
 use \SplFileObject;
 
-use \clarinet\model\Info;
+use \clarinet\model\Model;
 use \clarinet\model\Parser;
 
 /**
@@ -52,13 +52,13 @@ abstract class AbstractGenerator {
    * @param string $className The entity for which to generate code.
    */
   public function generate($className) {
-    $modelInfo = Parser::getModelInfo($className);
-    $classBody = $this->_generate($modelInfo);
+    $model = Parser::getModel($className);
+    $classBody = $this->_generate($model);
 
     if (!file_exists($this->_outputPath)) {
       mkdir($this->_outputPath, 0755, true);
     }
-    $fileName = str_replace('\\', '_', $modelInfo->getClass()) . '.php';
+    $fileName = str_replace('\\', '_', $model->getClass()) . '.php';
 
     $fullPath = $this->_outputPath . '/' . $fileName;
     $file = new SplFileObject($fullPath, 'w');
@@ -68,8 +68,8 @@ abstract class AbstractGenerator {
   /**
    * This method is responsible for actually generating the actor code.
    *
-   * @param Info $modelInfo Parsed model information.
+   * @param Model $model Parsed model information.
    * @return string The PHP code for the generated actor.
    */
-  protected abstract function _generate(Info $modelInfo);
+  protected abstract function _generate(Model $model);
 }

@@ -15,7 +15,7 @@
  */
 namespace clarinet;
 
-use \clarinet\model\Info;
+use \clarinet\model\Model;
 use \clarinet\transformer\ClassBuilder;
 
 /**
@@ -42,11 +42,11 @@ class TransformerGenerator extends AbstractGenerator {
    * Generates the PHP Code for a transformer actor for the given model
    * structure.
    *
-   * @param Info $modelInfo Information about the model for which a transformer
+   * @param Model $model Information about the model for which a transformer
    *   is to be generated.
    * @return string The PHP code for a transformer.
    */
-  protected function _generate(Info $modelInfo) {
-    return ClassBuilder::build($modelInfo);
+  protected function _generate(Model $model) {
+    return ClassBuilder::build($model);
   }
 }

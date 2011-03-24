@@ -11,16 +11,13 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/model
  */
 namespace clarinet\model;
 
 /**
- * This object encapsulates information about a model classes persisted
- * property.
+ * This object encapsulates information about a model property.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/model
  */
 class Property {
 
