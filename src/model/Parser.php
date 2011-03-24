@@ -19,7 +19,7 @@ use \ReflectionClass;
 use \ReflectionException;
 
 use \clarinet\Exception;
-use \reed\util\ReflectionHelper;
+use \reed\reflection\ReflectionHelper;
 
 /**
  * This class parses a model class' information into an array structure that is

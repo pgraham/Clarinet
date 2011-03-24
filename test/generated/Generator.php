@@ -23,7 +23,7 @@ use \clarinet\PersisterGenerator;
 use \clarinet\TransformerGenerator;
 use \clarinet\ValidatorGenerator;
 
-use \reed\util\ReflectionHelper;
+use \reed\reflection\ReflectionHelper;
 
 /**
  * This class generates actors for all mock entities.
