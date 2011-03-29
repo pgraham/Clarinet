@@ -10,7 +10,33 @@ use \clarinet\Exception;
  */
 class ${actor} {
 
-${asArray}
-${fromArray}
+  private static $_PROPERTY_MAP = array(
+    ${join:property_map:,}
+  );
 
+  public function asArray(\${class} $model) {
+    $a = Array();
+
+    ${each:properties AS property}
+      $a[self::$_PROPERTY_MAP['${property}']] = $model->get${property}();
+    ${done}
+
+    return $a;
+  }
+
+  public function fromArray(array $a) {
+    $model = new \${class}();
+
+
+    ${each:properties AS property}
+      $val = null;
+      if (isset($a[self::$_PROPERTY_MAP['${property}']])) {
+        $val = $a[self::$_PROPERTY_MAP['${property}']];
+      }
+      $model->set${property}($val);
+
+    ${done}
+
+    return $model;
+  }
 }

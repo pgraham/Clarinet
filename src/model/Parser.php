@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/model
  */
 namespace clarinet\model;
 
@@ -26,7 +25,6 @@ use \reed\reflection\ReflectionHelper;
  * expected by the generator classes.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/model
  */
 class Parser {
 
@@ -237,6 +235,9 @@ class Parser {
       if (isset($annotations['enumerated'])) {
         // TODO - Raise a warning that the annotation will be ignored.
       }
+
+      // TODO - Check the type.  Only numeric and string types should be
+      //        accepted
       return $this->_parseColumn($methodName, $annotations);
     } else {
       // If no column annotation has been provided assume that the column is
@@ -272,6 +273,18 @@ class Parser {
       }
       $property->setValues($annotations['enumerated']['values']);
     }
+
+    if (isset($annotations['type'])) {
+      $type = strtolower($annotations['type']);
+
+      if (!in_array($type, Property::$ALL_TYPES)) {
+        $this->_fail("{$this->_className}::$methodName: "
+          . " Column type must be one of: " . implode(', ', Property::ALL_TYPES)
+          . ".");
+      }
+      $property->setType($type);
+    }
+
     return $property;
   }
 

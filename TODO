@@ -1,12 +1,8 @@
 - Support migrating a right side entity in a one-to-many relationship to a new
   left side entity.
+
 - Support cache updates for mirrored many-to-many relationships.
 
-- Add support for columns that define type = boolean.  Since SQL doesn't define
-  a boolean type they are stored as integers and need translation.  This will
-  mean creating a PropertyBuilder class that generates custom code for boolean
-  properties.
- 
 - Add support for one-to-one relationships
 
 - Move Model structure representation classes (contained in model package) into

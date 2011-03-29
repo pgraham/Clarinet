@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/persister
  */
 namespace clarinet\persister;
 
@@ -23,7 +22,6 @@ use \reed\generator\CodeTemplateLoader;
  * structure for the persisted class.
  *
  * @author Philip Graham
- * @package clarinet/persister
  */
 class ClassBuilder {
 
@@ -56,6 +54,8 @@ class ClassBuilder {
     $populateParameters = Array();
     $populateProperties = Array();
     foreach ($model->getProperties() AS $property) {
+      $propBuilder = new PropertyBuilder($property);
+
       $prop = $property->getName();
       $col  = $property->getColumn();
 
@@ -63,8 +63,8 @@ class ClassBuilder {
       $valueNames[] = ":$col";
       $sqlSetters[] = "$col = :$col";
 
-      $populateParameters[] = "\$params[':$col'] = \$model->get$prop();";
-      $populateProperties[] = "\$model->set$prop(\$row['$col']);";
+      $populateParameters[] = $propBuilder->populateIntoDb('params', 'model');
+      $populateProperties[] = $propBuilder->populateFromDb('model', 'row');
     }
 
     $populateRelationships = Array();

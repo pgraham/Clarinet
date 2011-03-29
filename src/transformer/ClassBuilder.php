@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/generator
  */
 namespace clarinet\transformer;
 
@@ -53,29 +52,28 @@ class ClassBuilder {
    * to insert into a transformer template.
    */
   private static function _buildTemplateValues(Model $model) {
-    $arraySetters = Array();
-    $modelSetters = Array();
+    $properties  = array();
+    $propertyMap = array();
 
     $id = $model->getId()->getName();;
     $idIdx = strtolower($id);
-    $arraySetters[] = "    \$a['$idIdx'] = \$model->get$id();";
-    $modelSetters[] = "    \$model->set$id(\$a['$idIdx']);";
+    $properties[] = $id;
+    $propertyMap[] = "'$id' => '$idIdx'";
 
     foreach ($model->getProperties() AS $property) {
       $prop = $property->getName();
       $idx = strtolower($prop);
 
-      $arraySetters[] = "    \$a['$idx'] = \$model->get$prop();";
-      $modelSetters[] = "    \$model->set$prop(\$a['$idx']);";
+      $properties[] = $prop;
+      $propertyMap[] = "'$prop' => '$idx'";
     }
 
     $templateValues = Array
     (
-      '${class}'       => $model->getClass(),
-      '${actor}'       => $model->getActor(),
-
-      '${array_setters}' => implode("\n", $arraySetters),
-      '${model_setters}' => implode("\n", $modelSetters)
+      'class'        => $model->getClass(),
+      'actor'        => $model->getActor(),
+      'properties'   => $properties,
+      'property_map' => $propertyMap
     );
     return $templateValues;
   }
