@@ -36,13 +36,6 @@ class ClassBuilder {
 
     // Load templates
     $templateLoader = CodeTemplateLoader::get(__DIR__);
-    $asArray   = $templateLoader->load('asArray',   $templateValues);
-    $fromArray = $templateLoader->load('fromArray', $templateValues);
-
-    // Put it all together
-    $templateValues['${asArray}'] = $asArray;
-    $templateValues['${fromArray}'] = $fromArray;
-
     $body = $templateLoader->load('class', $templateValues);
     return $body;
   }
