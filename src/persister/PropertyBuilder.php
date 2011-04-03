@@ -20,6 +20,9 @@ use \clarinet\model\Property;
  * This class is responsible for building getter/setter code for different types
  * of properties.
  *
+ * TODO Once the transformer has been expanded to perform db-model
+ *      transformations for properties, this class can be eliminated.
+ *
  * @author Philip Graham <philip@zeptech.ca>
  */
 class PropertyBuilder {
@@ -79,6 +82,9 @@ class PropertyBuilder {
       case Property::TYPE_BOOLEAN:
       return "\${$modelVar}->set$name"
         . "(\${$rowVar}['$col'] == 1 ? true : false);";
+
+      case Property::TYPE_INTEGER:
+      return "\${$modelVar}->set$name((int) \${$rowVar}['$col']);";
 
       default:
       return "\${$modelVar}->set$name(\${$rowVar}['$col']);";

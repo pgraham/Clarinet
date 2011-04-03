@@ -15,6 +15,8 @@
 namespace clarinet\transformer;
 
 use \clarinet\model\Model;
+use \clarinet\model\Property;
+
 use \reed\generator\CodeTemplateLoader;
 
 /**
@@ -50,6 +52,10 @@ class ClassBuilder {
 
     $id = $model->getId()->getName();;
     $idIdx = strtolower($id);
+    $fromDbIdCast = '';
+    if ($model->getId()->getType() == Property::TYPE_INTEGER) {
+      $fromDbIdCast = '(int) ';
+    }
     $properties[] = $id;
     $propertyMap[] = "'$id' => '$idIdx'";
 
@@ -63,10 +69,11 @@ class ClassBuilder {
 
     $templateValues = Array
     (
-      'class'        => $model->getClass(),
-      'actor'        => $model->getActor(),
-      'properties'   => $properties,
-      'property_map' => $propertyMap
+      'class'           => $model->getClass(),
+      'actor'           => $model->getActor(),
+      'properties'      => $properties,
+      'property_map'    => $propertyMap,
+      'from_db_id_cast' => $fromDbIdCast
     );
     return $templateValues;
   }

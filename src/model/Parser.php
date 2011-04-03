@@ -228,22 +228,26 @@ class Parser {
       $this->_fail("{$this->_className}: Only a getter can be marked as"
         . " the id");
     }
-    $property = substr($methodName, 3);
-    $this->_ensureSetter($property);
+    $propertyName = substr($methodName, 3);
+    $this->_ensureSetter($propertyName);
 
     if (isset($annotations['column'])) {
       if (isset($annotations['enumerated'])) {
         // TODO - Raise a warning that the annotation will be ignored.
       }
 
-      // TODO - Check the type.  Only numeric and string types should be
-      //        accepted
-      return $this->_parseColumn($methodName, $annotations);
+      $property  = $this->_parseColumn($methodName, $annotations);
     } else {
       // If no column annotation has been provided assume that the column is
       // named 'id'
-      return new Property($property, 'id');
+      $property = new Property($propertyName, 'id');
     }
+
+    // The default type for ID columns is integer
+    if (!isset($annotations['type'])) {
+      $property->setType(Property::TYPE_INTEGER);
+    }
+    return $property;
   }
 
   /* Parse a method that is annotated with @Column */
@@ -279,8 +283,8 @@ class Parser {
 
       if (!in_array($type, Property::$ALL_TYPES)) {
         $this->_fail("{$this->_className}::$methodName: "
-          . " Column type must be one of: " . implode(', ', Property::ALL_TYPES)
-          . ".");
+          . " Column type must be one of: "
+          . implode(', ', Property::$ALL_TYPES) . ".");
       }
       $property->setType($type);
     }

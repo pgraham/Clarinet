@@ -28,6 +28,7 @@ class Property {
   const TYPE_FLOAT     = 'float';
   const TYPE_INTEGER   = 'integer';
   const TYPE_STRING    = 'string';
+  const TYPE_TEXT      = 'text';
   const TYPE_TIMESTAMP = 'timestamp';
 
   public static $ALL_TYPES = array(
@@ -36,6 +37,7 @@ class Property {
     self::TYPE_FLOAT,
     self::TYPE_INTEGER,
     self::TYPE_STRING,
+    self::TYPE_TEXT,
     self::TYPE_TIMESTAMP
   );
 

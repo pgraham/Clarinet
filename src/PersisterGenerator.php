@@ -50,6 +50,7 @@ class PersisterGenerator extends AbstractGenerator {
   protected function _generate(Model $model) {
     if (defined('DEBUG') && DEBUG === true) {
       ActorGenerator::generate('validator', $model->getClass());
+      ActorGenerator::generate('transformer', $model->getClass());
     }
     return ClassBuilder::build($model);
   }
