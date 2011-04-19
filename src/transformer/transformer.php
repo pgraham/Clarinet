@@ -1,12 +1,20 @@
 <?php
 namespace clarinet\transformer;
 
+use \clarinet\ActorFactory;
+use \clarinet\Criteria;
 use \clarinet\Exception;
 
 /**
  * This is a transformer class generate by Clarinet.  Do NOT modify this file.
  * Instead, modify the model class of this transformer, then run the clarinet
  * generator to re-generate this file.
+ *
+ * Notes about array -> model transformations:
+ *
+ * - All array indexes are the lowercase version of the property/relationship
+ * - Entities involved in a relationship with the entity being transformed are
+ *   always represented by IDs, not models, in the array representation.
  */
 class ${actor} {
 
@@ -21,12 +29,15 @@ class ${actor} {
       $a[self::$_PROPERTY_MAP['${property}']] = $model->get${property}();
     ${done}
 
+    ${each:relationshipsToArray AS relationship}
+      ${relationship}
+    ${done}
+
     return $a;
   }
 
   public function fromArray(array $a) {
     $model = new \${class}();
-
 
     ${each:properties AS property}
       $val = null;
@@ -35,6 +46,10 @@ class ${actor} {
       }
       $model->set${property}($val);
 
+    ${done}
+
+    ${each:relationshipsFromArray AS relationship}
+      ${relationship}
     ${done}
 
     return $model;

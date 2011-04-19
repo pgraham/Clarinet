@@ -38,7 +38,7 @@ class ClassBuilder {
 
     // Load templates
     $templateLoader = CodeTemplateLoader::get(__DIR__);
-    $body = $templateLoader->load('class', $templateValues);
+    $body = $templateLoader->load('transformer.php', $templateValues);
     return $body;
   }
 
@@ -47,8 +47,11 @@ class ClassBuilder {
    * to insert into a transformer template.
    */
   private static function _buildTemplateValues(Model $model) {
-    $properties  = array();
     $propertyMap = array();
+
+    $properties  = array();
+    $relationshipsToArray = array();
+    $relationshipsFromArray = array();
 
     $id = $model->getId()->getName();;
     $idIdx = strtolower($id);
@@ -67,13 +70,27 @@ class ClassBuilder {
       $propertyMap[] = "'$prop' => '$idx'";
     }
 
+    $relationshipBuilder = new RelationshipBuilder();
+    foreach ($model->getRelationships() AS $relationship) {
+      $relationshipsToArray[] = $relationshipBuilder->buildToArray(
+        $relationship);
+      $relationshipsFromArray[] = $relationshipBuilder->buildFromArray(
+        $relationship);
+
+      $rel = $relationship->getLhsProperty();
+      $idx = strtolower($rel);
+      $propertyMap[] = "'$rel' => '$idx'";
+    }
+
     $templateValues = Array
     (
-      'class'           => $model->getClass(),
-      'actor'           => $model->getActor(),
-      'properties'      => $properties,
-      'property_map'    => $propertyMap,
-      'from_db_id_cast' => $fromDbIdCast
+      'class'                  => $model->getClass(),
+      'actor'                  => $model->getActor(),
+      'properties'             => $properties,
+      'relationshipsToArray'   => $relationshipsToArray,
+      'relationshipsFromArray' => $relationshipsFromArray,
+      'property_map'           => $propertyMap,
+      'from_db_id_cast'        => $fromDbIdCast
     );
     return $templateValues;
   }

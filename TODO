@@ -5,5 +5,7 @@
 
 - Add support for one-to-one relationships
 
-- Move Model structure representation classes (contained in model package) into
-  Reed
+- Update transformer to CAST to appropriate type in the fromArray method
+
+- Add support for deleting orphaned entities on the many side of a one-to-many
+  relationship

@@ -114,6 +114,16 @@ class PdoWrapper {
   }
 
   /**
+   * Escape the given string using the encapsulated PDO object's quote(...)
+   * method.
+   *
+   * @param string $toQuote
+   */
+  public function quote($toQuote) {
+    return $this->_pdo->quote($toQuote);
+  }
+
+  /**
    * Passthrough for the lastInsertId() method.
    *
    * @param string $name The name of the sequence object from which the ID

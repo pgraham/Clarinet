@@ -88,10 +88,22 @@ class Criteria {
    *   fully qualified.
    */
   public function addEquals($column, $value) {
-    $idx = count($this->_params);
-    $paramName = ":param$idx";
-    $this->_conditions[] = "$column = $paramName";
-    $this->_params[$paramName] = $value;
+    if (is_array($value)) {
+      $this->addIn($column, $value);
+      return;
+    }
+
+    $escCol = $this->_escapeFieldName($column);
+    if ($value !== null) {
+      $idx = count($this->_params);
+      $paramName = ":param$idx";
+      $this->_params[$paramName] = $value;
+
+      $this->_conditions[] = "$escCol = $paramName";
+
+    } else {
+      $this->_conditions[] = "$escCol IS NULL";
+    }
   }
 
   /**
@@ -102,6 +114,11 @@ class Criteria {
    * @param array $values Array of values to check against
    */
   public function addIn($column, Array $values) {
+    if (count($values) == 0) {
+      return;
+    }
+
+    $escCol = $this->_escapeFieldName($column);
     $paramNames = Array();
 
     $idx = count($this->_params);
@@ -111,7 +128,7 @@ class Criteria {
       $this->_params[$paramName] = $val;
       $idx++;
     }
-    $this->_conditions[] = "$column IN (" . implode(',', $paramNames) . ")";
+    $this->_conditions[] = "$escCol IN (" . implode(',', $paramNames) . ")";
   }
 
   /**
@@ -183,5 +200,10 @@ class Criteria {
    */
   public function setTable($table) {
     $this->_table = $table;
+  }
+
+  /* Escape the given field name. */
+  private function _escapeFieldName($fieldName) {
+    return '`' . str_replace('`', '``', $fieldName) . '`';
   }
 }

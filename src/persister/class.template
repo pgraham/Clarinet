@@ -59,8 +59,12 @@ class ${actor} {
     $this->_create = $this->_pdo->prepare(
       "INSERT INTO ${table} (${join:column_names:,}) VALUES (${join:value_names:,})");
 
-    $this->_update = $this->_pdo->prepare(
-      "UPDATE ${table} SET ${join:sql_setters:,} WHERE ${id_column} = :id");
+    ${if:has_update}
+      $this->_update = $this->_pdo->prepare(
+        "UPDATE ${table} SET ${join:sql_setters:,} WHERE ${id_column} = :id");
+    ${else}
+      $this->_update = null;
+    ${fi}
 
     $this->_delete = $this->_pdo->prepare(
       "DELETE FROM ${table} WHERE ${id_column} = :id");
@@ -303,8 +307,12 @@ class ${actor} {
         ${populate_param}
       ${done}
 
-      $this->_update->execute($params);
-      $rowCount = $this->_update->rowCount();
+      if ($this->_update !== null) {
+        $this->_update->execute($params);
+        $rowCount = $this->_update->rowCount();
+      } else {
+        $rowCount = 0;
+      }
 
       ${each:save_relationships as save_rel}
         ${save_rel}

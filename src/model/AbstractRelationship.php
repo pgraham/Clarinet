@@ -23,6 +23,10 @@ namespace clarinet\model;
  */
 abstract class AbstractRelationship implements Relationship {
 
+  const TYPE_MANYTOMANY = 'many-to-many';
+  const TYPE_MANYTOONE  = 'many-to-one';
+  const TYPE_ONETOMANY  = 'one-to-many';
+
   /* Model for the entity on the left side of the relationship */
   protected $_lhs;
 
@@ -32,6 +36,9 @@ abstract class AbstractRelationship implements Relationship {
   /* Model for the entity on the right side of the relationship */
   protected $_rhs;
 
+  /* The type of the relationship. */
+  private $_type;
+
   /**
    * Initiate a new relationship.
    *
@@ -39,8 +46,8 @@ abstract class AbstractRelationship implements Relationship {
    *   relationship.
    * @param Model $rhs The model entity on the right side of the
    *   relationship.
-   * @param string $lhsProperty The property  on the left side that contains the
-   *   relationship
+   * @param string $lhsProperty The name of the property on the left side that
+   *   contains the relationship.
    */
   protected function __construct(Model $lhs, Model $rhs, $lhsProperty) {
     $this->_lhs = $lhs;
@@ -60,7 +67,7 @@ abstract class AbstractRelationship implements Relationship {
 
   /**
    * Getter for the column on the left side that contains this relationship.
-   * One the ManyToOne relationship returns a value for this method so the
+   * Only the ManyToOne relationship returns a value for this method so the
    * default is to return null
    *
    * @return null
@@ -86,5 +93,23 @@ abstract class AbstractRelationship implements Relationship {
    */
   public function getRhs() {
     return $this->_rhs;
+  }
+
+  /**
+   * Getter for the type of relationship.
+   *
+   * @return string One of this class' TYPE_* constants.
+   */
+  public function getType() {
+    if ($this instanceof ManyToMany) {
+      return self::TYPE_MANYTOMANY;
+    } else if ($this instanceof ManyToOne) {
+      return self::TYPE_MANYTOONE;
+    } else if ($this instanceof OneToMany) {
+      return self::TYPE_ONETOMANY;
+    } else {
+      $class = get_class($this);
+      assert("false /* Unrecognized Relationship implementation: $class */");
+    }
   }
 }

@@ -120,6 +120,9 @@ class ClassBuilder {
       'save_relationships'     => $saveRelationships,
       'delete_relationships'   => $deleteRelationships
     );
+    if (count($sqlSetters) > 0) {
+      $templateValues['has_update'] = true;
+    }
     return $templateValues;
   }
 }
