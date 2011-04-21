@@ -14,6 +14,8 @@
  */
 namespace clarinet\persister;
 
+use \ReflectionClass;
+
 use \clarinet\model\Model;
 use \reed\generator\CodeTemplateLoader;
 
@@ -23,7 +25,13 @@ use \reed\generator\CodeTemplateLoader;
  *
  * @author Philip Graham
  */
-class ClassBuilder {
+class PersisterBuilder {
+
+  private $_templateLoader;
+
+  public function __construct() {
+    $this->_templateLoader = CodeTemplateLoader::get(__DIR__);
+  }
 
   /**
    * Generate a persister class given an entities table/class structure.
@@ -32,11 +40,10 @@ class ClassBuilder {
    *     which a persister will be generated.
    * @return The persister's PHP code.
    */
-  public static function build(Model $model) {
-    $templateValues = self::_buildTemplateValues($model);
+  public function build(Model $model) {
+    $templateValues = $this->_buildTemplateValues($model);
 
-    $templateLoader = CodeTemplateLoader::get(__DIR__);
-    $body = $templateLoader->load('class', $templateValues);
+    $body = $this->_templateLoader->load('persister.php', $templateValues);
     return $body;
   }
 
@@ -44,7 +51,7 @@ class ClassBuilder {
    * This method uses a parsed model info array structure to create the values
    * to insert into a persister template.
    */
-  private static function _buildTemplateValues(Model $model) {
+  private function _buildTemplateValues(Model $model) {
     $className = $model->getClass();
     $persisterName = str_replace('\\', '_', $className);
 
@@ -120,6 +127,33 @@ class ClassBuilder {
       'save_relationships'     => $saveRelationships,
       'delete_relationships'   => $deleteRelationships
     );
+
+    // Add booleans for callbacks
+    $modelClass = new ReflectionClass($model->getClass());
+
+    if ($modelClass->hasMethod('beforeCreate')) {
+      $templateValues['beforeCreate'] = true;
+    }
+    if ($modelClass->hasMethod('onCreate')) {
+      $templateValues['onCreate'] = true;
+    }
+
+    if ($modelClass->hasMethod('beforeUpdate')) {
+      $templateValues['beforeUpdate'] = true;
+    }
+    if ($modelClass->hasMethod('onUpdate')) {
+      $templateValues['onUpdate'] = true;
+    }
+
+    if ($modelClass->hasMethod('beforeDelete')) {
+      $templateValues['beforeDelete'] = true;
+    }
+    if ($modelClass->hasMethod('onDelete')) {
+      $templateValues['onDelete'] = true;
+    }
+
+    // If the model doesn't define any columns (only relationships) then don't
+    // generate an UPDATE statement as it will result in an SQL error
     if (count($sqlSetters) > 0) {
       $templateValues['has_update'] = true;
     }

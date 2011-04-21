@@ -93,6 +93,9 @@ class ${actor} {
       return $model->get${id_property}();
     }
 
+    ${if:beforeCreate}
+      $model->beforeCreate();
+    ${fi}
 
     try {
       $startTransaction = $this->_pdo->beginTransaction();
@@ -122,6 +125,10 @@ class ${actor} {
 
       $saveLock->release();
 
+      ${if:onCreate}
+        $model->onCreate();
+      ${fi}
+
       return $id;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
@@ -149,6 +156,10 @@ class ${actor} {
     $params = Array();
     $params[':id'] = $id;
 
+    ${if:beforeDelete}
+      $model->beforeDelete();
+    ${fi}
+
     try {
       $startTransaction = $this->_pdo->beginTransaction();
 
@@ -166,6 +177,10 @@ class ${actor} {
       $this->_cache[$id] = null;
       $model->set${id_property}(null);
 
+      ${if:onDelete}
+        $model->onDelete();
+      ${fi}
+
       return $rowCount;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
@@ -179,6 +194,7 @@ class ${actor} {
    * then null is returned.
    *
    * @param integer $id
+   * @return ${class}
    */
   public function getById($id) {
     if (!isset($this->_cache[$id])) {
@@ -194,6 +210,26 @@ class ${actor} {
       }
     }
     return $this->_cache[$id];
+  }
+
+  /**
+   * Retrieve a single entity that matches the given criteria.  If the criteria
+   * results in more than one entity being retrieved then an exception is
+   * thrown.
+   *
+   * @param Criteria $c Criteria that will result in a single entity
+   * @return ${class}
+   * @throws Exception if the criteria results in more than one entity.
+   */
+  public function retrieveOne(Criteria $c) {
+    $entities = $this->retrieve($c);
+
+    $num = count($entities);
+    if ($num !== 1) {
+      throw new Exception("Criteria maps to $num entities, expected 1");
+    }
+
+    return $entities[0];
   }
 
   /**
@@ -295,6 +331,10 @@ class ${actor} {
       throw $e;
     }
 
+    ${if:beforeUpdate}
+      $model->beforeUpdate();
+    ${fi}
+
     try {
       $startTransaction = $this->_pdo->beginTransaction();
 
@@ -307,12 +347,10 @@ class ${actor} {
         ${populate_param}
       ${done}
 
-      if ($this->_update !== null) {
+      ${if:has_update}
         $this->_update->execute($params);
         $rowCount = $this->_update->rowCount();
-      } else {
-        $rowCount = 0;
-      }
+      ${fi}
 
       ${each:save_relationships as save_rel}
         ${save_rel}
@@ -324,7 +362,15 @@ class ${actor} {
         $this->_pdo->commit();
       }
 
-      
+      ${if:onUpdate}
+        $model->onUpdate();
+      ${fi}
+
+      ${if:has_update}
+        return $rowCount;
+      ${else}
+        return 1;
+      ${fi}
       return $rowCount;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
