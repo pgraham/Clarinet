@@ -73,6 +73,10 @@ class Criteria {
       $clauses[] = 'WHERE ' . implode(' AND ', $this->_conditions);
     }
 
+    if (count($this->_sorts) > 0) {
+      $clauses[] = 'ORDER BY ' . implode(',', $this->_sorts);
+    }
+
     if ($this->_limit !== null) {
       $clauses[] = 'LIMIT ' .$this->_limit;
     }
@@ -159,6 +163,21 @@ class Criteria {
       $this->_selectColumns = Array();
     }
     $this->_selectColumns[] = $select;
+  }
+
+  /**
+   * Add a sort column, or list of sort columns.
+   *
+   * @param mixed $sorts The sorts to add
+   */
+  public function addSort($sort) {
+    if (!is_array($sort)) {
+      $sort = explode(',', $sort);
+    }
+
+    foreach ($sort AS $col) {
+      $this->_sorts[] = $this->_escapeFieldName(trim($col));
+    }
   }
 
   /**
