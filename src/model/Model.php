@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/model
  */
 namespace clarinet\model;
 
@@ -19,9 +18,8 @@ namespace clarinet\model;
  * This class encapsulates entity information for a model class.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/model
  */
-class Info {
+class Model {
 
   private $_class;
   private $_actor;
@@ -105,7 +103,10 @@ class Info {
    * @return Property
    */
   public function getProperty($name) {
-    return $this->_properties[$name];
+    if (isset($this->_properties[$name])) {
+      return $this->_properties[$name];
+    }
+    return null;
   }
 
   /**
@@ -164,6 +165,16 @@ class Info {
    */
   public function getTable() {
     return $this->_table;
+  }
+
+  /**
+   * Determines if the model has a property with the given name.
+   *
+   * @param string $name
+   * @return boolean
+   */
+  public function hasProperty($name) {
+    return $this->getProperty($name) !== null;
   }
 
   /**

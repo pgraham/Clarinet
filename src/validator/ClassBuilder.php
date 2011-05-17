@@ -15,7 +15,7 @@
  */
 namespace clarinet\validator;
 
-use \clarinet\model\Info;
+use \clarinet\model\Model;
 use \reed\generator\CodeTemplateLoader;
 
 /**
@@ -31,15 +31,15 @@ class ClassBuilder {
   /**
    * Generate a validator actor for the given model information.
    *
-   * @param array $modelInfo The model's structure information as parsed by
+   * @param Model $model The model's structure information as parsed by
    *   ModelParser::parse(...).
    * @return string The model's validator's class body.
    */
-  public static function build(Info $modelInfo) {
+  public static function build(Model $model) {
     if (self::$_templateLoader === null) {
       self::$_templateLoader = CodeTemplateLoader::get(__DIR__);
     }
-    $templateValues = self::_buildTemplateValues($modelInfo);
+    $templateValues = self::_buildTemplateValues($model);
 
     // Load templates
     $validate = self::$_templateLoader->load('validate', $templateValues);
@@ -55,12 +55,12 @@ class ClassBuilder {
    * This method uses the parsed model info to create the values to insert into
    * the validator's template.
    */
-  private static function _buildTemplateValues(Info $modelInfo) {
+  private static function _buildTemplateValues(Model $model) {
     $propertyGetters    = Array();
     $propertyCheckers   = Array();
     $propertyValidators = Array();
 
-    foreach ($modelInfo->getProperties() AS $property) {
+    foreach ($model->getProperties() AS $property) {
       $prop = $property->getName();
       $var  = lcfirst($prop);
 
@@ -81,7 +81,7 @@ class ClassBuilder {
         // Load the enum check method
         $values = Array
         (
-          '${model}'    => $modelInfo->getClass(),
+          '${model}'    => $model->getClass(),
           '${property}' => $prop,
           '${var_name}' => "\$$var",
           '${values}'   => implode(',', $property->getValues())
@@ -92,8 +92,8 @@ class ClassBuilder {
 
     $templateValues = Array
     (
-      '${class}'     => $modelInfo->getClass(),
-      '${actor}'     => $modelInfo->getActor(),
+      '${class}'     => $model->getClass(),
+      '${actor}'     => $model->getActor(),
 
       '${property_getters}'    => implode("\n", $propertyGetters),
       '${property_checkers}'   => implode("\n", $propertyCheckers),

@@ -15,7 +15,7 @@
  */
 namespace clarinet;
 
-use \clarinet\model\Info;
+use \clarinet\model\Model;
 use \clarinet\validator\ClassBuilder;
 
 /**
@@ -43,11 +43,11 @@ class ValidatorGenerator extends AbstractGenerator {
    * Generates the PHP Code for a validator actor for the given model
    * structure.
    *
-   * @param Info $modelInfo Information about the model for which a validator
+   * @param Model $model Information about the model for which a validator
    *   is to be generated.
    * @return string The PHP code for a validator.
    */
-  protected function _generate(Info $modelInfo) {
-    return ClassBuilder::build($modelInfo);
+  protected function _generate(Model $model) {
+    return ClassBuilder::build($model);
   }
 }

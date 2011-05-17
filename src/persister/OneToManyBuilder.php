@@ -88,6 +88,12 @@ class OneToManyBuilder implements RelationshipBuilderI {
         'rhs_property'    => $mirrorProp,
         'rhs_column'      => $mirrorCol
       );
+
+      /* TODO
+      if ($this->_oneToMany->deleteOrphans()) {
+        $templateValues['deleteOrphan'] = true;
+      }
+      */
       $templateName = 'one-to-many-save-mirror';
     } else {
       $templateValues = Array

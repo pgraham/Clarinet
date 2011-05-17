@@ -23,36 +23,43 @@ namespace clarinet\model;
  */
 abstract class AbstractRelationship implements Relationship {
 
-  /* Info for the entity on the left side of the relationship */
+  const TYPE_MANYTOMANY = 'many-to-many';
+  const TYPE_MANYTOONE  = 'many-to-one';
+  const TYPE_ONETOMANY  = 'one-to-many';
+
+  /* Model for the entity on the left side of the relationship */
   protected $_lhs;
 
   /* Property in the left side entity that contains this relationship */
   protected $_lhsPropery;
 
-  /* Info for the entity on the right side of the relationship */
+  /* Model for the entity on the right side of the relationship */
   protected $_rhs;
+
+  /* The type of the relationship. */
+  private $_type;
 
   /**
    * Initiate a new relationship.
    *
-   * @param string $lhs The name of the entity on the left side of the
+   * @param Model $lhs The model entity on the left side of the
    *   relationship.
-   * @param string $rhs The name of the entity on the right side of the
+   * @param Model $rhs The model entity on the right side of the
    *   relationship.
-   * @param string $lhsProperty The property  on the left side that contains the
-   *   relationship
+   * @param string $lhsProperty The name of the property on the left side that
+   *   contains the relationship.
    */
-  protected function __construct($lhs, $rhs, $lhsProperty) {
-    $this->_lhs = Parser::getModelInfo($lhs);
-    $this->_rhs = Parser::getModelInfo($rhs);
+  protected function __construct(Model $lhs, Model $rhs, $lhsProperty) {
+    $this->_lhs = $lhs;
+    $this->_rhs = $rhs;
     $this->_lhsProperty = $lhsProperty;
   }
 
   /**
-   * Getter for the clarinet\model\Info object for the left side of the
+   * Getter for the clarinet\model\Model object for the left side of the
    * relationship.
    *
-   * @return Info
+   * @return Model
    */
   public function getLhs() {
     return $this->_lhs;
@@ -60,7 +67,7 @@ abstract class AbstractRelationship implements Relationship {
 
   /**
    * Getter for the column on the left side that contains this relationship.
-   * One the ManyToOne relationship returns a value for this method so the
+   * Only the ManyToOne relationship returns a value for this method so the
    * default is to return null
    *
    * @return null
@@ -79,12 +86,30 @@ abstract class AbstractRelationship implements Relationship {
   }
 
   /**
-   * Getter for the clarinet\model\Info object for the right side of the
+   * Getter for the clarinet\model\Model object for the right side of the
    * relationship.
    *
-   * @return Info
+   * @return Model
    */
   public function getRhs() {
     return $this->_rhs;
+  }
+
+  /**
+   * Getter for the type of relationship.
+   *
+   * @return string One of this class' TYPE_* constants.
+   */
+  public function getType() {
+    if ($this instanceof ManyToMany) {
+      return self::TYPE_MANYTOMANY;
+    } else if ($this instanceof ManyToOne) {
+      return self::TYPE_MANYTOONE;
+    } else if ($this instanceof OneToMany) {
+      return self::TYPE_ONETOMANY;
+    } else {
+      $class = get_class($this);
+      assert("false /* Unrecognized Relationship implementation: $class */");
+    }
   }
 }

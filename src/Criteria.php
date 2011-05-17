@@ -73,6 +73,10 @@ class Criteria {
       $clauses[] = 'WHERE ' . implode(' AND ', $this->_conditions);
     }
 
+    if (count($this->_sorts) > 0) {
+      $clauses[] = 'ORDER BY ' . implode(',', $this->_sorts);
+    }
+
     if ($this->_limit !== null) {
       $clauses[] = 'LIMIT ' .$this->_limit;
     }
@@ -88,10 +92,22 @@ class Criteria {
    *   fully qualified.
    */
   public function addEquals($column, $value) {
-    $idx = count($this->_params);
-    $paramName = ":param$idx";
-    $this->_conditions[] = "$column = $paramName";
-    $this->_params[$paramName] = $value;
+    if (is_array($value)) {
+      $this->addIn($column, $value);
+      return;
+    }
+
+    $escCol = $this->_escapeFieldName($column);
+    if ($value !== null) {
+      $idx = count($this->_params);
+      $paramName = ":param$idx";
+      $this->_params[$paramName] = $value;
+
+      $this->_conditions[] = "$escCol = $paramName";
+
+    } else {
+      $this->_conditions[] = "$escCol IS NULL";
+    }
   }
 
   /**
@@ -102,6 +118,11 @@ class Criteria {
    * @param array $values Array of values to check against
    */
   public function addIn($column, Array $values) {
+    if (count($values) == 0) {
+      return;
+    }
+
+    $escCol = $this->_escapeFieldName($column);
     $paramNames = Array();
 
     $idx = count($this->_params);
@@ -111,7 +132,7 @@ class Criteria {
       $this->_params[$paramName] = $val;
       $idx++;
     }
-    $this->_conditions[] = "$column IN (" . implode(',', $paramNames) . ")";
+    $this->_conditions[] = "$escCol IN (" . implode(',', $paramNames) . ")";
   }
 
   /**
@@ -142,6 +163,21 @@ class Criteria {
       $this->_selectColumns = Array();
     }
     $this->_selectColumns[] = $select;
+  }
+
+  /**
+   * Add a sort column, or list of sort columns.
+   *
+   * @param mixed $sorts The sorts to add
+   */
+  public function addSort($sort) {
+    if (!is_array($sort)) {
+      $sort = explode(',', $sort);
+    }
+
+    foreach ($sort AS $col) {
+      $this->_sorts[] = $this->_escapeFieldName(trim($col));
+    }
   }
 
   /**
@@ -183,5 +219,10 @@ class Criteria {
    */
   public function setTable($table) {
     $this->_table = $table;
+  }
+
+  /* Escape the given field name. */
+  private function _escapeFieldName($fieldName) {
+    return '`' . str_replace('`', '``', $fieldName) . '`';
   }
 }

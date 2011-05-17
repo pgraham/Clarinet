@@ -15,8 +15,8 @@
  */
 namespace clarinet;
 
-use \clarinet\model\Info;
-use \clarinet\persister\ClassBuilder;
+use \clarinet\model\Model;
+use \clarinet\persister\PersisterBuilder;
 
 /**
  * Generator for model persisters.  Generated code is output into a file at the
@@ -43,14 +43,16 @@ class PersisterGenerator extends AbstractGenerator {
    * Generates the PHP Code for a persister actor for the given model
    * structure.
    *
-   * @param Info $modelInfo Information about the model for which a persister is
+   * @param Model $model Information about the model for which a persister is
    *   to be generated.
    * @return string The PHP code for a persister.
    */
-  protected function _generate(Info $modelInfo) {
+  protected function _generate(Model $model) {
     if (defined('DEBUG') && DEBUG === true) {
-      ActorGenerator::generate('validator', $modelInfo->getClass());
+      ActorGenerator::generate('validator', $model->getClass());
+      ActorGenerator::generate('transformer', $model->getClass());
     }
-    return ClassBuilder::build($modelInfo);
+    $builder = new PersisterBuilder();
+    return $builder->build($model);
   }
 }

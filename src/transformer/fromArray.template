@@ -1,7 +1,0 @@
-  public function fromArray(Array $a) {
-    $model = new \${class}();
-
-${model_setters}
-
-    return $model;
-  }

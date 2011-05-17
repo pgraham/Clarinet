@@ -28,10 +28,8 @@ class ManyToOne extends AbstractRelationship {
   /**
    * Creates a new Many-to-one relationship representation.
    *
-   * @param string $lhs The name of the entity on the left side of the
-   *   relationship.
-   * @param string $rhs The name of the entity on the right side of the
-   *   relationship.
+   * @param Model $lhs The model on the left side of the relationship.
+   * @param string $rhs The model on the right side of the relationship.
    * @param string $property The name of the model's property that contains the
    *   relationship.
    * @param string $column The name of the model table's column that contains

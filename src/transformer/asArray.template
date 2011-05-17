@@ -1,7 +1,0 @@
-  public function asArray(\${class} $model) {
-    $a = Array();
-
-${array_setters}
-
-    return $a;
-  }

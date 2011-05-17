@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test/generated
  */
 namespace clarinet\test\generated;
 
@@ -23,13 +22,12 @@ use \clarinet\PersisterGenerator;
 use \clarinet\TransformerGenerator;
 use \clarinet\ValidatorGenerator;
 
-use \reed\util\ReflectionHelper;
+use \reed\reflection\ReflectionHelper;
 
 /**
  * This class generates actors for all mock entities.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/generated
  */
 class Generator {
 

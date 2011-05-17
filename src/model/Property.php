@@ -11,21 +11,39 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/model
  */
 namespace clarinet\model;
 
+use \clarinet\Exception;
+
 /**
- * This object encapsulates information about a model classes persisted
- * property.
+ * This object encapsulates information about a model property.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/model
  */
 class Property {
 
+  const TYPE_BOOLEAN   = 'boolean';
+  const TYPE_DATE      = 'date';
+  const TYPE_FLOAT     = 'float';
+  const TYPE_INTEGER   = 'integer';
+  const TYPE_STRING    = 'string';
+  const TYPE_TEXT      = 'text';
+  const TYPE_TIMESTAMP = 'timestamp';
+
+  public static $ALL_TYPES = array(
+    self::TYPE_BOOLEAN,
+    self::TYPE_DATE,
+    self::TYPE_FLOAT,
+    self::TYPE_INTEGER,
+    self::TYPE_STRING,
+    self::TYPE_TEXT,
+    self::TYPE_TIMESTAMP
+  );
+
   private $_name;
   private $_column;
+  private $_type;
   private $_values;
 
   /**
@@ -38,6 +56,19 @@ class Property {
   public function __construct($name, $column) {
     $this->_name = $name;
     $this->_column = $column;
+
+    // Default type is string
+    $this->_type = self::TYPE_STRING;
+  }
+
+  /**
+   * Getter for the name of the column in which the property's values are
+   * stored.
+   *
+   * @return string
+   */
+  public function getColumn() {
+    return $this->_column;
   }
 
   /**
@@ -50,13 +81,12 @@ class Property {
   }
 
   /**
-   * Getter for the name of the column in which the property's values are
-   * stored.
+   * Getter for the type of the property.
    *
-   * @return string
+   * @return string One of this class's TYPE_ constants
    */
-  public function getColumn() {
-    return $this->_column;
+  public function getType() {
+    return $this->_type;
   }
 
   /**
@@ -76,6 +106,18 @@ class Property {
    */
   public function isEnumerated() {
     return $this->_values !== null;
+  }
+
+  /**
+   * Setter for the type of the property.
+   *
+   * @param string $type One of this class's TYPE_ constants
+   */
+  public function setType($type) {
+    if (!in_array($type, self::$ALL_TYPES)) {
+      throw new Exception("Unsupported property type: $type");
+    }
+    $this->_type = $type;
   }
 
   /**

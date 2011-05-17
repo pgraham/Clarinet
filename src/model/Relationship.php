@@ -24,10 +24,10 @@ namespace clarinet\model;
 interface Relationship {
 
   /**
-   * This method is responsible for returning the clarinet\model\Info object for
+   * This method is responsible for returning the clarinet\model\Model object for
    * the entity on the left side of the relationship.
    *
-   * @return Info
+   * @return Model
    */
   public function getLhs();
 
@@ -40,10 +40,10 @@ interface Relationship {
   public function getLhsProperty();
 
   /**
-   * This method is responsible for returning the clarinet\model\info object for
+   * This method is responsible for returning the clarinet\model\Model object for
    * the entity on the right side of the relationship.
    *
-   * @return Info
+   * @return Model
    */
   public function getRhs();
 }

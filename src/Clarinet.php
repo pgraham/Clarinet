@@ -56,7 +56,7 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $persister = ActorFactory::getAction('persister', $modelClass);
+    $persister = ActorFactory::getActor('persister', $modelClass);
 
     $rows = $persister->delete($obj);
     if ($rows != 1) {

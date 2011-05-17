@@ -29,10 +29,8 @@ class OneToMany extends AbstractRelationship {
   /**
    * Creates a new one-to-many relationship representation.
    *
-   * @param string $lhs The name of the entity on the left side of the
-   *   relationship.
-   * @param string $rhs The name of the entity on the right side of the
-   *   relationship.
+   * @param Model $lhs The model on the left side of the relationship.
+   * @param Model $rhs The model on the right side of the relationship.
    * @param string $lhsProperty The name of the property in the left hand side
    *   entity that contains the related right hand side instances.
    * @param string $rhsColumn The name of the column in the right side of the

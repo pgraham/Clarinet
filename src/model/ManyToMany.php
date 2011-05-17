@@ -32,10 +32,8 @@ class ManyToMany extends AbstractRelationship {
    * the relationship is implied by the Info object to which the relationship
    * belongs.
    *
-   * @param string $lhs The name of the entity on the left side of the
-   *   relationship.
-   * @param string $rhs The name of the entity on the right side of the
-   *   relationship.
+   * @param Model $lhs The model on the left side of the relationship.
+   * @param Model $rhs The model on the right side of the relationship.
    * @param string $property The name of the property that contains the related
    *   entity.
    * @param string $linkTable The name of the table that contains the mapping.
