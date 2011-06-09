@@ -25,6 +25,8 @@ class ${actor} {
   public function asArray(\${class} $model) {
     $a = Array();
 
+    $a[self::$_PROPERTY_MAP['${id}']] = $model->get${id}();
+
     ${each:properties AS property}
       $a[self::$_PROPERTY_MAP['${property}']] = $model->get${property}();
     ${done}
@@ -37,7 +39,12 @@ class ${actor} {
   }
 
   public function fromArray(array $a) {
-    $model = new \${class}();
+    if (isset($a[self::$_PROPERTY_MAP['${id}']])) {
+      $persister = ActorFactory::getActor('persister', '${class}');
+      $model = $persister->getById($a[self::$_PROPERTY_MAP['${id}']]);
+    } else {
+      $model = new \${class}();
+    }
 
     ${each:properties AS property}
       $val = null;

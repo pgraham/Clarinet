@@ -59,7 +59,6 @@ class ClassBuilder {
     if ($model->getId()->getType() == Property::TYPE_INTEGER) {
       $fromDbIdCast = '(int) ';
     }
-    $properties[] = $id;
     $propertyMap[] = "'$id' => '$idIdx'";
 
     foreach ($model->getProperties() AS $property) {
@@ -86,6 +85,7 @@ class ClassBuilder {
     (
       'class'                  => $model->getClass(),
       'actor'                  => $model->getActor(),
+      'id'                     => $id,
       'properties'             => $properties,
       'relationshipsToArray'   => $relationshipsToArray,
       'relationshipsFromArray' => $relationshipsFromArray,

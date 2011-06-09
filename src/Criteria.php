@@ -122,6 +122,11 @@ class Criteria {
       return;
     }
 
+    if (count($values) == 1) {
+      $this->addEquals($column, $values[0]);
+      return;
+    }
+
     $escCol = $this->_escapeFieldName($column);
     $paramNames = Array();
 
@@ -150,6 +155,35 @@ class Criteria {
       $this->_joins[] = "JOIN $table ON \${table}.$lhs = $table.$rhs";
     } else {
       $this->_joins[] = "JOIN $table USING ($lhs)";
+    }
+  }
+
+  /**
+   * Add a WHERE condition using a LIKE operator.
+   *
+   * @param string $column The column to compare
+   * @param mixed $value The value to compare against.  If an array then a
+   *   tuple of OR conditions will be created, one for each value in the array.
+   */
+  public function addLike($column, $value) {
+    $escCol = $this->_escapeFieldName($column);
+    $idx = count($this->_params);
+    
+    if (is_array($value)) {
+      $conditions = array();
+      foreach ($value AS $val) {
+        $paramName = ":param$idx";
+        $this->_params[$paramName] = $val;
+        $idx++;
+
+        $conditions[] = "$escCol LIKE $paramName";
+      }
+      $this->_conditions[] = '(' . implode(' OR ', $conditions) . ')';
+
+    } else {
+      $paramName = ":param$idx";
+      $this->_params[$paramName] = $value;
+      $this->_conditions[] = "$escCol LIKE $paramName";
     }
   }
 
