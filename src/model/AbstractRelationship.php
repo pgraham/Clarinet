@@ -21,20 +21,23 @@ namespace clarinet\model;
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/model
  */
-abstract class AbstractRelationship implements Relationship {
+abstract class AbstractRelationship implements Relationship, Identifiable {
 
   const TYPE_MANYTOMANY = 'many-to-many';
   const TYPE_MANYTOONE  = 'many-to-one';
   const TYPE_ONETOMANY  = 'one-to-many';
 
-  /* Model for the entity on the left side of the relationship */
+  /** Model for the entity on the left side of the relationship */
   protected $_lhs;
 
-  /* Property in the left side entity that contains this relationship */
+  /** Property in the left side entity that contains this relationship */
   protected $_lhsPropery;
 
-  /* Model for the entity on the right side of the relationship */
+  /** Model for the entity on the right side of the relationship */
   protected $_rhs;
+
+  /* Identifiable instance's unique identifier. */
+  private $_identifier;
 
   /* The type of the relationship. */
   private $_type;
@@ -53,6 +56,17 @@ abstract class AbstractRelationship implements Relationship {
     $this->_lhs = $lhs;
     $this->_rhs = $rhs;
     $this->_lhsProperty = $lhsProperty;
+
+    $this->_identifier = $lhs->getIdentifier() . '-' . $rhs->getIdentifier();
+  }
+
+  /**
+   * Getter for the Identifiable instance's unique identifier.
+   *
+   * @return string
+   */
+  public function getIdentifier() {
+    return $this->_identifier;
   }
 
   /**

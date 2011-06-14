@@ -21,7 +21,7 @@ use \clarinet\Exception;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class Property {
+class Property implements Identifiable {
 
   const TYPE_BOOLEAN   = 'boolean';
   const TYPE_DATE      = 'date';
@@ -69,6 +69,17 @@ class Property {
    */
   public function getColumn() {
     return $this->_column;
+  }
+
+  /**
+   * Getter for the identifiable instance's identifier.
+   *
+   * // TODO This will not be unique among all Indentifiable instances, only
+   *         among Property instances belonging to the same model.  This is
+   *         sufficient for now but may not be in the future.
+   */
+  public function getIdentifier() {
+    return $this->_name;
   }
 
   /**
