@@ -17,6 +17,9 @@ namespace clarinet\test\generated;
 
 use \clarinet\test\mock\SimpleEntity;
 use \PHPUnit_Framework_TestCase as TestCase;
+
+require_once __DIR__ . '/../test-common.php';
+
 /**
  * This class tests a generated persister for a simple entity that contains only
  * scalar value columns.

@@ -35,7 +35,7 @@ class CriteriaTest  extends TestCase {
     $c = $this->_createBaseCriteria();
 
     $c->addEquals('name', 'aName');
-    $expected = "SELECT * FROM simple_entity WHERE `name` = :param0";
+    $expected = "SELECT `simple_entity`.* FROM `simple_entity` WHERE `name` = :param0";
     $this->_assertCriteriaOutput($c, $expected);
 
     $params = $c->getParameters();
@@ -47,22 +47,22 @@ class CriteriaTest  extends TestCase {
   public function testAddSorts() {
     $c = $this->_createBaseCriteria();
     $c->addSort('col1');
-    $expected = "SELECT * FROM simple_entity ORDER BY `col1`";
+    $expected = "SELECT `simple_entity`.* FROM `simple_entity` ORDER BY `col1`";
     $this->_assertCriteriaOutput($c, $expected);
 
     $c = $this->_createBaseCriteria();
     $c->addSort('col1, col2');
-    $expected = "SELECT * FROM simple_entity ORDER BY `col1`,`col2`";
+    $expected = "SELECT `simple_entity`.* FROM `simple_entity` ORDER BY `col1`,`col2`";
     $this->_assertCriteriaOutput($c, $expected);
 
     $c = $this->_createBaseCriteria();
     $c->addSort(array('col1', 'col2'));
-    $expected = "SELECT * FROM simple_entity ORDER BY `col1`,`col2`";
+    $expected = "SELECT `simple_entity`.* FROM `simple_entity` ORDER BY `col1`,`col2`";
     $this->_assertCriteriaOutput($c, $expected);
 
     $c = $this->_createBaseCriteria();
     $c->addSort('messed`up``column```name');
-    $expected = "SELECT * FROM simple_entity ORDER BY `messed``up````column``````name`";
+    $expected = "SELECT `simple_entity`.* FROM `simple_entity` ORDER BY `messed``up````column``````name`";
     $this->_assertCriteriaOutput($c, $expected);
   }
 

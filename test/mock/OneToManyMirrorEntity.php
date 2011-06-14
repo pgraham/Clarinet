@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test/mock
  */
 namespace clarinet\test\mock;
 
@@ -20,7 +19,6 @@ namespace clarinet\test\mock;
  * on the other side of the relationship.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/mock
  *
  * @Entity(table = one_to_many_mirror)
  */
@@ -59,7 +57,7 @@ class OneToManyMirrorEntity {
     $this->_name = $name;
   }
 
-  public function setMany(Array $many) {
+  public function setMany(array $many) {
     $this->_many = $many;
   }
 }

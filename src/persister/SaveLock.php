@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/persister
  */
 namespace clarinet\persister;
 
@@ -23,7 +22,6 @@ namespace clarinet\persister;
  * block can be started by a persister-persister save invocation.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/persister
  */
 class SaveLock {
 
@@ -31,14 +29,22 @@ class SaveLock {
 
   public static function acquire() {
     if (self::$_locked === null) {
-      self::$_locked = Array();
+      self::$_locked = array();
       return new SaveLock(true);
     }
     return new SaveLock(false);
   }
 
   public static function isLocked($model) {
-    return is_array(self::$_locked) && in_array($model, self::$_locked);
+    if (self::$_locked === null) {
+      return false;
+    }
+
+    if (in_array($model, self::$_locked)) {
+      return true;
+    }
+
+    return false;
   }
 
   /*

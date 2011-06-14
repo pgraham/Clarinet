@@ -23,9 +23,13 @@ namespace clarinet\model;
  */
 interface Relationship {
 
+  const TYPE_MANYTOMANY = 'many-to-many';
+  const TYPE_MANYTOONE  = 'many-to-one';
+  const TYPE_ONETOMANY  = 'one-to-many';
+
   /**
-   * This method is responsible for returning the clarinet\model\Model object for
-   * the entity on the left side of the relationship.
+   * This method is responsible for returning the clarinet\model\Model object
+   * for the entity on the left side of the relationship.
    *
    * @return Model
    */
@@ -40,8 +44,8 @@ interface Relationship {
   public function getLhsProperty();
 
   /**
-   * This method is responsible for returning the clarinet\model\Model object for
-   * the entity on the right side of the relationship.
+   * This method is responsible for returning the clarinet\model\Model object
+   * for the entity on the right side of the relationship.
    *
    * @return Model
    */

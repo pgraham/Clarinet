@@ -25,6 +25,7 @@ class Property implements Identifiable {
 
   const TYPE_BOOLEAN   = 'boolean';
   const TYPE_DATE      = 'date';
+  const TYPE_DECIMAL   = 'decimal';
   const TYPE_FLOAT     = 'float';
   const TYPE_INTEGER   = 'integer';
   const TYPE_STRING    = 'string';
@@ -34,6 +35,7 @@ class Property implements Identifiable {
   public static $ALL_TYPES = array(
     self::TYPE_BOOLEAN,
     self::TYPE_DATE,
+    self::TYPE_DECIMAL,
     self::TYPE_FLOAT,
     self::TYPE_INTEGER,
     self::TYPE_STRING,
@@ -44,6 +46,7 @@ class Property implements Identifiable {
   private $_name;
   private $_column;
   private $_type;
+  private $_default;
   private $_values;
 
   /**
@@ -69,6 +72,16 @@ class Property implements Identifiable {
    */
   public function getColumn() {
     return $this->_column;
+  }
+
+  /**
+   * Getter for the default value for the property.  If no default is specified
+   * then the default is null.
+   *
+   * @return mixed
+   */
+  public function getDefault() {
+    return $this->_default;
   }
 
   /**
@@ -117,6 +130,15 @@ class Property implements Identifiable {
    */
   public function isEnumerated() {
     return $this->_values !== null;
+  }
+
+  /**
+   * Setter for the default value of the property.
+   *
+   * @param string $default The default value for the property.
+   */
+  public function setDefault($default) {
+    $this->_default = $default;
   }
 
   /**

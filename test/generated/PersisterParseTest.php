@@ -11,29 +11,29 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
+ * @package clarinet/test/generated
  */
-namespace clarinet\test;
+namespace clarinet\test\generated;
 
-use \PHPUnit_Framework_TestSuite as TestSuite;
+use \clarinet\test\mock\SimpleEntity;
+use \clarinet\PersisterGenerator;
 
-require_once __DIR__ . '/test-common.php';
+use \PHPUnit_Framework_TestCase as TestCase;
+
+require_once __DIR__ . '/../test-common.php';
 
 /**
- * This class build a suite consisting of all tests for clarinet.
+ * This class tests a generated persister for a simple entity that contains only
+ * scalar value columns.
  *
  * @author Philip Graham <philip@zeptech.ca>
+ * @package clarinet/test/generated
  */
-class AllTests {
+class SimpleEntityPersisterTest extends TestCase {
 
-  public static function suite() {
-    $suite = new TestSuite('All Clarinet Tests');
-
-    $suite->addTestSuite('clarinet\test\CriteriaTest');
-    $suite->addTestSuite('clarinet\test\PdoWrapperTest');
-    $suite->addTestSuite('clarinet\test\model\ParserTest');
-
-    $suite->addTestSuite(\clarinet\test\generated\AllTests::suite());
-
-    return $suite;
+  public function testCreate() {
+    $mockDir = __DIR__ . '/../mock';
+    $generator = new PersisterGenerator($mockDir . '/gen');
+    $generator->generate('clarinet\test\mock\SimpleEntity');
   }
 }

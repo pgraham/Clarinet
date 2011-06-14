@@ -269,15 +269,8 @@ class Parser {
     }
     $property = new Property($propertyName, $column);
 
-    if (isset($annotations['enumerated'])) {
-      if (!is_array($annotations['enumerated']['values'])) {
-        $this->_fail("{$this->_className}::$methodName: "
-          . " Enumerated annotation must contain a parameter 'values' that is"
-          . " defined as an array.");
-      }
-      $property->setValues($annotations['enumerated']['values']);
-    }
-
+    // Parse the type first so that the default value and enumerated values can
+    // be cast to the appropriate type.
     if (isset($annotations['type'])) {
       $type = strtolower($annotations['type']);
 
@@ -287,6 +280,20 @@ class Parser {
           . implode(', ', Property::$ALL_TYPES) . ".");
       }
       $property->setType($type);
+    }
+
+    if (isset($annotations['enumerated'])) {
+      if (!is_array($annotations['enumerated']['values'])) {
+        $this->_fail("{$this->_className}::$methodName: "
+          . " Enumerated annotation must contain a parameter 'values' that is"
+          . " defined as an array.");
+      }
+      $property->setValues($annotations['enumerated']['values']);
+    }
+
+    if (isset($annotations['default'])) {
+      $default = strtolower($annotations['default']);
+      $property->setDefault($default);
     }
 
     return $property;
