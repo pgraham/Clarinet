@@ -37,7 +37,6 @@ class ManyToManyMirrorPersisterTest extends TestCase {
    */
   public static function setUpBeforeClass() {
     Generator::generate();
-   // \clarinet\Autoloader::$genBasePath = __DIR__ . '/../mock/gen/clarinet';
   }
 
   /* The object under test */
@@ -70,14 +69,14 @@ class ManyToManyMirrorPersisterTest extends TestCase {
    */
   public function testCreate() {
     $lhs = Array();
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 5; $i++) {
       $e = new ManyToManyMirrorLhsEntity();
       $e->setName("Lhs$i");
       $lhs[] = $e;
     }
 
     $rhs = Array();
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 5; $i++) {
       $e = new ManyToManyMirrorRhsEntity();
       $e->setName("Rhs$i");
       $rhs[] = $e;
@@ -105,7 +104,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
     }
 
     $createdLhs = $this->_persister->retrieve();
-    $this->assertEquals(10, count($createdLhs));
+    $this->assertEquals(5, count($createdLhs));
   }
 
   /**
@@ -113,14 +112,14 @@ class ManyToManyMirrorPersisterTest extends TestCase {
    */
   public function testRetrieve() {
     $lhs = Array();
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 5; $i++) {
       $e = new ManyToManyMirrorLhsEntity();
       $e->setName("Lhs$i");
       $lhs[] = $e;
     }
 
     $rhs = Array();
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 5; $i++) {
       $e = new ManyToManyMirrorRhsEntity();
       $e->setName("Rhs$i");
       $rhs[] = $e;
@@ -158,7 +157,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
       $retrievedRhs = $retrieved->getMany();
       $this->assertNotNull($retrievedRhs);
       $this->assertInternalType('array', $retrievedRhs);
-      $this->assertEquals(10, count($retrievedRhs));
+      $this->assertEquals(5, count($retrievedRhs));
 
       foreach ($retrievedRhs AS $rhsE) {
         $this->assertContains($rhsE->getId(), $rhsIds);
@@ -171,14 +170,14 @@ class ManyToManyMirrorPersisterTest extends TestCase {
    */
   public function testUpdate() {
     $lhs = Array();
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 5; $i++) {
       $e = new ManyToManyMirrorLhsEntity();
       $e->setName("Lhs$i");
       $lhs[] = $e;
     }
 
     $rhs = Array();
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 5; $i++) {
       $e = new ManyToManyMirrorRhsEntity();
       $e->setName("Rhs$i");
       $rhs[] = $e;
@@ -241,14 +240,14 @@ class ManyToManyMirrorPersisterTest extends TestCase {
    */
   public function testDelete() {
     $lhs = Array();
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 5; $i++) {
       $e = new ManyToManyMirrorLhsEntity();
       $e->setName("Lhs$i");
       $lhs[] = $e;
     }
 
     $rhs = Array();
-    for ($i = 1; $i <= 10; $i++) {
+    for ($i = 1; $i <= 5; $i++) {
       $e = new ManyToManyMirrorRhsEntity();
       $e->setName("Rhs$i");
       $rhs[] = $e;
@@ -284,7 +283,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
 
     $lhs = $this->_persister->retrieve();
     $this->assertInternalType('array', $lhs);
-    $this->assertEquals(9, count($lhs));
+    $this->assertEquals(4, count($lhs));
 
     foreach ($lhs AS $lhsE) {
       $this->assertNotEquals($deletedId, $lhsE->getId());
@@ -292,7 +291,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
       
       $rhs = $lhsE->getMany();
       $this->assertInternalType('array', $rhs);
-      $this->assertEquals(10, count($rhs));
+      $this->assertEquals(5, count($rhs));
 
       foreach ($rhs AS $rhsE) {
         $this->assertNotNull($rhsE);

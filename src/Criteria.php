@@ -26,6 +26,9 @@ class Criteria {
   /* Set of expressions that are AND'd together to create the criteria */
   private $_conditions = Array();
 
+  /* The query's distinct clause */
+  private $_distinct = false;
+
   /* Set of join clauses */
   private $_joins = Array();
 
@@ -55,10 +58,15 @@ class Criteria {
    */
   public function __toString() {
     $clauses = Array();
+
+    $select = 'SELECT ';
+    if ($this->_distinct === true) {
+      $select .= 'DISTINCT ';
+    }
     if ($this->_selectColumns === null) {
-      $select = 'SELECT *';
+      $select .= "$this->_table.*";
     } else {
-      $select = 'SELECT ' . implode(',', $this->_selectColumns);
+      $select .= implode(',', $this->_selectColumns);
     }
     $clauses[] = $select;
 
@@ -95,6 +103,15 @@ class Criteria {
     if (is_array($value)) {
       $this->addIn($column, $value);
       return;
+    }
+
+    // Normalize booleans to their INT equivalent as this is how they are stored
+    // in the database
+    if ($value === true) {
+      $value = 1;
+    }
+    if ($value === false) {
+      $value = 0;
     }
 
     $escCol = $this->_escapeFieldName($column);
@@ -146,8 +163,9 @@ class Criteria {
    *   join on. Optional. Default, null.  If null the USING syntax is used.
    */
   public function addJoin($table, $lhs, $rhs = null) {
+    $escaped = $this->_escapeFieldName($table);
     if ($rhs !== null) {
-      $this->_joins[] = "JOIN $table ON \${table}.$lhs = $table.$rhs";
+      $this->_joins[] = "JOIN $table ON \${table}.$lhs = $escaped.$rhs";
     } else {
       $this->_joins[] = "JOIN $table USING ($lhs)";
     }
@@ -200,6 +218,17 @@ class Criteria {
   }
 
   /**
+   * Setter for whether or not to include a distinct clause in the query.
+   * If anything other than a boolean true is passed in then no DISTINCT clause
+   * is added.
+   *
+   * @param boolean $distinct
+   */
+  public function setDistinct($distinct) {
+    $this->_distinct = $distinct;
+  }
+
+  /**
    * Setter for the LIMIT clause of the SQL statement.
    *
    * @param integer $limit The maximum number of rows to return
@@ -218,11 +247,20 @@ class Criteria {
    * @param string $table
    */
   public function setTable($table) {
-    $this->_table = $table;
+    $this->_table = $this->_escapeFieldName($table);
   }
 
   /* Escape the given field name. */
   private function _escapeFieldName($fieldName) {
-    return '`' . str_replace('`', '``', $fieldName) . '`';
+    if (strpos($fieldName, '.') === false) {
+      return '`' . str_replace('`', '``', $fieldName) . '`';
+    }
+
+    $parts = explode('.', $fieldName);
+    $escaped = array();
+    foreach ($parts AS $part) {
+      $escaped[] = '`' . str_replace('`', '``', $part) . '`';
+    }
+    return implode('.', $escaped);
   }
 }

@@ -23,10 +23,6 @@ namespace clarinet\model;
  */
 abstract class AbstractRelationship implements Relationship {
 
-  const TYPE_MANYTOMANY = 'many-to-many';
-  const TYPE_MANYTOONE  = 'many-to-one';
-  const TYPE_ONETOMANY  = 'one-to-many';
-
   /* Model for the entity on the left side of the relationship */
   protected $_lhs;
 
@@ -102,11 +98,11 @@ abstract class AbstractRelationship implements Relationship {
    */
   public function getType() {
     if ($this instanceof ManyToMany) {
-      return self::TYPE_MANYTOMANY;
+      return Relationship::TYPE_MANYTOMANY;
     } else if ($this instanceof ManyToOne) {
-      return self::TYPE_MANYTOONE;
+      return Relationship::TYPE_MANYTOONE;
     } else if ($this instanceof OneToMany) {
-      return self::TYPE_ONETOMANY;
+      return Relationship::TYPE_ONETOMANY;
     } else {
       $class = get_class($this);
       assert("false /* Unrecognized Relationship implementation: $class */");

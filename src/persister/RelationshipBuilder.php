@@ -10,7 +10,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/persister
  */
 namespace clarinet\persister;
 
@@ -24,7 +23,6 @@ use \clarinet\model\Relationship;
  * used to construct.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/persister
  */
 class RelationshipBuilder implements RelationshipBuilderI {
 
@@ -36,7 +34,6 @@ class RelationshipBuilder implements RelationshipBuilderI {
    * delegated.
    */
   private $_builder;
-
 
   /**
    * Create a new relationship builder for the given relationship.

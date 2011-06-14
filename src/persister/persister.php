@@ -291,7 +291,7 @@ class ${actor} {
 
       return $result;
     } catch (PDOException $e) {
-      throw new Exception("Error retrieving ${class_str} instances: {$e->getMessage()}", $e);
+      throw new Exception("Error retrieving ${class_str} instances: {$e->getMessage()}\n\n$sql\n", $e);
     }
   }
 

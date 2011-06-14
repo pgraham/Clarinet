@@ -13,14 +13,13 @@
  * This file sets up the environment for running tests.
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test
  */
 
 /*
  * -----------------------------------------------------------------------------
  * SINCE BASSOON RELIES ON REED IN ORDER TO PROPERLY TEST SOME CLASSES WE NEED
  * TO LOAD SOME REED CLASSES.  FOR THIS REASON THE TESTS WON'T RUN UNTIL THIS
- * PATH POINTS TO THE SOURCE DIRECTORY OR A REED INSTALLATION.
+ * PATH POINTS TO THE SOURCE DIRECTORY OF A REED INSTALLATION.
  * -----------------------------------------------------------------------------
  */
 if (!defined('REED_PATH')) {

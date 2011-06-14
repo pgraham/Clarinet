@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/persister
  */
 namespace clarinet\persister;
 
@@ -22,7 +21,6 @@ use \reed\generator\CodeTemplateLoader;
  * This class generates the persister code for a one-to-many relationship.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/persister
  */
 class OneToManyBuilder implements RelationshipBuilderI {
 

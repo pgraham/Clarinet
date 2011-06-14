@@ -12,27 +12,31 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace clarinet\test;
+namespace clarinet\test\generated;
 
 use \PHPUnit_Framework_TestSuite as TestSuite;
 
-require_once __DIR__ . '/test-common.php';
+require_once __DIR__ . '/../test-common.php';
 
 /**
- * This class build a suite consisting of all tests for clarinet.
+ * This class builds a suite consisting of all tests for clarinet's generated
+ * classes.
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
 class AllTests {
 
   public static function suite() {
-    $suite = new TestSuite('All Clarinet Tests');
+    $suite = new TestSuite('All Clarinet Generated Classes Tests');
 
-    $suite->addTestSuite('clarinet\test\CriteriaTest');
-    $suite->addTestSuite('clarinet\test\PdoWrapperTest');
-    $suite->addTestSuite('clarinet\test\model\ParserTest');
-
-    $suite->addTestSuite(\clarinet\test\generated\AllTests::suite());
+    $suite->addTestSuite('clarinet\test\generated\SimpleEntityPersisterTest');
+    $suite->addTestSuite('clarinet\test\generated\ManyToOnePersisterTest');
+    $suite->addTestSuite('clarinet\test\generated\OneToManyPersisterTest');
+    $suite->addTestSuite('clarinet\test\generated\ManyToManyPersisterTest');
+    $suite->addTestSuite(
+      'clarinet\test\generated\OneToManyMirrorPersisterTest');
+    $suite->addTestSuite(
+      'clarinet\test\generated\ManyToManyMirrorPersisterTest');
 
     return $suite;
   }

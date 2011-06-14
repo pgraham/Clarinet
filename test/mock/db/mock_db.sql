@@ -63,5 +63,5 @@ CREATE TABLE one_to_many_mirror(
 CREATE TABLE many_to_one_mirror(
   id integer PRIMARY KEY AUTOINCREMENT,
   name varchar(255),
-  one_to_many_mirror_id integer NOT NULL REFERENCES one_to_many_mirror (id)
+  one_to_many_mirror_id integer REFERENCES one_to_many_mirror (id)
 );
