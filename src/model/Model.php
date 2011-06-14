@@ -164,7 +164,7 @@ class Model implements Identifiable {
    * @return Relationship[]
    */
   public function getRelationships() {
-    return $this->_relationships;
+    return array_values($this->_relationships);
   }
 
   /** 

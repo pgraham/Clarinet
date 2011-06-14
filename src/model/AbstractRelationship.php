@@ -23,10 +23,6 @@ namespace clarinet\model;
  */
 abstract class AbstractRelationship implements Relationship, Identifiable {
 
-  const TYPE_MANYTOMANY = 'many-to-many';
-  const TYPE_MANYTOONE  = 'many-to-one';
-  const TYPE_ONETOMANY  = 'one-to-many';
-
   /** Model for the entity on the left side of the relationship */
   protected $_lhs;
 
