@@ -18,45 +18,89 @@ use \clarinet\Exception;
  */
 class ${actor} {
 
-  private static $_PROPERTY_MAP = array(
-    ${join:property_map:,}
-  );
-
   public function asArray(\${class} $model) {
     $a = Array();
 
-    $a[self::$_PROPERTY_MAP['${id}']] = $model->get${id}();
+    $a['${id}'] = $model->get${id}();
 
     ${each:properties AS property}
-      $a[self::$_PROPERTY_MAP['${property}']] = $model->get${property}();
+      $a['${property}'] = $model->get${property}();
     ${done}
 
-    ${each:relationshipsToArray AS relationship}
-      ${relationship}
+    ${each:relationships AS relationship}
+      $relVal = $model->get${relationship[name]}();
+      if ($relVal === null) {
+        $a['${relationship[name]}'] = null;
+      } else {
+
+        ${if:relationship[type] = many-to-many or relationship[type] = one-to-many }
+
+          $relIds = array();
+          foreach ($relVal AS $rel) {
+            $relIds[] = $rel->get${relationship[rhsIdProperty]}();
+          }
+          $a['${relationship[name]}'] = $relIds;
+
+        ${elseif:relationship[type] = many-to-one}
+
+          $relId = $relVal->get${relationship[rhsIdProperty]}();
+          $a['${relationship[name]}'] = $relId;
+
+        ${fi}
+
+      }
+
     ${done}
 
     return $a;
   }
 
   public function fromArray(array $a) {
-    if (isset($a[self::$_PROPERTY_MAP['${id}']])) {
+    if (isset($a['${id}'])) {
       $persister = ActorFactory::getActor('persister', '${class}');
-      $model = $persister->getById($a[self::$_PROPERTY_MAP['${id}']]);
+      $model = $persister->getById($a['${id}']);
     } else {
       $model = new \${class}();
     }
 
     ${each:properties AS property}
-      $val = null;
-      if (isset($a[self::$_PROPERTY_MAP['${property}']])) {
-        $val = $a[self::$_PROPERTY_MAP['${property}']];
+      if (isset($a['${property}'])) {
+        $val = $a['${property}'];
+        $model->set${property}($val);
       }
-      $model->set${property}($val);
-
     ${done}
 
-    ${each:relationshipsFromArray AS relationship}
-      ${relationship}
+    ${each:relationships AS relationship}
+    
+      ${if:relationship[type] = many-to-many or relationship[type] = one-to-many}
+
+        if (isset($a['${relationship[name]}'])) {
+          $relIds = $a['${relationship[name]}'];
+
+          $c = new Criteria();
+          $c->addIn('${relationship[rhsIdProperty]}', $relIds);
+
+          $persister = ActorFactory::getActor('persister',
+            '${relationship[rhs]}');
+          $relVal = $persister->retrieve($c);
+          $model->set${relationship[name]}($relVal);
+        }
+
+      ${elseif:relationship[type] = many-to-one}
+
+        if (isset($a['${relationship[name]}'])) {
+          $relId = $a['${relationship[name]}'];
+
+          if ($relId !== null) {
+            $persister = ActorFactory::getActor('persister',
+              '${relationship[rhs]}');
+            $relVal = $persister->getById($relId);
+            $model->set${relationship[name]}($relVal);
+          }
+        }
+
+      ${fi}
+
     ${done}
 
     return $model;

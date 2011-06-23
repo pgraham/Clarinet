@@ -43,20 +43,23 @@ class Property implements Identifiable {
     self::TYPE_TIMESTAMP
   );
 
-  private $_name;
   private $_column;
-  private $_type;
   private $_default;
+  private $_model;
+  private $_name;
+  private $_type;
   private $_values;
 
   /**
    * Create a new persisted property representation.
    *
+   * @param Model $model The model to which this property belongs.
    * @param string $name The name of the property.
    * @param string $column The name of the column in the database table in which
    *   instances are persisted.
    */
-  public function __construct($name, $column) {
+  public function __construct(Model $model, $name, $column) {
+    $this->_model = $model;
     $this->_name = $name;
     $this->_column = $column;
 
@@ -93,6 +96,15 @@ class Property implements Identifiable {
    */
   public function getIdentifier() {
     return $this->_name;
+  }
+
+  /**
+   * Getter for the model to which the property belongs.
+   *
+   * @return Model
+   */
+  public function getModel() {
+    return $this->_model;
   }
 
   /**

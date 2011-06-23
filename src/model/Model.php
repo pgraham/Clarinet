@@ -184,7 +184,7 @@ class Model implements Identifiable {
    * @return boolean
    */
   public function hasProperty($propId) {
-    return $this->getProperty($name) !== null;
+    return $this->getProperty($propId) !== null;
   }
 
   /**

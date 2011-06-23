@@ -144,7 +144,7 @@ class Parser {
           $this->_fail("{$this->_className} has more than one id column"
             . " defined");
         }
-        $id = $this->_parseId($methodName, $annotations);
+        $id = $this->_parseId($model, $methodName, $annotations);
         $model->setId($id);
 
         // We continue to loop at this point to verify that only one id column
@@ -152,6 +152,7 @@ class Parser {
       }
     }
 
+    // Don't parse any further if no ID column has been defined
     if ($id === null) {
       $this->_fail("{$this->_className} does not define an Id column."
         . "  Use the @Id annotation to denote a column as the id column.");
@@ -163,7 +164,7 @@ class Parser {
       $methodName = $method->getName();
 
       if (isset($annotations['column'])) {
-        $property = $this->_parseColumn($methodName, $annotations);
+        $property = $this->_parseColumn($model, $methodName, $annotations);
         $model->addProperty($property);
       }
     }
@@ -223,7 +224,7 @@ class Parser {
   }
 
   /* Parse a method annotated with @Id */
-  private function _parseId($methodName, $annotations) {
+  private function _parseId($model, $methodName, $annotations) {
     if (substr($methodName, 0, 3) !== 'get') {
       $this->_fail("{$this->_className}: Only a getter can be marked as"
         . " the id");
@@ -236,22 +237,23 @@ class Parser {
         // TODO - Raise a warning that the annotation will be ignored.
       }
 
-      $property  = $this->_parseColumn($methodName, $annotations);
+      $property  = $this->_parseColumn($model, $methodName, $annotations);
     } else {
       // If no column annotation has been provided assume that the column is
       // named 'id'
-      $property = new Property($propertyName, 'id');
+      $property = new Property($model, $propertyName, 'id');
     }
 
     // The default type for ID columns is integer
     if (!isset($annotations['type'])) {
       $property->setType(Property::TYPE_INTEGER);
     }
+
     return $property;
   }
 
   /* Parse a method that is annotated with @Column */
-  private function _parseColumn($methodName, $annotations) {
+  private function _parseColumn($model, $methodName, $annotations) {
     if (substr($methodName, 0, 3) !== 'get') {
       $this->_fail("{$this->_className}: Only getters can be marked as"
         . " columns");
@@ -267,7 +269,7 @@ class Parser {
       // TODO - Update this to expand camel casing to underscores
       $column = strtolower($propertyName);
     }
-    $property = new Property($propertyName, $column);
+    $property = new Property($model, $propertyName, $column);
 
     // Parse the type first so that the default value and enumerated values can
     // be cast to the appropriate type.

@@ -47,50 +47,36 @@ class ClassBuilder {
    * to insert into a transformer template.
    */
   private static function _buildTemplateValues(Model $model) {
-    $propertyMap = array();
+    $id = $model->getId()->getName();;
 
     $properties  = array();
-    $relationshipsToArray = array();
-    $relationshipsFromArray = array();
+    foreach ($model->getProperties() AS $property) {
+      $properties[] = $property->getIdentifier();
+    }
 
-    $id = $model->getId()->getName();;
-    $idIdx = strtolower($id);
+    $relationships = array();
+    foreach ($model->getRelationships() AS $relationship) {
+      $relationships[] = array(
+        'type'          => $relationship->getType(),
+        'name'          => $relationship->getLhsProperty(),
+        'rhs'           => $relationship->getRhs()->getClass(),
+        'rhsIdProperty' => $relationship->getRhs()->getId()->getIdentifier()
+      );
+    }
+
     $fromDbIdCast = '';
     if ($model->getId()->getType() == Property::TYPE_INTEGER) {
       $fromDbIdCast = '(int) ';
     }
-    $propertyMap[] = "'$id' => '$idIdx'";
-
-    foreach ($model->getProperties() AS $property) {
-      $prop = $property->getName();
-      $idx = strtolower($prop);
-
-      $properties[] = $prop;
-      $propertyMap[] = "'$prop' => '$idx'";
-    }
-
-    $relationshipBuilder = new RelationshipBuilder();
-    foreach ($model->getRelationships() AS $relationship) {
-      $relationshipsToArray[] = $relationshipBuilder->buildToArray(
-        $relationship);
-      $relationshipsFromArray[] = $relationshipBuilder->buildFromArray(
-        $relationship);
-
-      $rel = $relationship->getLhsProperty();
-      $idx = strtolower($rel);
-      $propertyMap[] = "'$rel' => '$idx'";
-    }
 
     $templateValues = Array
     (
-      'class'                  => $model->getClass(),
-      'actor'                  => $model->getActor(),
-      'id'                     => $id,
-      'properties'             => $properties,
-      'relationshipsToArray'   => $relationshipsToArray,
-      'relationshipsFromArray' => $relationshipsFromArray,
-      'property_map'           => $propertyMap,
-      'from_db_id_cast'        => $fromDbIdCast
+      'class'           => $model->getClass(),
+      'actor'           => $model->getActor(),
+      'id'              => $id,
+      'properties'      => $properties,
+      'relationships'   => $relationships,
+      'from_db_id_cast' => $fromDbIdCast
     );
     return $templateValues;
   }
