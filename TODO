@@ -9,3 +9,6 @@
 
 - Add support for deleting orphaned entities on the many side of a one-to-many
   relationship
+
+- Replace backticks with double-quotes in fieldname escaping as backticks are
+  MySQL specific.  This will require users to enable MySQL SQL_MODE ANSI_QUOTES
