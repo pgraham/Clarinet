@@ -23,6 +23,39 @@ namespace clarinet;
  */
 class Criteria {
 
+  const OP_EQUALS = '=';
+  const OP_NOT_EQUALS = '<>';
+  const OP_GREATER_THAN = '>';
+  const OP_GREATER_EQUALS = '>=';
+  const OP_LESS_THAN = '<';
+  const OP_LESS_EQUALS = '<=';
+  const OP_LIKE = 'LIKE';
+
+  /*
+   * Array of supported predicate values that by-pass parameterization.  The
+   * values are defined as lambas so that they can be distinguished from a
+   * literal value named the same as the function.
+   */
+  private static $_funcs;
+
+  /* Whether or not the supported function values are initialized. */
+  private static $_initialized = false;
+
+  /*
+   * Array of operators supported by the addPredicate() method.  This array only
+   * contains operators that have a single right hand side value.  Other
+   * operators (IN, BETWEEN, IS NULL and IS NOT NULL) have their own methods.
+   */
+  private static $_ops = array(
+    self::OP_EQUALS,
+    self::OP_NOT_EQUALS,
+    self::OP_GREATER_THAN,
+    self::OP_GREATER_EQUALS,
+    self::OP_LESS_THAN,
+    self::OP_LESS_EQUALS,
+    self::OP_LIKE
+  );
+
   /* Set of expressions that are AND'd together to create the criteria */
   private $_conditions = Array();
 
@@ -35,8 +68,8 @@ class Criteria {
   /* Limit for the number of rows to query. */
   private $_limit = null;
 
-  /* List of columns to sort by with their direction TODO */
-  private $_sorts = Array();
+  /* Offset from the beginning of the result from which to select rows. */
+  private $_offset = null;
 
   /* Clauses are created with parameterized values, these are the parameters */
   private $_params = Array();
@@ -47,8 +80,52 @@ class Criteria {
    */
   private $_selectColumns = null;
 
+  /* List of columns to sort by with their direction TODO */
+  private $_sorts = Array();
+
   /* The table to select from. */
   private $_table = null;
+
+  /**
+   * Getter for the function lamba for the predicate function value with the
+   * given name.
+   *
+   * @param string $func
+   */
+  public static function getPredicateFunction($func) {
+    self::_init();
+
+    $name = strtoupper($func);
+    if (!array_key_exists($name, self::$_funcs)) {
+      throw new Exception("Unrecognized predicate function: $func");
+    }
+
+    return self::$_funcs[$name];
+  }
+
+  /**
+   * Static initializer.
+   */
+  protected static function _init() {
+    if (self::$_initialized) {
+      return;
+    }
+    self::$_initialized = true;
+
+    self::$_funcs = array();
+
+    self::$_funcs['CURRENT_DATE'] = function () {
+      return 'CURRENT_DATE';
+    };
+
+    self::$_funcs['CURRENT_TIME'] = function () {
+      return 'CURRENT_TIME';
+    };
+
+    self::$_funcs['CURRENT_TIMESTAMP'] = function () {
+      return 'CURRENT_TIMESTAMP';
+    };
+  }
 
   /**
    * Return the SQL representation of the criteria.  This will be a complete SQL
@@ -86,49 +163,65 @@ class Criteria {
     }
 
     if ($this->_limit !== null) {
-      $clauses[] = 'LIMIT ' .$this->_limit;
+      $limitClause = 'LIMIT ' . $this->_limit;
+
+      if ($this->_offset !== null) {
+        $limitClause .= ' OFFSET ' . $this->_offset;
+      }
+
+      $clauses[] = $limitClause;
     }
 
     return implode(' ', $clauses);
   }
 
   /**
-   * Add an equals (=) clause to the statement's WHERE condition.
+   * Add a between condition to the statement's WHERE clause.
+   *
+   * @param string $column The column to use as the left hand side of the
+   *   expression. If the criteria contains any joins then the column may need
+   *   to be fully qualified.
+   * @param mixed $value1 The first end point of the desired range, inclusive.
+   * @param mixed $value2 The second end point of the desired range, inclusive.
+   * @return $this
+   */
+  public function addBetween($column, $value1, $value2) {
+    if ($value1 === null || $value2 === null) {
+      throw new Exception('BETWEEN end points cannot be NULL');
+    }
+
+    $escCol = $this->_escapeFieldName($column);
+
+    $idx = count($this->_params);
+    $paramName1 = ":param$idx";
+    $this->_params[$paramName] = $value1;
+
+    $idx = count($this->_params);
+    $paramName2 = ":param$idx";
+    $this->_params[$paramName] = $value2;
+
+    $this->_conditions[] = "$escCol BETWEEN $paramName1 AND $paramName2";
+
+    return $this;
+  }
+
+  /**
+   * Add an equals (=) condition to the statement's WHERE clause.
    *
    * @param string $column The column to use as the left hand side of the
    *   expression.  If the criteria contains any joins then the column must be
    *   fully qualified.
+   * @param mixed $value The value to use as the right hand side of the
+   *   expression.  This value will not be used directly in the statement but
+   *   will instead be used as a value for parameterized statement.
+   * @return $this
    */
   public function addEquals($column, $value) {
-    if (is_array($value)) {
-      $this->addIn($column, $value);
-      return;
-    }
-
-    // Normalize booleans to their INT equivalent as this is how they are stored
-    // in the database
-    if ($value === true) {
-      $value = 1;
-    }
-    if ($value === false) {
-      $value = 0;
-    }
-
-    $escCol = $this->_escapeFieldName($column);
-    if ($value !== null) {
-      $idx = count($this->_params);
-      $paramName = ":param$idx";
-      $this->_params[$paramName] = $value;
-
-      $this->_conditions[] = "$escCol = $paramName";
-
-    } else {
-      $this->_conditions[] = "$escCol IS NULL";
-    }
+    return $this->addPredicate($column, $value, self::OP_EQUALS);
   }
 
   /**
-   * Add an IN clause to the statement's WHERE condition.
+   * Add an IN predicate to the statement's WHERE clause.
    *
    * @param string $column The column to use as the left hand side of the
    *   expression.
@@ -155,6 +248,34 @@ class Criteria {
       $idx++;
     }
     $this->_conditions[] = "$escCol IN (" . implode(',', $paramNames) . ")";
+
+    return $this;
+  }
+
+  /**
+   * Add an IS NOT NULL predicate to the statement's WHERE clause.
+   *
+   * @param string $column The colum to evaluate as not null
+   * @return $this
+   */
+  public function addIsNotNull($column) {
+    $escCol = $this->_escapeFieldName($column);
+    $this->_conditions[] = "$escCol IS NOT NULL";
+
+    return $this;
+  }
+
+  /**
+   * Add an IS NULL predicate to the statement's WHERE clause.
+   *
+   * @param string $column The column to evaluate as null
+   * @return $this
+   */
+  public function addIsNull($column) {
+    $escCol = $this->_escapeFieldName($column);
+    $this->_conditions[] = "$escCol IS NULL";
+
+    return $this;
   }
 
   /**
@@ -174,6 +295,8 @@ class Criteria {
     } else {
       $this->_joins[] = "JOIN $table USING ($lhs)";
     }
+
+    return $this;
   }
 
   /**
@@ -184,25 +307,86 @@ class Criteria {
    *   tuple of OR conditions will be created, one for each value in the array.
    */
   public function addLike($column, $value) {
+    return $this->addPredicate($column, $value, self::OP_LIKE);
+  }
+
+  /**
+   * Add a Predicate to the statement's WHERE clause.
+   *
+   * @param string $column The column to use as the left hand side of the
+   *   expression.  If the criteria contains any joins then the column must be
+   *   fully qualified.
+   * @param mixed $value The value to use as the right hand side of the
+   *   expression.  This value will not be used directly in the statement but
+   *   will instead by used as a value in a parameterized statement.  If the
+   *   value is an array then a tuple of OR predicates is created.
+   * @param string $op The operator for the predicate.  Must be one of the
+   *   supported operators, defined by the OP_* constants.
+   * @return $this
+   */
+  public function addPredicate($column, $value, $op) {
+    if (!in_array($op, self::$_ops)) {
+      $cmpOp = strtoupper($op);
+      switch ($cmpOp) {
+
+        case 'IN':
+        throw $this->_notSupportedException('IN', 'addIn');
+
+        case 'BETWEEN':
+        throw $this->_notSupportedException('BETWEEN', 'addBetween');
+
+        case 'IS NULL':
+        throw $this->_notSupportedException('IS NULL', 'addIsNull');
+
+        case 'IS NOT NULL':
+        throw $this->_notSupportedException('IS NOT NULL', 'addIsNotNull');
+
+        default:
+        throw new Exception("Unrecognized operator: $op");
+      }
+    }
+
+    // If the given value is null the delegate the the appropriate null value
+    // method.  If the operator does not make sense for a null value then throw
+    // an exception.
+    if ($value === null) {
+      if ($op === self::OP_EQUALS) {
+        return $this->addIsNull($column);
+      } else if ($op === self::OP_NOT_EQUALS) {
+        return $this->addIsNoNull($column);
+      } else {
+        throw new Exception("Invalid predicate: $op with NULL value");
+      }
+    }
+
+    // Normalize booleans to their INT equivalent as this is how they are stored
+    // in the database
+    if ($value === true) {
+      $value = 1;
+    }
+    if ($value === false) {
+      $value = 0;
+    }
+
     $escCol = $this->_escapeFieldName($column);
-    $idx = count($this->_params);
-    
+
     if (is_array($value)) {
       $conditions = array();
       foreach ($value AS $val) {
-        $paramName = ":param$idx";
-        $this->_params[$paramName] = $val;
-        $idx++;
+        $paramName = $this->_getParam($val);
 
-        $conditions[] = "$escCol LIKE $paramName";
+        $conditions[] = "$escCol $op $paramName";
       }
+
       $this->_conditions[] = '(' . implode(' OR ', $conditions) . ')';
 
     } else {
-      $paramName = ":param$idx";
-      $this->_params[$paramName] = $value;
-      $this->_conditions[] = "$escCol LIKE $paramName";
+      $paramName = $this->_getParam($value);
+
+      $this->_conditions[] = "$escCol $op $paramName";
     }
+
+    return $this;
   }
 
   /**
@@ -215,6 +399,8 @@ class Criteria {
       $this->_selectColumns = Array();
     }
     $this->_selectColumns[] = $select;
+
+    return $this;
   }
 
   /**
@@ -230,6 +416,8 @@ class Criteria {
     foreach ($sort AS $col) {
       $this->_sorts[] = $this->_escapeFieldName(trim($col));
     }
+
+    return $this;
   }
 
   /**
@@ -260,28 +448,45 @@ class Criteria {
    */
   public function setDistinct($distinct) {
     $this->_distinct = $distinct;
+
+    return $this;
   }
 
   /**
    * Setter for the LIMIT clause of the SQL statement.
    *
    * @param integer $limit The maximum number of rows to return
+   * @param integer $offset [optional] The offset from the beginning of the
+   *   result set from which to select rows.
    */
-  public function setLimit($limit) {
+  public function setLimit($limit, $offset = null) {
     if (!is_int($limit)) {
-      throw new Exception("Limit clause must be an integer value."
-        . " $limit given");
+      throw new Exception("Limit must be an integer: $limit");
     }
     $this->_limit = $limit;
+
+    if ($offset !== null) {
+      if (!is_int($offset)) {
+        throw new Exception("Offset must be an integer: $offset");
+      }
+
+      $this->_offset = $offset;
+    }
+
+    return $this;
   }
 
   /**
-   * Setter for the table that this criteria will query.
+   * Setter for the table that this criteria will query.  It is generally not
+   * necessary to call this method manually as it will be set by the persister
+   * executing the query.
    *
    * @param string $table
    */
   public function setTable($table) {
     $this->_table = $this->_escapeFieldName($table);
+
+    return $this;
   }
 
   /* Escape the given field name. */
@@ -296,5 +501,34 @@ class Criteria {
       $escaped[] = '`' . str_replace('`', '``', $part) . '`';
     }
     return implode('.', $escaped);
+  }
+
+  /*
+   * Get the name of the parameter (right hand side) to use in a WHERE clause
+   * predicate.
+   */
+  private function _getParam($value) {
+    if (is_object($value)) {
+      if (in_array($value, self::$_funcs)) {
+        return $value();
+      } else {
+        throw new Exception('Predicate value cannot be an object');
+      }
+    }
+    
+    $idx = count($this->_params);
+    $paramName = ":param$idx";
+    $this->_params[$paramName] = $value;
+
+    return $paramName;
+  }
+
+  /*
+   * Build an exception for users that have use addPredicate for an operator
+   * with a dedicated method.
+   */
+  private function _notSupportedException($op, $method) {
+    $msg = "$op is not supported by addPredicate(), use $method() instead";
+    return new Exception($msg);
   }
 }
