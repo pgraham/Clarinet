@@ -254,7 +254,7 @@ class ${actor} {
       $stmt = $this->_pdo->prepare($sql);
       $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
-      $params = ($c !== null) ? $c->getParameters() : null;
+      $params = $c->getParameters();
       $stmt->execute($params);
 
       $transformer = new Transformer();
