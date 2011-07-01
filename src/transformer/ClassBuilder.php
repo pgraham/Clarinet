@@ -51,7 +51,10 @@ class ClassBuilder {
 
     $properties  = array();
     foreach ($model->getProperties() AS $property) {
-      $properties[] = $property->getIdentifier();
+      $properties[] = array(
+        'id'   => $property->getIdentifier(),
+        'type' => $property->getType()
+      );
     }
 
     $relationships = array();

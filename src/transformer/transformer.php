@@ -1,6 +1,9 @@
 <?php
 namespace clarinet\transformer;
 
+use \DateTime;
+use \DateTimeZone;
+
 use \clarinet\ActorFactory;
 use \clarinet\Criteria;
 use \clarinet\Exception;
@@ -18,13 +21,18 @@ use \clarinet\Exception;
  */
 class ${actor} {
 
+  /**
+   * Transform the given model object into an array.
+   *
+   * @param ${class} $model The model instance to convert.
+   */
   public function asArray(\${class} $model) {
     $a = Array();
 
     $a['${id}'] = $model->get${id}();
 
     ${each:properties AS property}
-      $a['${property}'] = $model->get${property}();
+      $a['${property[id]}'] = $model->get${property[id]}();
     ${done}
 
     ${each:relationships AS relationship}
@@ -64,9 +72,14 @@ class ${actor} {
     }
 
     ${each:properties AS property}
-      if (isset($a['${property}'])) {
-        $val = $a['${property}'];
-        $model->set${property}($val);
+      if (isset($a['${property[id]}'])) {
+        $val = $a['${property[id]}'];
+
+        ${if:property[type] = timestamp}
+          // Ensure proper format for timestamps
+          $val = date('Y-m-d H:i:s', strtotime($val));
+        ${fi}
+        $model->set${property[id]}($val);
       }
     ${done}
 
