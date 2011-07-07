@@ -115,7 +115,7 @@ class ActorFactory {
    * specified model class.
    */
   private function _load($modelClass) {
-    if (defined('DEBUG') && DEBUG === true) {
+    if (Clarinet::$debug) {
       ActorGenerator::generate($this->_actorType, $modelClass);
     }
 

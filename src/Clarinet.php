@@ -29,6 +29,9 @@ use \clarinet\model\ConfigValue;
  */
 class Clarinet {
 
+  /** Whether or not actor classes should be generated on demand. */
+  public static $debug = false;
+
   /** Path to generated class files. */
   public static $outputPath = null;
 
@@ -88,13 +91,13 @@ class Clarinet {
    * Retrieve all instances of a given entity and return this in an array
    * indexed by the given column.
    *
-   * @param string $entity The type of entity to load.
+   * @param string $entity The type of model to load.
    * @param string $property The property to index by.
    */
-  public static function getAll($entity, $property) {
+  public static function getAll($model, $property) {
     self::_ensureInitialized();
 
-    $rows = self::get($entity);
+    $rows = self::get($model);
 
     $getter = 'get' . ucfirst($property);
     
@@ -156,6 +159,10 @@ class Clarinet {
     // autoloader so that generated classes are loaded properly
     self::$outputPath = $config['outputPath'];
     Autoloader::$genBasePath = $config['outputPath'] . '/clarinet';
+
+    if (isset($config['debug'])) {
+      self::$debug = $config['debug'];
+    }
 
     self::$_initialized = true;
   }
