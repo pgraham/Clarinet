@@ -120,6 +120,16 @@ class ${actor} {
   }
 
   /**
+   * Normalized method for retrieving an entity's id.
+   *
+   * @param entity $entity
+   * @return mixed The entity's id.
+   */
+  public function getId($entity) {
+    return $entity->get${id}();
+  }
+
+  /**
    * Transform the value returned by the DB into the appropriate type for
    * the model.  This is needed since PDO seems to only return string values.
    *

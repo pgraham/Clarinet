@@ -31,6 +31,9 @@ class Criteria {
   const OP_LESS_EQUALS = '<=';
   const OP_LIKE = 'LIKE';
 
+  const SORT_ASC = 'asc';
+  const SORT_DESC = 'desc';
+
   /*
    * Array of supported predicate values that by-pass parameterization.  The
    * values are defined as lambas so that they can be distinguished from a
@@ -408,13 +411,17 @@ class Criteria {
    *
    * @param mixed $sorts The sorts to add
    */
-  public function addSort($sort) {
+  public function addSort($sort, $direction = 'asc') {
+    if ($direction !== self::SORT_ASC && $direction !== self::SORT_DESC) {
+      throw new Exception("Invalid sort direction: $direction");
+    }
+
     if (!is_array($sort)) {
       $sort = explode(',', $sort);
     }
 
     foreach ($sort AS $col) {
-      $this->_sorts[] = $this->_escapeFieldName(trim($col));
+      $this->_sorts[] = $this->_escapeFieldName(trim($col)) . " $direction";
     }
 
     return $this;
