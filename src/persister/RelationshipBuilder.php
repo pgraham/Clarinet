@@ -83,14 +83,6 @@ class RelationshipBuilder implements RelationshipBuilderI {
    * Delegates to the relationship building for the type of relationship given
    * to the constructor.
    */
-  public function getSaveLhsCode() {
-    return $this->_builder->getSaveLhsCode();
-  }
-
-  /**
-   * Delegates to the relationship building for the type of relationship given
-   * to the constructor.
-   */
   public function getSaveRhsCode() {
     return $this->_builder->getSaveRhsCode();
   }

@@ -100,9 +100,34 @@ class ${actor} {
       $model->set${id_property}(self::CREATE_MARKER);
 
       $params = Array();
-      ${each:populate_parameters AS populate_param}
-        ${populate_param}
+      ${each:properties as prop}
+
+        ${if:prop[type] = boolean}
+          $params[':${prop[col]}'] = $model->get${prop[name]}() ? 1 : 0;
+        ${else}
+          $params[':${prop[col]}'] = $model->get${prop[name]}();
+        ${fi}
+
       ${done}
+
+      ${each:relationships as rel}
+
+        ${if:rel[type] = many-to-one}
+          // Populate ${rel[rhs]} parameter
+          $rhs = $model->get${rel[lhsProperty]}();
+          $rhsId = null;
+          if ($rhs !== null) {
+            $rhsId = $rhs->get${rel[rhsIdProperty]}();
+            if ($rhsId === null) {
+              $persister = ActorFactory::getActor('persister', '${rel[rhs]}');
+              $rhsId = $persister->create($rhs);
+            }
+          }
+          $params[':${rel[lhsColumn]}'] = $rhsId;
+        ${fi}
+
+      ${done}
+
 
       $this->_create->execute($params);
       $id = $this->_pdo->lastInsertId();
@@ -340,8 +365,30 @@ class ${actor} {
 
       $params = Array();
       $params[':id'] = $id;
-      ${each:populate_parameters as populate_param}
-        ${populate_param}
+      ${each:properties as prop}
+        ${if:prop[type] = boolean}
+          $params[':${prop[col]}'] = $model->get${prop[name]}() ? 1 : 0;
+        ${else}
+          $params[':${prop[col]}'] = $model->get${prop[name]}();
+        ${fi}
+      ${done}
+
+      ${each:relationships as rel}
+
+        ${if:rel[type] = many-to-one}
+          // Populate ${rel[rhs]} parameter
+          $rhs = $model->get${rel[lhsProperty]}();
+          $rhsId = null;
+          if ($rhs !== null) {
+            $rhsId = $rhs->get${rel[rhsIdProperty]}();
+            if ($rhsId === null) {
+              $persister = ActorFactory::getActor('persister', '${rel[rhs]}');
+              $rhsId = $persister->create($rhs);
+            }
+          }
+          $params[':${rel[lhsColumn]}'] = $rhsId;
+        ${fi}
+
       ${done}
 
       ${if:has_update}

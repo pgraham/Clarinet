@@ -71,10 +71,6 @@ class ManyToManyBuilder implements RelationshipBuilderI {
     return $code;
   }
 
-  public function getSaveLhsCode() {
-    return null;
-  }
-
   public function getSaveRhsCode() {
     $lhs = $this->_manyToMany->getLhs();
     $rhs = $this->_manyToMany->getRhs();

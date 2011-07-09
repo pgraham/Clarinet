@@ -59,20 +59,6 @@ class ManyToOneBuilder implements RelationshipBuilderI {
     return $code;
   }
 
-  public function getSaveLhsCode() {
-    $templateValues = Array
-    (
-      'rhs'             => $this->_manyToOne->getRhs()->getClass(),
-      'rhs_id_property' => $this->_manyToOne->getRhs()->getId()->getName(),
-      'lhs_property'    => $this->_manyToOne->getLhsProperty(),
-      'lhs_column'      => $this->_manyToOne->getLhsColumn()
-    );
-
-    $templateLoader = CodeTemplateLoader::get(__DIR__);
-    $code = $templateLoader->load('many-to-one-save', $templateValues);
-    return $code;
-  }
-
   public function getSaveRhsCode() {
     return null;
   }

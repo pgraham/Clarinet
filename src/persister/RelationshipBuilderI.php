@@ -40,15 +40,6 @@ interface RelationshipBuilderI {
   public function getRetrieveCode();
 
   /**
-   * This method is reponsible for returning the PHP code that will populate an
-   * SQL statement parameter array with any information that is stored in the
-   * left side of the relationship about the right side of the relationship.
-   *
-   * @return string PHP code
-   */
-  public function getSaveLhsCode();
-
-  /**
    * This method is responsible for returning the PHP code that will save the
    * right side of the relation.
    *

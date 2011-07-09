@@ -58,35 +58,46 @@ class PersisterBuilder {
     $columnNames = Array();
     $valueNames = Array();
     $sqlSetters = Array();
-    $populateParameters = Array();
+    $properties = array();
     $populateProperties = Array();
     foreach ($model->getProperties() AS $property) {
       $propBuilder = new PropertyBuilder($property);
 
-      $prop = $property->getName();
+      $name = $property->getName();
+      $type = $property->getType();
       $col  = $property->getColumn();
 
-      $columnNames[] = $col;
-      $valueNames[] = ":$col";
-      $sqlSetters[] = "$col = :$col";
+      $properties[] = array(
+        'type' => $type,
+        'name' => $name,
+        'col'  => $col
+      );
 
-      $populateParameters[] = $propBuilder->populateIntoDb('params', 'model');
+      $columnNames[] = "`$col`";
+      $valueNames[] = ":$col";
+      $sqlSetters[] = "`$col` = :$col";
+
       $populateProperties[] = $propBuilder->populateFromDb('model', 'row');
     }
 
     $populateRelationships = Array();
     $saveRelationships = Array();
     $deleteRelationships = Array();
+    $relationships = array();
     foreach ($model->getRelationships() AS $relationship) {
+      $relationships[] = array(
+        'type'          => $relationship->getType(),
+        'lhs'           => $relationship->getLhs()->getClass(),
+        'lhsProperty'   => $relationship->getLhsProperty(),
+        'lhsColumn'     => $relationship->getLhsColumn(),
+        'rhs'           => $relationship->getRhs()->getClass(),
+        'rhsIdProperty' => $relationship->getRhs()->getId()->getName(),
+      );
+
       $relationshipBuilder = new RelationshipBuilder($relationship);
       $populateRelationship = $relationshipBuilder->getRetrieveCode();
       if ($populateRelationship !== null) {
         $populateRelationships[] = $populateRelationship;
-      }
-
-      $populateParameter = $relationshipBuilder->getSaveLhsCode();
-      if ($populateParameter !== null) {
-        $populateParameters[] = $populateParameter;
       }
 
       $saveRelationship = $relationshipBuilder->getSaveRhsCode();
@@ -101,9 +112,9 @@ class PersisterBuilder {
 
       $columnName = $relationship->getLhsColumn();
       if ($columnName !== null) {
-        $columnNames[] = $columnName;
+        $columnNames[] = "`$columnName`";
         $valueNames[] = ":$columnName";
-        $sqlSetters[] = "$columnName = :$columnName";
+        $sqlSetters[] = "`$columnName` = :$columnName";
       }
     }
 
@@ -118,10 +129,12 @@ class PersisterBuilder {
       'id_property'            => $model->getId()->getName(),
       'id_column'              => $model->getId()->getColumn(),
 
+      'properties'             => $properties,
+      'relationships'          => $relationships,
+
       'column_names'           => $columnNames,
       'value_names'            => $valueNames,
       'sql_setters'            => $sqlSetters,
-      'populate_parameters'    => $populateParameters,
       'populate_properties'    => $populateProperties,
       'populate_relationships' => $populateRelationships,
       'save_relationships'     => $saveRelationships,

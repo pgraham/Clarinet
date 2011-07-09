@@ -61,10 +61,6 @@ class OneToManyBuilder implements RelationshipBuilderI {
     return $code;
   }
 
-  public function getSaveLhsCode() {
-    return null;
-  }
-
   public function getSaveRhsCode() {
     $rhs = $this->_oneToMany->getRhs();
     $lhs = $this->_oneToMany->getLhs();

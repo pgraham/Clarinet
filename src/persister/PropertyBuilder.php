@@ -40,31 +40,6 @@ class PropertyBuilder {
   }
 
   /**
-   * Get the getter code for the property.
-   *
-   * @param string $paramVar The name of the variable that contains the
-   *   parameters to insert into the database.
-   * @param string $modelVar The name of the variable that contains the model
-   *   from which to get the property.
-   * @return string
-   */
-  public function populateIntoDb($paramVar, $modelVar) {
-    $name = $this->_property->getName();
-    $type = $this->_property->getType();
-    $col = $this->_property->getColumn();
-
-    $param = "\${$paramVar}[':$col']";
-
-    switch ($type) {
-      case Property::TYPE_BOOLEAN:
-      return "\${$paramVar}[':$col'] = \${$modelVar}->get$name() ? 1 : 0;";
-
-      default:
-      return "\${$paramVar}[':$col'] = \${$modelVar}->get$name();";
-    }
-  }
-
-  /**
    * Get the setter code for the property.
    *
    * @param string $modelVar The name of the variable that contains the model
