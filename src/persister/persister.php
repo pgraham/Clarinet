@@ -75,6 +75,38 @@ class ${actor} {
   }
 
   /**
+   * Return a count of all entities that match the given criteria.
+   *
+   * @param Criteria $c
+   * @return integer
+   */
+  public function count(Criteria $c) {
+    if ($c === null) {
+      $c = new Criteria();
+    }
+
+    if ($c->getTable() === null) {
+      $c->setTable('${table}');
+    }
+
+    $c->clearSelects()
+      ->addSelect('COUNT(*)')
+      ->setLimit(null);
+    $sql = $c->__toString();
+    try {
+
+      $stmt = $this->_pdo->prepare($sql);
+      $params = $c->getParameters();
+      $stmt->execute($params);
+
+      return $stmt->fetchColumn();
+    } catch (PDOException $e) {
+      throw new Exception("Error retrieving SELECT count: {$e->getMessage()}".
+        "\n\n$sql\n", $e);
+    }
+  }
+
+  /**
    * Insert the given entity into the database.
    *
    * @param ${class} $model
@@ -160,7 +192,7 @@ class ${actor} {
         $saveLock->forceRelease();
       }
 
-      throw new Exception('Error creating ${class_str}: ' . $e->getMessage(), $e);
+      throw new Exception("Error creating ${class_str}: {$e->getMessage()}", $e);
     }
   }
 

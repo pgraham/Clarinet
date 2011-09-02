@@ -23,6 +23,16 @@ namespace clarinet;
  */
 class Criteria {
 
+  // 
+  // Constants representing all valid column transformations
+  //
+
+  const EXTRACT_DATE = 'EXTRACT_DATE';
+
+  //
+  // Constants representing all of the valid predicate operators
+  //
+
   const OP_EQUALS = '=';
   const OP_NOT_EQUALS = '<>';
   const OP_GREATER_THAN = '>';
@@ -30,6 +40,10 @@ class Criteria {
   const OP_LESS_THAN = '<';
   const OP_LESS_EQUALS = '<=';
   const OP_LIKE = 'LIKE';
+
+  //
+  // Constants representing all of the valid sorts directions
+  // 
 
   const SORT_ASC = 'asc';
   const SORT_DESC = 'desc';
@@ -59,6 +73,106 @@ class Criteria {
     self::OP_LIKE
   );
 
+  /*
+   * Array of support column transformation values that allow columns to be
+   * modified as part of a predicate without being backticked (`).
+   */
+  private static $_transforms;
+
+  /**
+   * Getter for the function lambda that performs the requested transformation.
+   * TODO Separate Column Transformation into its own class with a protected
+   *      constructor.  This will allow parameterized transformations,
+   *      e.g. getColumnTransformation("CAST_AS_TYPE", 'DECIMAL', 10, 2),  to be
+   *      constructed that can also be vetted as being valid by the
+   *      addPredicate(...) function.
+   *
+   * @param string $transformation
+   * @return function
+   */
+  public static function getColumnTransformation($transformation) {
+    self::init();
+
+    $cmp = strtoupper($transformation);
+    if (!array_key_exists($cmp, self::$_transforms)) {
+      throw self::_newInvalidTransformationException($transformation);
+    }
+
+    return self::$_transforms[$cmp];
+  }
+
+  /**
+   * Getter for the function lambda for the predicate function value with the
+   * given name.
+   *
+   * @param string $func
+   */
+  public static function getPredicateFunction($func) {
+    self::init();
+
+    $name = strtoupper($func);
+    if (!array_key_exists($name, self::$_funcs)) {
+      throw new Exception("Unrecognized predicate function: $func");
+    }
+
+    return self::$_funcs[$name];
+  }
+
+  /**
+   * Static initializer.
+   */
+  protected static function init() {
+    if (self::$_initialized) {
+      return;
+    }
+    self::$_initialized = true;
+
+    self::$_funcs = array();
+
+    self::$_funcs['CURRENT_DATE'] = function () {
+      return 'CURRENT_DATE';
+    };
+
+    self::$_funcs['CURRENT_TIME'] = function () {
+      return 'CURRENT_TIME';
+    };
+
+    self::$_funcs['CURRENT_TIMESTAMP'] = function () {
+      return 'CURRENT_TIMESTAMP';
+    };
+
+    self::$_transforms = array();
+
+    self::$_transforms['EXTRACT_DATE'] = function ($escCol) {
+      return "DATE($escCol)";
+    };
+  }
+
+  /* Escape the given field name. */
+  private static function _escapeFieldName($fieldName) {
+    if (strpos($fieldName, '.') === false) {
+      return '`' . str_replace('`', '``', $fieldName) . '`';
+    }
+
+    $parts = explode('.', $fieldName);
+    $escaped = array();
+    foreach ($parts AS $part) {
+      $escaped[] = '`' . str_replace('`', '``', $part) . '`';
+    }
+    return implode('.', $escaped);
+  }
+
+  /* Build and throw an exception for the given invalid cast type. */
+  private static function _newInvalidTransformationException($transform) {
+    return new Exception("Invalid transformation: $transform");
+  }
+
+  /*
+   * ===========================================================================
+   * Instance
+   * ===========================================================================
+   */
+
   /* Set of expressions that are AND'd together to create the criteria */
   private $_conditions = Array();
 
@@ -83,52 +197,11 @@ class Criteria {
    */
   private $_selectColumns = null;
 
-  /* List of columns to sort by with their direction TODO */
-  private $_sorts = Array();
+  /* List of columns to sort by with their direction */
+  private $_sorts = array();
 
   /* The table to select from. */
   private $_table = null;
-
-  /**
-   * Getter for the function lamba for the predicate function value with the
-   * given name.
-   *
-   * @param string $func
-   */
-  public static function getPredicateFunction($func) {
-    self::_init();
-
-    $name = strtoupper($func);
-    if (!array_key_exists($name, self::$_funcs)) {
-      throw new Exception("Unrecognized predicate function: $func");
-    }
-
-    return self::$_funcs[$name];
-  }
-
-  /**
-   * Static initializer.
-   */
-  protected static function _init() {
-    if (self::$_initialized) {
-      return;
-    }
-    self::$_initialized = true;
-
-    self::$_funcs = array();
-
-    self::$_funcs['CURRENT_DATE'] = function () {
-      return 'CURRENT_DATE';
-    };
-
-    self::$_funcs['CURRENT_TIME'] = function () {
-      return 'CURRENT_TIME';
-    };
-
-    self::$_funcs['CURRENT_TIMESTAMP'] = function () {
-      return 'CURRENT_TIMESTAMP';
-    };
-  }
 
   /**
    * Return the SQL representation of the criteria.  This will be a complete SQL
@@ -193,7 +266,7 @@ class Criteria {
       throw new Exception('BETWEEN end points cannot be NULL');
     }
 
-    $escCol = $this->_escapeFieldName($column);
+    $escCol = self::_escapeFieldName($column);
 
     $idx = count($this->_params);
     $paramName1 = ":param$idx";
@@ -240,7 +313,7 @@ class Criteria {
       return;
     }
 
-    $escCol = $this->_escapeFieldName($column);
+    $escCol = self::_escapeFieldName($column);
     $paramNames = Array();
 
     $idx = count($this->_params);
@@ -262,7 +335,7 @@ class Criteria {
    * @return $this
    */
   public function addIsNotNull($column) {
-    $escCol = $this->_escapeFieldName($column);
+    $escCol = self::_escapeFieldName($column);
     $this->_conditions[] = "$escCol IS NOT NULL";
 
     return $this;
@@ -275,7 +348,7 @@ class Criteria {
    * @return $this
    */
   public function addIsNull($column) {
-    $escCol = $this->_escapeFieldName($column);
+    $escCol = self::_escapeFieldName($column);
     $this->_conditions[] = "$escCol IS NULL";
 
     return $this;
@@ -292,7 +365,7 @@ class Criteria {
    *   join on. Optional. Default, null.  If null the USING syntax is used.
    */
   public function addJoin($table, $lhs, $rhs = null) {
-    $escaped = $this->_escapeFieldName($table);
+    $escaped = self::_escapeFieldName($table);
     if ($rhs !== null) {
       $this->_joins[] = "JOIN $table ON \${table}.$lhs = $escaped.$rhs";
     } else {
@@ -325,27 +398,21 @@ class Criteria {
    *   value is an array then a tuple of OR predicates is created.
    * @param string $op The operator for the predicate.  Must be one of the
    *   supported operators, defined by the OP_* constants.
+   * @param string $transform A function which returns a transformation to
+   *   apply to the preciates column. [Optional]
    * @return $this
    */
-  public function addPredicate($column, $value, $op) {
+  public function addPredicate($column, $value, $op, $transform = null) {
+    // Validate the given operator
     if (!in_array($op, self::$_ops)) {
-      $cmpOp = strtoupper($op);
-      switch ($cmpOp) {
+      $this->_throwInvalidOperatorException($op);
+      return; // This won't be reached since the above throws an exception
+    }
 
-        case 'IN':
-        throw $this->_notSupportedException('IN', 'addIn');
-
-        case 'BETWEEN':
-        throw $this->_notSupportedException('BETWEEN', 'addBetween');
-
-        case 'IS NULL':
-        throw $this->_notSupportedException('IS NULL', 'addIsNull');
-
-        case 'IS NOT NULL':
-        throw $this->_notSupportedException('IS NOT NULL', 'addIsNotNull');
-
-        default:
-        throw new Exception("Unrecognized operator: $op");
+    // Validate the transform, if given
+    if ($transform !== null) {
+      if (!in_array($transform, self::$_transforms)) {
+        throw self::_newInvalidTransformationException($transform);
       }
     }
 
@@ -371,7 +438,10 @@ class Criteria {
       $value = 0;
     }
 
-    $escCol = $this->_escapeFieldName($column);
+    $escCol = self::_escapeFieldName($column);
+    if ($transform !== null) {
+      $escCol = $transform($escCol);
+    }
 
     if (is_array($value)) {
       $conditions = array();
@@ -421,9 +491,22 @@ class Criteria {
     }
 
     foreach ($sort AS $col) {
-      $this->_sorts[] = $this->_escapeFieldName(trim($col)) . " $direction";
+      $this->_sorts[] = self::_escapeFieldName(trim($col)) . " $direction";
     }
 
+    return $this;
+  }
+
+  /**
+   * Clear the current select column list.  This is useful to reuse a criteria
+   * object in order to get a total count for the criteria:
+   *
+   *    $c->clearSelects()
+   *      ->addSelect('COUNT(*)')
+   *      ->setLimit(null);
+   */
+  public function clearSelects() {
+    $this->_selectColumns = null;
     return $this;
   }
 
@@ -460,25 +543,23 @@ class Criteria {
   }
 
   /**
-   * Setter for the LIMIT clause of the SQL statement.
+   * Setter for the LIMIT clause of the SQL statement. Current limit can be
+   * cleared with setLimit(null).
    *
    * @param integer $limit The maximum number of rows to return
    * @param integer $offset [optional] The offset from the beginning of the
    *   result set from which to select rows.
    */
   public function setLimit($limit, $offset = null) {
-    if (!is_int($limit)) {
+    if ($limit !== null && !is_int($limit)) {
       throw new Exception("Limit must be an integer: $limit");
     }
     $this->_limit = $limit;
 
-    if ($offset !== null) {
-      if (!is_int($offset)) {
+    if ($offset !== null && !is_int($offset)) {
         throw new Exception("Offset must be an integer: $offset");
-      }
-
-      $this->_offset = $offset;
     }
+    $this->_offset = $offset;
 
     return $this;
   }
@@ -491,23 +572,9 @@ class Criteria {
    * @param string $table
    */
   public function setTable($table) {
-    $this->_table = $this->_escapeFieldName($table);
+    $this->_table = self::_escapeFieldName($table);
 
     return $this;
-  }
-
-  /* Escape the given field name. */
-  private function _escapeFieldName($fieldName) {
-    if (strpos($fieldName, '.') === false) {
-      return '`' . str_replace('`', '``', $fieldName) . '`';
-    }
-
-    $parts = explode('.', $fieldName);
-    $escaped = array();
-    foreach ($parts AS $part) {
-      $escaped[] = '`' . str_replace('`', '``', $part) . '`';
-    }
-    return implode('.', $escaped);
   }
 
   /*
@@ -537,5 +604,29 @@ class Criteria {
   private function _notSupportedException($op, $method) {
     $msg = "$op is not supported by addPredicate(), use $method() instead";
     return new Exception($msg);
+  }
+
+  /*
+   * Build and throw an exception for the given invalid operator.
+   */
+  private function _throwInvalidOperatorException($op) {
+    $cmpOp = strtoupper($op);
+    switch ($cmpOp) {
+
+      case 'IN':
+      throw $this->_notSupportedException('IN', 'addIn');
+
+      case 'BETWEEN':
+      throw $this->_notSupportedException('BETWEEN', 'addBetween');
+
+      case 'IS NULL':
+      throw $this->_notSupportedException('IS NULL', 'addIsNull');
+
+      case 'IS NOT NULL':
+      throw $this->_notSupportedException('IS NOT NULL', 'addIsNotNull');
+
+      default:
+      throw new Exception("Unrecognized operator: $op");
+    }
   }
 }

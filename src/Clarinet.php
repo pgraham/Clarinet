@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet
  */
 namespace clarinet;
 
@@ -25,7 +24,6 @@ use \clarinet\model\ConfigValue;
  * CRUD and transformation capabilities.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet
  */
 class Clarinet {
 
