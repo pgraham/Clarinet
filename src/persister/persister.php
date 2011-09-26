@@ -99,7 +99,7 @@ class ${actor} {
       $params = $c->getParameters();
       $stmt->execute($params);
 
-      return $stmt->fetchColumn();
+      return (int) $stmt->fetchColumn();
     } catch (PDOException $e) {
       throw new Exception("Error retrieving SELECT count: {$e->getMessage()}".
         "\n\n$sql\n", $e);

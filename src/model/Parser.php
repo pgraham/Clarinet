@@ -24,6 +24,9 @@ use \reed\reflection\ReflectionHelper;
  * This class parses a model class' information into an array structure that is
  * expected by the generator classes.
  *
+ * TODO Move static interface into a class in the base namespace that only
+ *      provides a static interface.
+ *
  * @author Philip Graham <philip@zeptech.ca>
  */
 class Parser {
@@ -33,6 +36,8 @@ class Parser {
 
   /**
    * Clears the cache of parsed models.  This is used for testing.
+   *
+   * @deprecated Remove once functionality has been migrated to a static class.
    */
   public static function clearCache() {
     self::$_cache = Array();
@@ -49,6 +54,8 @@ class Parser {
    * Due to this fact, if an error is encountered parsing any model, the entire
    * cache will be wiped out.
    *
+   * @deprecated Remove once functionality has been migrated to a static class.
+   *
    * @param string $className The name of the model class to parse.
    * @return Model
    */
@@ -64,6 +71,8 @@ class Parser {
   /**
    * Returns a boolean indicating whether or not the model info for the given
    * model has been loaded into the cache.  This is used for testing.
+   *
+   * @deprecated Remove once functionality has been migrated to a static class.
    *
    * @param string $className The name of the model class.
    * @return boolean
