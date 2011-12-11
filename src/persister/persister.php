@@ -269,7 +269,8 @@ class ${actor} {
   /**
    * Retrieve a single entity that matches the given criteria.  If the criteria
    * results in more than one entity being retrieved then an exception is
-   * thrown.
+   * thrown.  If the criteria results in no entities being retrieved then NULL
+   * is returned
    *
    * @param Criteria $c Criteria that will result in a single entity
    * @return ${class}
@@ -279,8 +280,10 @@ class ${actor} {
     $entities = $this->retrieve($c);
 
     $num = count($entities);
-    if ($num !== 1) {
+    if ($num > 1) {
       throw new Exception("Criteria maps to $num entities, expected 1");
+    } else if ($num === 0) {
+      return null;
     }
 
     return $entities[0];
