@@ -111,4 +111,19 @@ getXXX().  So the previous sample could be written as:
   // ...
 
 Clarinet also supports relationship definition using annotated getter/setter
-pairs.
+pairs.  There are three types of supported relationships, many-to-one, one-to-many
+and many-to-many which a specified using the @ManyToOne, @OneToMany and @ManyToMany
+annotations respectively.  The annotations defining the relationship type all require an
+'entity' parameter which is the name of the entity on the right side of the relationship.
+
+Example:
+--------
+
+  // ...
+
+  /**
+   * @ManyToOne( entity = Category )
+   */
+  public function getCategory() {
+    return $this->_category;
+  }
