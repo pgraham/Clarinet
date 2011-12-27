@@ -18,7 +18,7 @@ use \ReflectionClass;
 use \ReflectionException;
 
 use \clarinet\Exception;
-use \reed\reflection\ReflectionHelper;
+use \reed\reflection\Annotations;
 
 /**
  * This class parses a model class' information into an array structure that is
@@ -111,7 +111,7 @@ class Parser {
         $e);
     }
     $docComment = $this->_class->getDocComment();
-    $this->_classAnnotations = ReflectionHelper::getAnnotations($docComment);
+    $this->_classAnnotations = new Annotations($this->_class);
 
     if (!isset($this->_classAnnotations['entity'])) {
       throw new Exception("Clarinet can only generate classes for models"
@@ -138,15 +138,14 @@ class Parser {
       return $this->_model;
     }
 
-    $model = new Model($this->_className);
+    $model = new Model($this->_className, $this->_classAnnotations);
     $model->setTable($this->_classAnnotations['entity']['table']);
 
     // Find the id column.  This is done before parsing other column types since
     // some default values rely on the id.
     $id = null;
     foreach ($this->_methods AS $method) {
-      $docComment = $method->getDocComment();
-      $annotations = ReflectionHelper::getAnnotations($docComment);
+      $annotations = new Annotations($method);
       $methodName = $method->getName();
 
       if (isset($annotations['id'])) {
@@ -169,8 +168,7 @@ class Parser {
     }
 
     foreach ($this->_methods AS $method) {
-      $docComment = $method->getDocComment();
-      $annotations = ReflectionHelper::getAnnotations($docComment);
+      $annotations = new Annotations($method);
       $methodName = $method->getName();
 
       if (isset($annotations['column'])) {
@@ -184,8 +182,7 @@ class Parser {
     self::$_cache[$this->_className] = $model;
 
     foreach ($this->_methods AS $method) {
-      $docComment = $method->getDocComment();
-      $annotations = ReflectionHelper::getAnnotations($docComment);
+      $annotations = new Annotations($method);
       $methodName = $method->getName();
 
       $rel = null;

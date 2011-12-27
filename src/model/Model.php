@@ -29,6 +29,11 @@ class Model implements Identifiable {
    */
   private $_actor;
 
+  /*
+   * Class level model annotations.
+   */
+  private $_annotations;
+
   /* The fully qualified name of the class that defines the model. */
   private $_class;
 
@@ -49,9 +54,34 @@ class Model implements Identifiable {
    *
    * @param string $className The name of the class where the model is defined.
    */
-  public function __construct($className) {
+  public function __construct($className, $annotations) {
     $this->_class = $className;
     $this->_actor = str_replace('\\', '_', $className);
+    $this->_annotations = $annotations;
+  }
+
+  /**
+   * Getter for generic annotations on the model class.  This allows
+   * annotations to be retrieved as if they were bean properties of the
+   * class, i.e., $model->getGatekeeper() would check if an annotation named
+   * 'gatekeeper' is set on the model and if so return the value.
+   *
+   * Only methods of the form getXXX() are supported.
+   *
+   * @param string $name
+   * @param array $args
+   */
+  public function __call($name, $args) {
+    if (substr($name, 0, 3) !== 'get') {
+      throw new Exception("Unsupported method invocation ($name) on a " .
+        __CLASS__);
+    }
+
+    $prop = strtolower(substr($name, 3));
+    if (!$this->_annotations->hasAnnotation($prop)) {
+      return null;
+    }
+    return $this->_annotations[$prop];
   }
 
   /**
