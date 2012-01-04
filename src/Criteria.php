@@ -80,6 +80,32 @@ class Criteria {
   private static $_transforms;
 
   /**
+   * Escape the given field name.  This handles qualified fields as well as
+   * aliases
+   *
+   * @param string $fieldName The fieldname to escape.
+   */
+  public static function escapeFieldName($fieldName) {
+    if (strpos($fieldName, '.') === false &&
+        strpos($fieldName, ' ') === false)
+    {
+      return '`' . str_replace('`', '``', $fieldName) . '`';
+    }
+
+    $toEscape = explode(' ', $fieldName);
+    $escaped = array();
+    foreach ($toEscape AS $f) {
+      $parts = explode('.', $f);
+      $escapedField = array();
+      foreach ($parts AS $part) {
+        $escapedField[] = self::escapeFieldName($part);
+      }
+      $escaped[] = implode('.', $escapedField);
+    }
+    return implode(' ', $escaped);
+  }
+
+  /**
    * Getter for the function lambda that performs the requested transformation.
    * TODO Separate Column Transformation into its own class with a protected
    *      constructor.  This will allow parameterized transformations,
@@ -146,20 +172,6 @@ class Criteria {
     self::$_transforms['EXTRACT_DATE'] = function ($escCol) {
       return "DATE($escCol)";
     };
-  }
-
-  /* Escape the given field name. */
-  private static function _escapeFieldName($fieldName) {
-    if (strpos($fieldName, '.') === false) {
-      return '`' . str_replace('`', '``', $fieldName) . '`';
-    }
-
-    $parts = explode('.', $fieldName);
-    $escaped = array();
-    foreach ($parts AS $part) {
-      $escaped[] = '`' . str_replace('`', '``', $part) . '`';
-    }
-    return implode('.', $escaped);
   }
 
   /* Build and throw an exception for the given invalid cast type. */
@@ -266,7 +278,7 @@ class Criteria {
       throw new Exception('BETWEEN end points cannot be NULL');
     }
 
-    $escCol = self::_escapeFieldName($column);
+    $escCol = self::escapeFieldName($column);
 
     $idx = count($this->_params);
     $paramName1 = ":param$idx";
@@ -313,7 +325,7 @@ class Criteria {
       return;
     }
 
-    $escCol = self::_escapeFieldName($column);
+    $escCol = self::escapeFieldName($column);
     $paramNames = Array();
 
     $idx = count($this->_params);
@@ -335,7 +347,7 @@ class Criteria {
    * @return $this
    */
   public function addIsNotNull($column) {
-    $escCol = self::_escapeFieldName($column);
+    $escCol = self::escapeFieldName($column);
     $this->_conditions[] = "$escCol IS NOT NULL";
 
     return $this;
@@ -348,7 +360,7 @@ class Criteria {
    * @return $this
    */
   public function addIsNull($column) {
-    $escCol = self::_escapeFieldName($column);
+    $escCol = self::escapeFieldName($column);
     $this->_conditions[] = "$escCol IS NULL";
 
     return $this;
@@ -365,7 +377,7 @@ class Criteria {
    *   join on. Optional. Default, null.  If null the USING syntax is used.
    */
   public function addJoin($table, $lhs, $rhs = null) {
-    $escaped = self::_escapeFieldName($table);
+    $escaped = self::escapeFieldName($table);
     if ($rhs !== null) {
       $this->_joins[] = "JOIN $table ON \${table}.$lhs = $escaped.$rhs";
     } else {
@@ -416,7 +428,7 @@ class Criteria {
       }
     }
 
-    // If the given value is null the delegate the the appropriate null value
+    // If the given value is null then delegate to the appropriate null value
     // method.  If the operator does not make sense for a null value then throw
     // an exception.
     if ($value === null) {
@@ -438,7 +450,7 @@ class Criteria {
       $value = 0;
     }
 
-    $escCol = self::_escapeFieldName($column);
+    $escCol = self::escapeFieldName($column);
     if ($transform !== null) {
       $escCol = $transform($escCol);
     }
@@ -464,14 +476,14 @@ class Criteria {
 
   /**
    * Add a select column.
-   *
+   * 
    * @param string $select The name of the column to select.
    */
   public function addSelect($select) {
     if ($this->_selectColumns === null) {
-      $this->_selectColumns = Array();
+      $this->_selectColumns = array();
     }
-    $this->_selectColumns[] = $select;
+    $this->_selectColumns[] = self::escapeFieldName($select);
 
     return $this;
   }
@@ -491,7 +503,7 @@ class Criteria {
     }
 
     foreach ($sort AS $col) {
-      $this->_sorts[] = self::_escapeFieldName(trim($col)) . " $direction";
+      $this->_sorts[] = self::escapeFieldName(trim($col)) . " $direction";
     }
 
     return $this;
@@ -572,7 +584,7 @@ class Criteria {
    * @param string $table
    */
   public function setTable($table) {
-    $this->_table = self::_escapeFieldName($table);
+    $this->_table = self::escapeFieldName($table);
 
     return $this;
   }
