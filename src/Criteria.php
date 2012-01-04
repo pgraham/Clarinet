@@ -539,12 +539,7 @@ class Criteria {
   }
 
   /**
-   * Clear the current select column list.  This is useful to reuse a criteria
-   * object in order to get a total count for the criteria:
-   *
-   *    $c->clearSelects()
-   *      ->addSelect('COUNT(*)')
-   *      ->setLimit(null);
+   * Clear the current select column list.
    */
   public function clearSelects() {
     $this->_selectColumns = null;
@@ -568,6 +563,14 @@ class Criteria {
    */
   public function getTable() {
     return $this->_table;
+  }
+
+  /**
+   * Clear the select list and add a select column for COUNT(*)
+   */
+  public function selectCount() {
+    $this->_selectColumns = array ( 'COUNT(*)' );
+    return $this;
   }
 
   /**

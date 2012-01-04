@@ -89,8 +89,7 @@ class ${actor} {
       $c->setTable('${table}');
     }
 
-    $c->clearSelects()
-      ->addSelect('COUNT(*)')
+    $c->selectCount()
       ->setLimit(null);
     $sql = $c->__toString();
     try {
