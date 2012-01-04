@@ -341,6 +341,20 @@ class Criteria {
   }
 
   /**
+   * Add an INNER JOIN clause to the criteria.  The name of the table gets
+   * substituted at the time the criteria is transformed into an SQL string.
+   *
+   * @param string $table The name of the table to JOIN with.
+   * @param string $lhs The name of the column in the left side of the JOIN to
+   *   join on.
+   * @param string $rhs The name of the column in the right side of the JOIN to
+   *   join on. Optional. Default, null.  If null the USING syntax is used.
+   */
+  public function addInnerJoin($table, $lhs, $rhs = null) {
+    $this->addJoin($table, 'INNER', $lhs, $rhs);
+  }
+
+  /**
    * Add an IS NOT NULL predicate to the statement's WHERE clause.
    *
    * @param string $column The colum to evaluate as not null
@@ -371,20 +385,35 @@ class Criteria {
    * at the time the criteria is transformed into an SQL string.
    *
    * @param string $table The name of the table to JOIN with.
+   * @param string $type The type of join to perform.
    * @param string $lhs The name of the column in the left side of the JOIN to
    *   join on.
    * @param string $rhs The name of the column in the right side of the JOIN to
    *   join on. Optional. Default, null.  If null the USING syntax is used.
    */
-  public function addJoin($table, $lhs, $rhs = null) {
+  public function addJoin($table, $type, $lhs, $rhs = null) {
     $escaped = self::escapeFieldName($table);
     if ($rhs !== null) {
-      $this->_joins[] = "JOIN $table ON \${table}.$lhs = $escaped.$rhs";
+      $this->_joins[] = "$type JOIN $escaped ON \${table}.$lhs = $escaped.$rhs";
     } else {
-      $this->_joins[] = "JOIN $table USING ($lhs)";
+      $this->_joins[] = "$type JOIN $escaped USING ($lhs)";
     }
 
     return $this;
+  }
+
+  /**
+   * Add a LEFT JOIN clause to the criteria.  The name of the table gets
+   * substituted at the time the criteria is transformed into an SQL string.
+   *
+   * @param string $table The name of the table to JOIN with.
+   * @param string $lhs The name of the column in the left side of the JOIN to
+   *   join on.
+   * @param string $rhs The name of the column in the right side of the JOIN to
+   *   join on. Optional. Default, null.  If null the USING syntax is used.
+   */
+  public function addLeftJoin($table, $lhs, $rhs = null) {
+    $this->addJoin($table, 'LEFT', $lhs, $rhs);
   }
 
   /**
