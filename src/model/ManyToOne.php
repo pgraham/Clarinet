@@ -23,7 +23,7 @@ namespace clarinet\model;
  */
 class ManyToOne extends AbstractRelationship {
 
-  private $_column;
+  private $_lhsColumn;
 
   /**
    * Creates a new Many-to-one relationship representation.
@@ -32,12 +32,12 @@ class ManyToOne extends AbstractRelationship {
    * @param string $rhs The model on the right side of the relationship.
    * @param string $property The name of the model's property that contains the
    *   relationship.
-   * @param string $column The name of the model table's column that contains
+   * @param string $lhsColumn The name of the model table's column that contains
    *   the id of the related entity.
    */
-  public function __construct($lhs, $rhs, $property, $column) {
+  public function __construct($lhs, $rhs, $property, $lhsColumn) {
     parent::__construct($lhs, $rhs, $property);
-    $this->_column = $column;
+    $this->_lhsColumn = $lhsColumn;
   }
 
   /**
@@ -45,6 +45,6 @@ class ManyToOne extends AbstractRelationship {
    * database
    */
   public function getLhsColumn() {
-    return $this->_column;
+    return $this->_lhsColumn;
   }
 }

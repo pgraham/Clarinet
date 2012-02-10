@@ -67,22 +67,6 @@ class RelationshipBuilder implements RelationshipBuilderI {
    * Delegates to the relationship building for the type of relationship given
    * to the constructor.
    */
-  public function getDeleteCode() {
-    return $this->_builder->getDeleteCode();
-  }
-
-  /**
-   * Delegates to the relationship building for the type of relationship given
-   * to the constructor.
-   */
-  public function getRetrieveCode() {
-    return $this->_builder->getRetrieveCode();
-  }
-
-  /**
-   * Delegates to the relationship building for the type of relationship given
-   * to the constructor.
-   */
   public function getSaveRhsCode() {
     return $this->_builder->getSaveRhsCode();
   }

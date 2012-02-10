@@ -53,6 +53,7 @@ class ClassBuilder {
     foreach ($model->getProperties() AS $property) {
       $properties[] = array(
         'id'   => $property->getIdentifier(),
+        'idx'  => lcfirst($property->getIdentifier()),
         'type' => $property->getType()
       );
     }
@@ -62,6 +63,7 @@ class ClassBuilder {
       $relationships[] = array(
         'type'          => $relationship->getType(),
         'name'          => $relationship->getLhsProperty(),
+        'idx'           => lcfirst($relationship->getLhsProperty()),
         'rhs'           => $relationship->getRhs()->getClass(),
         'rhsIdProperty' => $relationship->getRhs()->getId()->getIdentifier()
       );
@@ -77,6 +79,7 @@ class ClassBuilder {
       'class'           => $model->getClass(),
       'actor'           => $model->getActor(),
       'id'              => $id,
+      'idIdx'           => lcfirst($id),
       'properties'      => $properties,
       'relationships'   => $relationships,
       'from_db_id_cast' => $fromDbIdCast

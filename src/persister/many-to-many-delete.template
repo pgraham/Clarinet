@@ -1,5 +1,0 @@
-// -------------------------------------------------------------------
-// Delete related ${rhs} entities
-$deleteStmt = $this->_pdo->prepare('DELETE FROM ${link_table} WHERE ${lhs_link_column} = :id');
-$deleteStmt->execute(Array(':id' => $id));
-// -------------------------------------------------------------------

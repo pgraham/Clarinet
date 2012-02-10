@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet
  */
 namespace clarinet;
 
@@ -19,7 +18,6 @@ namespace clarinet;
  * This class encapsulates a set of criteria for a SELECT statement.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet
  */
 class Criteria {
 
@@ -86,6 +84,10 @@ class Criteria {
    * @param string $fieldName The fieldname to escape.
    */
   public static function escapeFieldName($fieldName) {
+    if ($fieldName === '*') {
+      return $fieldName;
+    }
+
     if (strpos($fieldName, '.') === false &&
         strpos($fieldName, ' ') === false)
     {
@@ -228,18 +230,24 @@ class Criteria {
     if ($this->_distinct === true) {
       $select .= 'DISTINCT ';
     }
+
+    $escTable = self::escapeFieldName($this->_table);
     if ($this->_selectColumns === null) {
-      $select .= "$this->_table.*";
+      $select .= "$escTable.*";
     } else {
       $select .= implode(',', $this->_selectColumns);
     }
     $clauses[] = $select;
 
-    $clauses[] = 'FROM ' . $this->_table;
+    $clauses[] = "FROM $escTable";
 
     if (count($this->_joins) > 0) {
-      $joins = str_replace('${table}', $this->_table, $this->_joins);
-      $clauses[] = implode(' ', $joins);
+      foreach ($this->_joins AS $join) {
+        if ($join->getLhsTable() === null) {
+          $join->setLhsTable($this->_table);
+        }
+      }
+      $clauses[] = implode(' ', $this->_joins);
     }
 
     if (count($this->_conditions) > 0) {
@@ -351,7 +359,7 @@ class Criteria {
    *   join on. Optional. Default, null.  If null the USING syntax is used.
    */
   public function addInnerJoin($table, $lhs, $rhs = null) {
-    $this->addJoin($table, 'INNER', $lhs, $rhs);
+    return $this->addJoin($table, 'INNER', $lhs, $rhs);
   }
 
   /**
@@ -382,7 +390,32 @@ class Criteria {
 
   /**
    * Add a JOIN clause to the criteria.  The name of the table gets substituted
-   * at the time the criteria is transformed into an SQL string.
+   * at the time the criteria is transformed into an SQL string.  All joins are
+   * against the criteria's FROM table.  In order to chain joins, use the
+   * chain() method of the JOIN object returned by this method:
+   *
+   *   $c = new Criteria();
+   *   $c->setFrom('foo');
+   *   $c->addJoin('goo', 'INNER', 'goo_id', 'id');
+   *   $c->addJoin('hoo', 'INNER', 'hoo_id', 'id');
+   *
+   *   echo $c->__toString();
+   *   // SELECT * FROM foo
+   *   // JOIN goo ON foo.goo_id = goo.id
+   *   // JOIN hoo ON foo.hoo_id = hoo.id
+   *
+   *   vs.
+   *   ---
+   *
+   *   $c = new Criteria();
+   *   $c->setFrom('foo');
+   *   $c->addJoin('goo', 'INNER', 'goo_id', 'id')
+   *     ->chain('hoo', 'INNER', 'hoo_id', id');
+   *
+   *   echo $c->__toString();
+   *   // SELECT * FROM foo
+   *   // JOIN goo ON foo.goo_id = goo.id
+   *   // JOIN hoo ON goo.hoo_id = hoo.id
    *
    * @param string $table The name of the table to JOIN with.
    * @param string $type The type of join to perform.
@@ -390,14 +423,17 @@ class Criteria {
    *   join on.
    * @param string $rhs The name of the column in the right side of the JOIN to
    *   join on. Optional. Default, null.  If null the USING syntax is used.
+   * @return $this
    */
   public function addJoin($table, $type, $lhs, $rhs = null) {
-    $escaped = self::escapeFieldName($table);
+    $join = new Join($table, $type);
     if ($rhs !== null) {
-      $this->_joins[] = "$type JOIN $escaped ON \${table}.$lhs = $escaped.$rhs";
+      $join->setRhsColumn($rhs);
+      $join->setLhsColumn($lhs);
     } else {
-      $this->_joins[] = "$type JOIN $escaped USING ($lhs)";
+      $join->setLhsColumn($lhs);
     }
+    $this->_joins[] = $join;
 
     return $this;
   }
@@ -413,7 +449,7 @@ class Criteria {
    *   join on. Optional. Default, null.  If null the USING syntax is used.
    */
   public function addLeftJoin($table, $lhs, $rhs = null) {
-    $this->addJoin($table, 'LEFT', $lhs, $rhs);
+    return $this->addJoin($table, 'LEFT', $lhs, $rhs);
   }
 
   /**
@@ -539,6 +575,39 @@ class Criteria {
   }
 
   /**
+   * Chain an INNER join to the previously added join.
+   *
+   * @param string $table
+   * @param string $lhs
+   * @param string $rhs
+   */
+  public function chainInnerJoin($table, $lhs, $rhs = null) {
+    return $this->chainJoin('INNER', $table, $lhs, $rhs);
+  }
+
+  /**
+   * Chain a join to the join previously added to the criteria.  I.e, the table
+   * on the left side of the join will be the table from the right side of
+   * the previously added join.
+   *
+   * @param string $type
+   * @param string $table
+   * @param string $lhs
+   * @param string $rhs
+   */
+  public function chainJoin($type, $table, $lhs, $rhs = null) {
+    $this->addJoin($table, $type, $lhs, $rhs);
+
+    $numJoins = count($this->_joins);
+    $chained = $this->_joins[$numJoins - 1];
+    $chainedTo = $this->_joins[$numJoins - 2];
+
+    $chained->setLhsTable($chainedTo->getTable());
+
+    return $this;
+  }
+
+  /**
    * Clear the current select column list.
    */
   public function clearSelects() {
@@ -616,7 +685,7 @@ class Criteria {
    * @param string $table
    */
   public function setTable($table) {
-    $this->_table = self::escapeFieldName($table);
+    $this->_table = $table;
 
     return $this;
   }

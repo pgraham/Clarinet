@@ -26,6 +26,7 @@ class ManyToMany extends AbstractRelationship {
   private $_linkTable;
   private $_linkLhsId;
   private $_linkRhsId;
+  private $_orderBy;
 
   /**
    * Create a new Many-to-many relationship representation.  The left side of
@@ -78,5 +79,27 @@ class ManyToMany extends AbstractRelationship {
    */
   public function getLinkTable() {
     return $this->_linkTable;
+  }
+
+  /**
+   * Getter for the order by clause to use when retrieving related entities.
+   *
+   * @return array
+   */
+  public function getOrderBy() {
+    return $this->_orderBy;
+  }
+
+  /**
+   * Setter for the order by clause to use when retrieving the related entities.
+   *
+   * @param string $column
+   * @param string $direction
+   */
+  public function setOrderBy($column, $direction) {
+    $this->_orderBy = array(
+      'col' => $column,
+      'dir' => $direction
+    );
   }
 }

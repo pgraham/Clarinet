@@ -347,8 +347,20 @@ class Parser {
       $linkRhsId = $rhs->getTable() . '_' .$rhs->getId()->getColumn();
     }
 
-    return new ManyToMany($lhs, $rhs, $property, $linkTable, $linkLhsId,
+    $rel = new ManyToMany($lhs, $rhs, $property, $linkTable, $linkLhsId,
       $linkRhsId);
+
+    // Parse the order by property for retrieving related entities.
+    if (isset($annotations['onetomany']['order'])) {
+      $orderBy = $annotations['onetomany']['order'];
+      $dir = 'ASC';
+      if (isset($annotations['onetomany']['dir'])) {
+        $dir = $annotations['onetomany']['dir'];
+      }
+      $rel->setOrderBy($orderBy, $dir);
+    }
+
+    return $rel;
   }
 
   /* Parse a method that is annotated with @ManyToOne */
@@ -404,20 +416,25 @@ class Parser {
       $rhsColumn = $lhs->getTable() . '_' . $lhs->getId()->getColumn();
     }
 
-    // Parse the property on the right side that stores the id of the entity on
-    // the left side.
-    // TODO If the no property is specified and the default property does not
-    //      exist, search the right hand side model for a relationship that
-    //      mirrors this relationship and use that property in the persister to
-    //      maintain the persisted relationship
-    if (isset($annotations['onetomany']['property'])) {
-      $rhsProperty = $annotations['onetomany']['property'];
-    } else {
-      $lhsNameParts = explode('\\', $lhs->getClass());
-      $lhsBaseName = array_pop($lhsNameParts);
-      $rhsProperty = $lhsBaseName . 'Id';
+    $rel = new OneToMany($lhs, $rhs, $property, $rhsColumn);
+
+    // Parse the order by property for retrieving related entities.
+    if (isset($annotations['onetomany']['order'])) {
+      $orderBy = $annotations['onetomany']['order'];
+      $dir = 'ASC';
+      if (isset($annotations['onetomany']['dir'])) {
+        $dir = $annotations['onetomany']['dir'];
+      }
+      $rel->setOrderBy($orderBy, $dir);
     }
 
-    return new OneToMany($lhs, $rhs, $property, $rhsColumn, $rhsProperty);
+    // Parse whether or not to delete orphaned entities on the many side
+    $deleteOrphans = false;
+    if (isset($annotations['onetomany']['deleteorphans'])) {
+      $deleteOrphans = (bool) $annotations['onetomany']['deleteorphans'];
+    }
+    $rel->deleteOrphans($deleteOrphans); 
+
+    return $rel;
   }
 }

@@ -15,7 +15,7 @@ use \clarinet\Exception;
  *
  * Notes about array -> model transformations:
  *
- * - All array indexes are the lowercase version of the property/relationship
+ * - All array indexes are the lcfirst version of the property/relationship
  * - Entities involved in a relationship with the entity being transformed are
  *   always represented by IDs, not models, in the array representation.
  */
@@ -27,18 +27,18 @@ class ${actor} {
    * @param ${class} $model The model instance to convert.
    */
   public function asArray(\${class} $model) {
-    $a = Array();
+    $a = array();
 
-    $a['${id}'] = $model->get${id}();
+    $a['${idIdx}'] = $model->get${id}();
 
     ${each:properties AS property}
-      $a['${property[id]}'] = $model->get${property[id]}();
+      $a['${property[idx]}'] = $model->get${property[id]}();
     ${done}
 
     ${each:relationships AS relationship}
       $relVal = $model->get${relationship[name]}();
       if ($relVal === null) {
-        $a['${relationship[name]}'] = null;
+        $a['${relationship[idx]}'] = null;
       } else {
 
         ${if:relationship[type] = many-to-many or relationship[type] = one-to-many }
@@ -47,12 +47,12 @@ class ${actor} {
           foreach ($relVal AS $rel) {
             $relIds[] = $rel->get${relationship[rhsIdProperty]}();
           }
-          $a['${relationship[name]}'] = $relIds;
+          $a['${relationship[idx]}'] = $relIds;
 
         ${elseif:relationship[type] = many-to-one}
 
           $relId = $relVal->get${relationship[rhsIdProperty]}();
-          $a['${relationship[name]}'] = $relId;
+          $a['${relationship[idx]}'] = $relId;
 
         ${fi}
 
@@ -63,17 +63,38 @@ class ${actor} {
     return $a;
   }
 
+  /**
+   * Transform an array of ${class} instances into an array.
+   *
+   * @param ${class}[] $models
+   */
+  public function asCollection(array $models) {
+    $a = array();
+    foreach ($models AS $model) {
+      if (!($model instanceof \${class})) {
+        throw new Exception("Cannot transform " . print_r($model, true));
+      }
+      $a[] = $this->asArray($model);
+    }
+    return $a;
+  }
+
+  /**
+   * Transform the given array into a model.
+   *
+   * @param array $a
+   */
   public function fromArray(array $a) {
-    if (isset($a['${id}'])) {
+    if (isset($a['${idIdx}'])) {
       $persister = ActorFactory::getActor('persister', '${class}');
-      $model = $persister->getById($a['${id}']);
+      $model = $persister->getById($a['${idIdx}']);
     } else {
       $model = new \${class}();
     }
 
     ${each:properties AS property}
-      if (isset($a['${property[id]}'])) {
-        $val = $a['${property[id]}'];
+      if (isset($a['${property[idx]}'])) {
+        $val = $a['${property[idx]}'];
 
         ${if:property[type] = timestamp}
           // Ensure proper format for timestamps
@@ -87,8 +108,8 @@ class ${actor} {
     
       ${if:relationship[type] = many-to-many or relationship[type] = one-to-many}
 
-        if (isset($a['${relationship[name]}'])) {
-          $relIds = $a['${relationship[name]}'];
+        if (isset($a['${relationship[idx]}'])) {
+          $relIds = $a['${relationship[idx]}'];
 
           $c = new Criteria();
           $c->addIn('${relationship[rhsIdProperty]}', $relIds);
@@ -101,8 +122,8 @@ class ${actor} {
 
       ${elseif:relationship[type] = many-to-one}
 
-        if (isset($a['${relationship[name]}'])) {
-          $relId = $a['${relationship[name]}'];
+        if (isset($a['${relationship[idx]}'])) {
+          $relId = $a['${relationship[idx]}'];
 
           if ($relId !== null) {
             $persister = ActorFactory::getActor('persister',
@@ -117,6 +138,19 @@ class ${actor} {
     ${done}
 
     return $model;
+  }
+
+  /**
+   * Transform a collection of array representations into an array of models.
+   *
+   * @param array $a
+   */
+  public function fromCollection(array $a) {
+    $models = array();
+    foreach ($a AS $modelArray) {
+      $models[] = $this->fromArray($modelArray);
+    }
+    return $models;
   }
 
   /**

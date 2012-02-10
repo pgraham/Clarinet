@@ -24,22 +24,6 @@ namespace clarinet\persister;
 interface RelationshipBuilderI {
 
   /**
-   * This method is responsible for returning the PHP code that will delete the
-   * right side of the relationship.
-   *
-   * @return string PHP code
-   */
-  public function getDeleteCode();
-
-  /**
-   * This method is responsible for returning the PHP code that will populate a
-   * left side entity with the entity on the right side of the relationship.
-   *
-   * @return string PHP code
-   */
-  public function getRetrieveCode();
-
-  /**
    * This method is responsible for returning the PHP code that will save the
    * right side of the relation.
    *

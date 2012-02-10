@@ -177,7 +177,8 @@ above would be 'simple_entity_id'. To specify the column do the following:
 For one-to-many and many-to-many relationships, the order in which the related
 entities are returned is undefined by default. If the order is important an
 order parameter can be specified in the annotation. The value of the parameter
-is the name of the column and an optional direction separated by white space:
+is the name of the column.  The direction can be specified with the 'dir'
+parameter.  The default direction is ASC.
 
 ```php
 <?php
@@ -185,7 +186,7 @@ is the name of the column and an optional direction separated by white space:
   // ...
 
   /**
-   * @OneToMany( entity = Category, order = name asc )
+   * @OneToMany( entity = Category, order = name, dir = asc )
    */
   public function getCategories() {
     return $this->_categories;

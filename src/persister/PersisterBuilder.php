@@ -59,10 +59,7 @@ class PersisterBuilder {
     $valueNames = Array();
     $sqlSetters = Array();
     $properties = array();
-    $populateProperties = Array();
     foreach ($model->getProperties() AS $property) {
-      $propBuilder = new PropertyBuilder($property);
-
       $name = $property->getName();
       $type = $property->getType();
       $col  = $property->getColumn();
@@ -76,41 +73,68 @@ class PersisterBuilder {
       $columnNames[] = "`$col`";
       $valueNames[] = ":$col";
       $sqlSetters[] = "`$col` = :$col";
-
-      $populateProperties[] = $propBuilder->populateFromDb('model', 'row');
     }
 
-    $populateRelationships = Array();
-    $saveRelationships = Array();
-    $deleteRelationships = Array();
     $relationships = array();
-    foreach ($model->getRelationships() AS $relationship) {
-      $relationships[] = array(
-        'type'          => $relationship->getType(),
-        'lhs'           => $relationship->getLhs()->getClass(),
-        'lhsProperty'   => $relationship->getLhsProperty(),
-        'lhsColumn'     => $relationship->getLhsColumn(),
-        'rhs'           => $relationship->getRhs()->getClass(),
-        'rhsIdProperty' => $relationship->getRhs()->getId()->getName(),
+    foreach ($model->getRelationships() AS $rel) {
+      $lhs = $rel->getLhs();
+      $rhs = $rel->getRhs();
+      $vals = array(
+        'type'          => $rel->getType(),
+        'lhs'           => $lhs->getClass(),
+        'lhsProperty'   => $rel->getLhsProperty(),
+        'lhsIdProperty' => $lhs->getId()->getName(),
+        'rhs'           => $rhs->getClass(),
+        'rhsStr'        => str_replace('\\', '\\\\', $rhs->getClass()),
+        'rhsIdProperty' => $rhs->getId()->getName(),
       );
 
-      $relationshipBuilder = new RelationshipBuilder($relationship);
-      $populateRelationship = $relationshipBuilder->getRetrieveCode();
-      if ($populateRelationship !== null) {
-        $populateRelationships[] = $populateRelationship;
+      switch (get_class($rel)) {
+        case 'clarinet\model\OneToMany':
+        $vals['rhsColumn'] = $rel->getRhsColumn();
+        $vals['rhsIdColumn'] = $rhs->getId()->getColumn();
+        $vals['deleteOrphan'] = $rel->deleteOrphans();
+
+        // Retrieve params
+        $orderBy = $rel->getOrderBy();
+        if ($orderBy !== null) {
+          $rel['orderByCol'] = $orderBy['col'];
+          $rel['orderByDir'] = $orderBy['dir'];
+        }
+
+        // Save params
+        $mirrored = $rhs->hasRelationship('many-to-one', $lhs->getClass());
+        $vals['mirrored'] = $mirrored;
+        if ($mirrored) {
+          $mirrorRel = $rhs->getRelationship('many-to-one', $lhs->getClass());
+          $vals['rhsProperty'] = $mirrorRel->getLhsProperty();
+        } else {
+          $vals['rhsTable'] = $rhs->getTable();
+        }
+        break;
+
+        case 'clarinet\model\ManyToOne':
+        $vals['lhsColumn'] = $rel->getLhsColumn();
+        break;
+
+        case 'clarinet\model\ManyToMany':
+        $vals['linkTable'] = $relationship->getLinkTable();
+        $vals['lhsLinkColumn'] = $relationship->getLinkLhsId();
+        $vals['rhsLinkColumn'] = $relationship->getLinkRhsId();
+        $vals['rhsTable'] = $relationship->getRhs()->getTable();
+        $vals['rhsIdColumn'] = $relationship->getRhs()->getId()->getColumn();
+
+        $orderBy = $relationship->getOrderBy();
+        if ($orderBy !== null) {
+          $vals['orderByCol'] = $orderBy['col'];
+          $vals['orderByDir'] = $orderBy['dir'];
+        }
+        break;
       }
 
-      $saveRelationship = $relationshipBuilder->getSaveRhsCode();
-      if ($saveRelationship !== null) {
-        $saveRelationships[] = $saveRelationship;
-      }
+      $relationships[] = $vals;
 
-      $deleteRelationship = $relationshipBuilder->getDeleteCode();
-      if ($deleteRelationship !== null) {
-        $deleteRelationships[] = $deleteRelationship;
-      }
-
-      $columnName = $relationship->getLhsColumn();
+      $columnName = $rel->getLhsColumn();
       if ($columnName !== null) {
         $columnNames[] = "`$columnName`";
         $valueNames[] = ":$columnName";
@@ -135,10 +159,6 @@ class PersisterBuilder {
       'column_names'           => $columnNames,
       'value_names'            => $valueNames,
       'sql_setters'            => $sqlSetters,
-      'populate_properties'    => $populateProperties,
-      'populate_relationships' => $populateRelationships,
-      'save_relationships'     => $saveRelationships,
-      'delete_relationships'   => $deleteRelationships
     );
 
     // Add booleans for callbacks

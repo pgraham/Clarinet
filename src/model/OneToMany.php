@@ -25,6 +25,8 @@ class OneToMany extends AbstractRelationship {
 
   private $_rhsColumn;
   private $_rhsProperty;
+  private $_orderBy;
+  private $_deleteOrphans;
 
   /**
    * Creates a new one-to-many relationship representation.
@@ -36,16 +38,33 @@ class OneToMany extends AbstractRelationship {
    * @param string $rhsColumn The name of the column in the right side of the
    *   relationship that contains the id of the left side entity to which
    *   right side entities are related.
-   * @param string $rhsProperty The name of the column in the right side of the
-   *   relationship that contains the id of the left side entity to which
-   *   right side entities are related.
    */
-  public function __construct($lhs, $rhs, $lhsProperty, $rhsColumn,
-    $rhsProperty)
-  {
+  public function __construct($lhs, $rhs, $lhsProperty, $rhsColumn) {
     parent::__construct($lhs, $rhs, $lhsProperty);
     $this->_rhsColumn = $rhsColumn;
-    $this->_rhsProperty = $rhsProperty;
+  }
+
+  /**
+   * Boolean getter/setter for whether or not orphaned entities on the many side
+   * of the relationship should be deleted.
+   *
+   * @param boolean $deleteOrphans If provided acts as a setter.
+   * @return boolean
+   */
+  public function deleteOrphans($deleteOrphans = null) {
+    if ($deleteOrphans !== null) {
+      $this->_deleteOrphans = $deleteOrphans;
+    }
+    return $this->_deleteOrphans;
+  }
+
+  /**
+   * Getter for the order by clause to use when retrieving related entities.
+   *
+   * @return array
+   */
+  public function getOrderBy() {
+    return $this->_orderBy;
   }
 
   /**
@@ -58,12 +77,15 @@ class OneToMany extends AbstractRelationship {
   }
 
   /**
-   * Getter for the relationship's right side property.
+   * Setter for the order by clause to use when retrieving the related entities.
    *
-   * @return string The name of the property on the right side of the
-   *   relationship
+   * @param string $column
+   * @param string $direction
    */
-  public function getRhsProperty() {
-    return $this->_rhsProperty;
+  public function setOrderBy($column, $direction) {
+    $this->_orderBy = array(
+      'col' => $column,
+      'dir' => $direction
+    );
   }
 }

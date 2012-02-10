@@ -7,6 +7,7 @@ use \PDOException;
 use \clarinet\ActorFactory;
 use \clarinet\Criteria;
 use \clarinet\Exception;
+use \clarinet\Persister;
 use \clarinet\PdoWrapper;
 
 /**
@@ -33,7 +34,7 @@ class ${actor} {
    * Delete entities will have an index in the cache but the value will be
    * null.
    */
-  private $_cache = Array();
+  private $_cache = array();
 
   /* PDO Connection to the database in which entities are to be persisted. */
   private $_pdo = null;
@@ -68,10 +69,20 @@ class ${actor} {
   }
 
   /**
-   * Clear the cache.  This is generally only used for testing.
+   * Clear the cache. If an id is provided, only the entity with the given id
+   * is cleared.  This will happen when an entity at the many side of an
+   * un-mirrored one-to-many relationship is updated to ensure that it does not
+   * have a stale id for the one side of the relationship.  The entire cache is
+   * generally only cleared during testing.
+   *
+   * @param mixed $id
    */
-  public function clearCache() {
-    $this->_cache = Array();
+  public function clearCache($id = null) {
+    if ($id === null) {
+      $this->_cache = array();
+    } else {
+      unset($this->_cache[$id]);
+    }
   }
 
   /**
@@ -89,8 +100,10 @@ class ${actor} {
       $c->setTable('${table}');
     }
 
-    $c->selectCount()
-      ->setLimit(null);
+
+    $c->setDistinct(true) // Ensure each entity is only counted once
+      ->selectCount()     // Setup the select list to only select COUNT(*)
+      ->setLimit(null);   // Remove any limit on the criteria
     $sql = $c->__toString();
     try {
 
@@ -142,7 +155,6 @@ class ${actor} {
       ${done}
 
       ${each:relationships as rel}
-
         ${if:rel[type] = many-to-one}
           // Populate ${rel[rhs]} parameter
           $rhs = $model->get${rel[lhsProperty]}();
@@ -150,15 +162,13 @@ class ${actor} {
           if ($rhs !== null) {
             $rhsId = $rhs->get${rel[rhsIdProperty]}();
             if ($rhsId === null) {
-              $persister = ActorFactory::getActor('persister', '${rel[rhs]}');
+              $persister = Persister::get('${rel[rhs]}');
               $rhsId = $persister->create($rhs);
             }
           }
           $params[':${rel[lhsColumn]}'] = $rhsId;
         ${fi}
-
       ${done}
-
 
       $this->_create->execute($params);
       $id = $this->_pdo->lastInsertId();
@@ -168,8 +178,62 @@ class ${actor} {
       $saveLock = SaveLock::acquire();
       $saveLock->lock($model);
 
-      ${each:save_relationships as save}
-        ${save}
+      ${each:relationships as rel}
+        // ---------------------------------------------------------------------
+        // Save related ${rel[rhs]} entities
+        $persister = Persister::get('${rel[rhs]}');
+        ${if:rel[type] = many-to-many}
+          // If any of the related entities are new, save them to ensure that
+          // they have an id, then update them.
+          $related = $model->get${rel[lhsProperty]}();
+          if ($related !== null) {
+            foreach($related AS $rel) {
+              if ($rel->get${rhsIdProperty}() === null) {
+              }
+            }
+          }
+
+          // Delete all link entries for this entity
+          $deleteStmt = $this->_pdo->prepare("DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id");
+          $deleteStmt->execute(array('id' => $id));
+
+          // Create new link entries for all related entities
+          if ($related !== null) {
+            $createStmt = $this->_pdo->prepare("INSERT INTO ${rel[linkTable]} (${rel[lhsLinkColumn]}, ${rel[rhsLinkColumn]}) VALUES (:lhsId, :rhsId)");
+            foreach ($related AS $rel) {
+              $createStmt->execute(array('lhsId' => $id, 'rhsId' => $rel->get${rel[rhsIdProperty]}()));
+            }
+          }
+
+        ${elseif:rel[type] = one-to-many}
+          $related = $model->get${rel[lhsProperty]}();
+          if ($related === null) {
+            $related = array();
+          }
+
+          // Update or save the collection
+          ${if:rel[mirrored]}
+           foreach ($related AS $rel) {
+             $rel->set${rel[rhsProperty]($model);
+             $persister->save($model);
+           }
+          ${else}
+            $updateStmt = $this->_pdo->prepare("UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = :id WHERE ${rel[rhsIdColumn]} = :relId");
+            foreach ($related AS $rel) {
+              if ($rel->get${rel[rhsIdProperty]}() === null) {
+                $persister->create($rel);
+              }
+              $updateStmt->execute(array(
+                'id' => $id,
+                'relId' => $rel->get${rel[rhsIdProperty]}()
+              ));
+
+              // Clear the cache of the RHS entity as it may contain a stale id
+              $persister->clearCache($rel->get${rel[rhsIdProperty]}());
+            }
+          ${fi}
+        ${fi}
+        // ---------------------------------------------------------------------
       ${done}
 
       if ($startTransaction) {
@@ -219,8 +283,22 @@ class ${actor} {
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
 
-      ${each:delete_relationships as delete}
-        ${delete}
+      ${each:relationships AS rel}
+        // ---------------------------------------------------------------------
+        // Delete related ${rhs} entities
+        ${if:rel[type] = one-to-many}
+          $persister = Persister::get('${rel[rhs]}');
+          $related = $model->get${rel[lhsProperty]}();
+          foreach ($related AS $rel) {
+            $persister->delete($rel);
+          }
+
+        ${elseif:rel[type] = many-to-many}
+          $deleteStmt = $this->_pdo->prepare('DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id');
+          $deleteStmt->execute(array('id' => $id));
+
+        ${fi}
+        // ---------------------------------------------------------------------
       ${done}
 
       if ($startTransaction) {
@@ -304,6 +382,11 @@ class ${actor} {
       $c->setTable('${table}');
     }
 
+
+    // Clear the selects so that the default of all columns for the FROM table
+    // are selected and ensure that only distinct entities are returned
+    $c->clearSelects()
+      ->setDistinct(true);
     $sql = $c->__toString();
     try {
 
@@ -333,13 +416,62 @@ class ${actor} {
         $this->_cache[$id] = $model;
 
         // Populate the model's properties
-        ${each:populate_properties as populate_prop}
-          ${populate_prop}
+        ${each:properties AS prop}
+          ${if:prop[type] = boolean}
+            $model->set${prop[name]}($row['${prop[col]}'] == 1 ? true : false);
+
+          ${elseif:prop[type] = integer}
+            $model->set${prop[name]}((int) $row['${prop[col]}']);
+
+          ${else}
+            $model->set${prop[name]}($row['${prop[col]}']);
+
+          ${fi}
         ${done}
 
         // Populate any relationships
-        ${each:populate_relationships as populate_rel}
-          ${populate_rel}
+        ${each:relationships AS rel}
+          // -------------------------------------------------------------------
+          // Populate the ${rel[rhs]}
+          ${if:rel[type] = one-to-many}
+            $c = new Criteria();
+            $c->addEquals('${rel[rhsColumn]}', $id);
+            ${if:rel[orderByCol] ISSET}
+              $c->addSort('${rel[orderByCol]}', '${rel[orderByDir]}');
+            ${fi}
+
+            $persister = Persister::get('${rel[rhs]}');
+            $related = $persister->retrieve($c);
+            $model->set${rel[lhsProperty]}($related);
+
+          ${elseif:rel[type] = many-to-many}
+            $c = new Criteria();
+            $c->addSelect('${rel[rhsTable]}.*');
+            $c->addJoin('${rel[linkTable]}', '${rel[rhsIdColumn]}', '${rel[rhsLinkColumn]}');
+            $c->addEquals('${rel[lhsLinkColumn]}', $id);
+            ${if:rel[orderByCol] ISSET}
+              $c->addSort('${rel[orderByCol]}', '${rel[orderByDir]}');
+            ${fi}
+
+            $persister = Persister::get('${rel[rhs]}');
+            $related = $persister->retrieve($c);
+            $model->set${rel[lhsProperty]}($related);
+
+          ${elseif:rel[type] = many-to-one}
+            $relId = $row['${rel[lhsColumn]}'];
+            if ($relId !== null) {
+              $persister = Persister::get('${rel[rhs]}');
+              $related = $persister->getById($relId);
+
+              if ($related === null) {
+                throw new Exception("No ${rel[rhsStr]} with id $relId.");
+              }
+
+              $model->set${rel[lhsProperty]}($related);
+            }
+
+          ${fi}
+          // -------------------------------------------------------------------
         ${done}
 
         $result[] = $model;
@@ -430,8 +562,94 @@ class ${actor} {
         $rowCount = $this->_update->rowCount();
       ${fi}
 
-      ${each:save_relationships as save_rel}
-        ${save_rel}
+      ${each:relationships as rel}
+        // ---------------------------------------------------------------------
+        // Save related ${rel[rhs]} entities
+        $persister = Persister::get('${rel[rhs]}');
+        ${if:rel[type] = many-to-many}
+          // If any of the related entities are new, save them to ensure that
+          // they have an id, then update them.
+          $related = $model->get${rel[lhsProperty]}();
+          if ($related !== null) {
+            foreach($related AS $rel) {
+              if ($rel->get${rhsIdProperty}() === null) {
+              }
+            }
+          }
+
+          // Delete all link entries for this entity
+          $deleteStmt = $this->_pdo->prepare("DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id");
+          $deleteStmt->execute(array('id' => $id));
+
+          // Create new link entries for all related entities
+          if ($related !== null) {
+            $createStmt = $this->_pdo->prepare("INSERT INTO ${rel[linkTable]} (${rel[lhsLinkColumn]}, ${rel[rhsLinkColumn]}) VALUES (:lhsId, :rhsId)");
+            foreach ($related AS $rel) {
+              $createStmt->execute(array('lhsId' => $id, 'rhsId' => $rel->get${rel[rhsIdProperty]}()));
+            }
+          }
+
+        ${elseif:rel[type] = one-to-many}
+          $related = $model->get${rel[lhsProperty]}();
+          if ($related === null) {
+            $related = array();
+          }
+
+          $relIds = array();
+          foreach ($related AS $rel) {
+            $relIds[] = $rel->get${rel[rhsIdProperty]}();
+          }
+
+          $c = new Criteria();
+          $c->addEquals('${rel[rhsColumn]}', $id);
+          $current = $persister->retrieve($c);
+
+          // Update or save the collection
+          ${if:rel[mirrored]}
+           foreach ($related AS $rel) {
+             $rel->set${rel[rhsProperty]($model);
+             $persister->save($model);
+           }
+            foreach ($current AS $cur) {
+              if (!in_array($cur->get${rel[rhsIdProperty]}(), $relIds)) {
+                ${if:rel[deleteOrphan]}
+                  $persister->delete($cur);
+                ${else}
+                  $cur->set${rel[rhsProperty]}(null);
+                  $persister->save($cur);
+                {$fi}
+              }
+            }
+          ${else}
+            $updateStmt = $this->_pdo->prepare("UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = :id WHERE ${rel[rhsIdColumn]} = :relId");
+            foreach ($related AS $rel) {
+              if ($rel->get${rel[rhsIdProperty]}() === null) {
+                $persister->create($rel);
+              }
+              $updateStmt->execute(array(
+                'id' => $id,
+                'relId' => $rel->get${rel[rhsIdProperty]}()
+              ));
+
+              // Clear the cache of the RHS entity as it may contain a stale id
+              $persister->clearCache($rel->get${rel[rhsIdProperty]}());
+            }
+
+            ${if:rel[deleteOrphan]}
+              $orphanStmt = $this->_pdo->prepare("DELETE FROM ${rel[rhsTable]} WHERE ${rel[rhsIdColumn]} = :relId");
+            ${else}
+              $orphanStmt = $this->_pdo->prepare("UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = null WHERE ${rel[rhsIdColumn]} = : relId");
+            ${fi}
+            foreach ($current AS $cur) {
+              if (!in_array($cur->get${rel[rhsIdProperty]}(), $relIds)) {
+                $orphanStmt->execute(array('relId' => $cur->get${rel[rhsIdProperty]}()));
+              }
+
+              $persister->clearCache($rel->get${rel[rhsIdProperty]}());
+            }
+          ${fi}
+        ${fi}
+        // ---------------------------------------------------------------------
       ${done}
 
       $saveLock->release();
