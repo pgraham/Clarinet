@@ -125,8 +125,7 @@ class ${actor} {
    */
   public function create(\${class} $model) {
     $validator = ActorFactory::getActor('validator', '${class}');
-    $e = $validator->validate($model);
-    if ($e !== null) {
+    if (!$validator->validate($model, $e)) {
       throw $e;
     }
 
@@ -514,8 +513,7 @@ class ${actor} {
     }
 
     $validator = ActorFactory::getActor('validator', '${class}');
-    $e = $validator->validate($model);
-    if ($e !== null) {
+    if (!$validator->validate($model, $e)) {
       throw $e;
     }
 

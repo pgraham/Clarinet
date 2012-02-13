@@ -170,7 +170,7 @@ class Property implements Identifiable {
    *
    * @param array $values
    */
-  public function setValues(Array $values) {
+  public function setValues(array $values) {
     $this->_values = $values;
   }
 }

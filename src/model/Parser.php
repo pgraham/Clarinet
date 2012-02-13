@@ -283,12 +283,11 @@ class Parser {
     if (isset($annotations['type'])) {
       $type = strtolower($annotations['type']);
 
-      if (!in_array($type, Property::$ALL_TYPES)) {
-        $this->_fail("{$this->_className}::$methodName: "
-          . " Column type must be one of: "
-          . implode(', ', Property::$ALL_TYPES) . ".");
+      try {
+        $property->setType($type);
+      } catch (Exception $e) {
+        $this->_fail($e->getMessage());
       }
-      $property->setType($type);
     }
 
     if (isset($annotations['enumerated'])) {

@@ -16,7 +16,10 @@
 namespace clarinet\validator;
 
 use \clarinet\model\Model;
-use \reed\generator\CodeTemplateLoader;
+use \pct\CodeTemplateParser;
+use \pct\SubstitutionException;
+use \pct\TemplateValues;
+use \Exception;
 
 /**
  * This class generates the PHP code for a validator actor for a specific model
@@ -26,7 +29,7 @@ use \reed\generator\CodeTemplateLoader;
  */
 class ClassBuilder {
 
-  private static $_templateLoader = null;
+  private static $_template;
 
   /**
    * Generate a validator actor for the given model information.
@@ -36,19 +39,19 @@ class ClassBuilder {
    * @return string The model's validator's class body.
    */
   public static function build(Model $model) {
-    if (self::$_templateLoader === null) {
-      self::$_templateLoader = CodeTemplateLoader::get(__DIR__);
+    if (self::$_template === null) {
+      $parser = new CodeTemplateParser();
+
+      $tmpl = file_get_contents(__DIR__ . '/validator.tmpl.php');
+      self::$_template = $parser->parse($tmpl);
     }
-    $templateValues = self::_buildTemplateValues($model);
-
-    // Load templates
-    $validate = self::$_templateLoader->load('validate', $templateValues);
-
-    // Put it all together
-    $templateValues['${validate}'] = $validate;
-
-    $body = self::$_templateLoader->load('class', $templateValues);
-    return $body;
+    
+    $values = self::_buildTemplateValues($model);
+    try {
+      return self::$_template->forValues(new TemplateValues($values));
+    } catch (SubstitutionException $e) {
+      throw new Exception($e->getMessage() . ' at ' . __DIR__ . '/validator.tmpl.php:' . $e->getLineNum());
+    }
   }
 
   /*
@@ -56,49 +59,25 @@ class ClassBuilder {
    * the validator's template.
    */
   private static function _buildTemplateValues(Model $model) {
-    $propertyGetters    = Array();
-    $propertyCheckers   = Array();
-    $propertyValidators = Array();
+    $properties = array();
 
     foreach ($model->getProperties() AS $property) {
-      $prop = $property->getName();
-      $var  = lcfirst($prop);
-
-      // If the property is enumerated 
+      $prop = array();
+      $prop['name'] = $property->getName();
+      $prop['type'] = $property->getType();
       if ($property->isEnumerated()) {
-        if (!isset($propertyGetters[$prop])) {
-          $propertyGetters[$prop] = "    \$$var = \$model->get$prop();";
-        }
-
-        // Load the code fragment that calls the check method
-        $values = Array
-        (
-          '${method_name}' => "_checkEnum$prop",
-          '${var_name}'    => "\$$var"
-        );
-        $propertyCheckers[] = self::$_templateLoader->load('checker', $values);
-
-        // Load the enum check method
-        $values = Array
-        (
-          '${model}'    => $model->getClass(),
-          '${property}' => $prop,
-          '${var_name}' => "\$$var",
-          '${values}'   => implode(',', $property->getValues())
-        );
-        $propertyValidators[] = self::$_templateLoader->load('enum', $values);
+        $prop['values'] = $property->getValues();
       }
+
+
+      $properties[] = $prop;
     }
 
-    $templateValues = Array
-    (
-      '${class}'     => $model->getClass(),
-      '${actor}'     => $model->getActor(),
+    return array(
+      'class'     => $model->getClass(),
+      'actor'     => $model->getActor(),
 
-      '${property_getters}'    => implode("\n", $propertyGetters),
-      '${property_checkers}'   => implode("\n", $propertyCheckers),
-      '${property_validators}' => implode("\n", $propertyValidators)
+      'properties' => $properties
     );
-    return $templateValues;
   }
 }

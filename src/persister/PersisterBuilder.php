@@ -14,11 +14,10 @@
  */
 namespace clarinet\persister;
 
-use \ReflectionClass;
-
 use \clarinet\model\Model;
 use \pct\CodeTemplateParser;
 use \pct\TemplateValues;
+use \ReflectionClass;
 
 /**
  * This class generates the PHP code for a persister class given the table
