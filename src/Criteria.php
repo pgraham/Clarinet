@@ -559,6 +559,7 @@ class Criteria {
    * @param mixed $sorts The sorts to add
    */
   public function addSort($sort, $direction = 'asc') {
+    $direction = strtolower($direction);
     if ($direction !== self::SORT_ASC && $direction !== self::SORT_DESC) {
       throw new Exception("Invalid sort direction: $direction");
     }
