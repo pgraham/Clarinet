@@ -197,3 +197,48 @@ parameter.  The default direction is ASC.
 
 Clarinet is licensed under the 3-clause BSD license, the text of which can be
 found in the file LICENSE.txt in the same directory as this file.
+
+## Usage
+
+### Initialization
+
+Clarinet provides three types of model actors, persiters, transformers and
+validators.  Before Clarinet's model actors can be used, clarinet itself needs
+to be initialized.
+
+```php
+<?php
+sql_autoload_register(function ($classname) {
+  if (substr($classname, 0, 9) !== "clarinet\\") {
+    return;
+  }
+
+  $basePath = '/path/to/clarinet/src';
+  $relPath = str_replace('\\', '/', $className) . '.php';
+  $fullPath = "$basePath/$relPath";
+  if (!file_exists($fullPath)) {
+    require $fullPath;
+  }
+});
+
+Clarinet::init(array(
+  'pdo' => $db, // PDO object connected to the database where model are persisted
+  'outputPath' => $out, // Path where generated files are output.
+                        // Needs to be writeable by web server for dev mode
+  'debug' => true/false, // Wether or not to generate actors when fist requested
+));
+```
+
+* * *
+Note: For those familiar with
+[PSR0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
+Clarinet is not compatible with this standard since generated classes are in the
+same base namespace as its source files.
+
+There are plans to change this but until this happens, any autoloader registered
+for classes in the clarinet\\ namespace cannot fail if a requested class is not
+found as the class may be a generated class located in a different base path.
+
+Clarinet will register its own autoloader for generated classes.
+* * *
+

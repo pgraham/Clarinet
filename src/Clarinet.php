@@ -155,8 +155,14 @@ class Clarinet {
 
     // Store the output path for the generators and set the path in the
     // autoloader so that generated classes are loaded properly
-    self::$outputPath = $config['outputPath'];
-    Autoloader::$genBasePath = $config['outputPath'] . '/clarinet';
+    self::$outputPath = $outputPath = $config['outputPath'];
+    spl_autoload_register(function ($classname) use ($outputPath) {
+      $logicalPath = str_replace('\\', '/', $classname) . '.php';
+      $fullPath = "$outputPath/$logicalPath";
+      if (file_exists($fullPath)) {
+        require $fullPath;
+      }
+    });
 
     if (isset($config['debug'])) {
       self::$debug = $config['debug'];
