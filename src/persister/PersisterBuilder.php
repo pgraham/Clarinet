@@ -17,7 +17,8 @@ namespace clarinet\persister;
 use \ReflectionClass;
 
 use \clarinet\model\Model;
-use \reed\generator\CodeTemplateLoader;
+use \pct\CodeTemplateParser;
+use \pct\TemplateValues;
 
 /**
  * This class generates the PHP code for a persister class given the table
@@ -27,11 +28,7 @@ use \reed\generator\CodeTemplateLoader;
  */
 class PersisterBuilder {
 
-  private $_templateLoader;
-
-  public function __construct() {
-    $this->_templateLoader = CodeTemplateLoader::get(__DIR__);
-  }
+  private static $_template;
 
   /**
    * Generate a persister class given an entities table/class structure.
@@ -40,18 +37,23 @@ class PersisterBuilder {
    *     which a persister will be generated.
    * @return The persister's PHP code.
    */
-  public function build(Model $model) {
-    $templateValues = $this->_buildTemplateValues($model);
+  public static function build(Model $model) {
+    if (self::$_template === null) {
+      $parser = new CodeTemplateParser();
 
-    $body = $this->_templateLoader->load('persister.php', $templateValues);
-    return $body;
+      $tmpl = file_get_contents(__DIR__ . '/persister.php');
+      self::$_template = $parser->parse($tmpl);
+    }
+
+    $values = self::_buildTemplateValues($model);
+    return self::$_template->forValues(new TemplateValues($values));
   }
 
   /*
    * This method uses a parsed model info array structure to create the values
    * to insert into a persister template.
    */
-  private function _buildTemplateValues(Model $model) {
+  private static function _buildTemplateValues(Model $model) {
     $className = $model->getClass();
     $persisterName = str_replace('\\', '_', $className);
 

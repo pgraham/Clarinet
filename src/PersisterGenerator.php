@@ -48,7 +48,6 @@ class PersisterGenerator extends AbstractGenerator {
    * @return string The PHP code for a persister.
    */
   protected function _generate(Model $model) {
-    $builder = new PersisterBuilder();
-    return $builder->build($model);
+    return PersisterBuilder::build($model);
   }
 }
