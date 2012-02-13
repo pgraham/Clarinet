@@ -100,8 +100,8 @@ class PersisterBuilder {
         // Retrieve params
         $orderBy = $rel->getOrderBy();
         if ($orderBy !== null) {
-          $rel['orderByCol'] = $orderBy['col'];
-          $rel['orderByDir'] = $orderBy['dir'];
+          $vals['orderByCol'] = $orderBy['col'];
+          $vals['orderByDir'] = $orderBy['dir'];
         }
 
         // Save params
