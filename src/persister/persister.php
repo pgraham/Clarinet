@@ -617,7 +617,7 @@ class ${actor} {
                 ${else}
                   $cur->set${rel[rhsProperty]}(null);
                   $persister->save($cur);
-                {$fi}
+                ${fi}
               }
             }
           ${else}
