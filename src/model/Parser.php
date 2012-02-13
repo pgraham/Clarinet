@@ -304,6 +304,10 @@ class Parser {
       $property->setDefault($default);
     }
 
+    if (isset($annotations['notnull'])) {
+      $property->notNull(true);
+    }
+
     return $property;
   }
 

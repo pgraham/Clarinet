@@ -35,6 +35,14 @@ class ${actor} {
 
   ${each:properties as prop}
     private function _check${prop[name]}($val) {
+      if ($val === null) {
+        ${if:prop[notNull]}
+          return "${prop[name]} cannot be null";
+        ${else}
+          return null;
+        ${fi}
+      }
+
       ${if:prop[values] ISSET}
         $accepted = array("${join:prop[values]:","}");
         if (!in_array($val, $accepted)) {

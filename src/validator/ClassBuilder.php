@@ -69,6 +69,7 @@ class ClassBuilder {
         $prop['values'] = $property->getValues();
       }
 
+      $prop['notNull'] = $property->notNull();
 
       $properties[] = $prop;
     }

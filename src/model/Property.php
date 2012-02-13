@@ -47,6 +47,7 @@ class Property implements Identifiable {
   private $_default;
   private $_model;
   private $_name;
+  private $_notNull;
   private $_type;
   private $_values;
 
@@ -65,6 +66,9 @@ class Property implements Identifiable {
 
     // Default type is string
     $this->_type = self::TYPE_STRING;
+
+    // Default is to allow null values
+    $this->_notNull = false;
   }
 
   /**
@@ -142,6 +146,20 @@ class Property implements Identifiable {
    */
   public function isEnumerated() {
     return $this->_values !== null;
+  }
+
+  /**
+   * Getter/setter for whether or not the property is allowed to contain null
+   * values.
+   *
+   * @param boolean $notNull If specified, then the method acts as a setter.
+   * @return boolean
+   */
+  public function notNull($notNull = null) {
+    if (is_bool($notNull)) {
+      $this->_notNull = $notNull;
+    }
+    return $this->_notNull;
   }
 
   /**

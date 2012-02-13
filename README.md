@@ -128,6 +128,16 @@ getXXX().  So the previous sample could be written as:
 
 ```
 
+Other supported annotations for columns:
+
+  - _@Type_: The type of data contained by the property. In addition to standard
+    database type, Clarinet provides support for some types (such as email)
+    which provide an additional addtional abstraction to standard database
+    types. These types are enforced at runtime by a Validator actor.
+  - _@Enumerated_: If a column only supports a finite list of values, those
+    values can be defined using the values parameter of an _@enumerated_
+    annotation, e.g. `@enumerated( values = { ... } )`.
+
 ### Relationships
 
 Clarinet also supports relationship definition using annotated getter/setter
@@ -197,6 +207,14 @@ parameter.  The default direction is ASC.
 
 Clarinet is licensed under the 3-clause BSD license, the text of which can be
 found in the file LICENSE.txt in the same directory as this file.
+
+## Actor Generation
+
+Clarinet uses the
+[PHP Code Templates](https://github.com/pgraham/php-code-templates) library
+for generating persister, validator and transformer actors for a given model
+class. In order to use clarinet\*Generator classes, the classes for this library
+must be available.
 
 ## Usage
 
