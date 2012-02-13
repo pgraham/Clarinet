@@ -46,7 +46,7 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $transformer = ActorFactory::getActor('transformer', $modelClass);
+    $transformer = Transformer::get($modelClass);
     return $transformer->asArray($obj);
   }
 
@@ -57,7 +57,7 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $persister = ActorFactory::getActor('persister', $modelClass);
+    $persister = Persister::get($modelClass);
 
     $rows = $persister->delete($obj);
     if ($rows != 1) {
@@ -79,7 +79,7 @@ class Clarinet {
   public static function get($modelClass, Criteria $c = null) {
     self::_ensureInitialized();
 
-    $persister = ActorFactory::getActor('persister', $modelClass);
+    $persister = Persister::get($modelClass);
 
     $rows = $persister->retrieve($c);
     return $rows;
@@ -180,7 +180,7 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $persister = ActorFactory::getActor('persister', $modelClass);
+    $persister = Persister::get($modelClass);
     $persister->save($obj);
   }
 
@@ -195,7 +195,7 @@ class Clarinet {
     self::_ensureInitialized();
 
     $modelClass = get_class($obj);
-    $validator = ActorFactory::getActor('validator', $modelClass);
+    $persister = Validator::get($modelClass);
 
     $e = $validator->validate($obj);
     return $e;
