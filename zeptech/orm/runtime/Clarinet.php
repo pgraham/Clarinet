@@ -12,12 +12,10 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace clarinet;
+namespace zeptech\orm\runtime;
 
 use \Exception;
 use \PDO;
-
-use \clarinet\model\ConfigValue;
 
 /**
  * This class provides a static interface to most (if not all) of Clarinet's
@@ -26,12 +24,6 @@ use \clarinet\model\ConfigValue;
  * @author Philip Graham <philip@zeptech.ca>
  */
 class Clarinet {
-
-  /** Whether or not actor classes should be generated on demand. */
-  public static $debug = false;
-
-  /** Path to generated class files. */
-  public static $outputPath = null;
 
   /* Whether or not clarinet has been initialized. */
   private static $_initialized = false;
@@ -138,37 +130,15 @@ class Clarinet {
    *
    * @param array $config Array of configuration object
    */
-  public static function init($config = array()) {
-    if (!isset($config['pdo']) || !is_object($config['pdo'])) {
-      throw new Exception('Clarinet needs a PDO connection in order to be able'
-        . ' to do anything.');
+  public static function init(PDO $pdo) {
+    if (self::$_initialized) {
+      return;
     }
-    $config['pdo']->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    PdoWrapper::set($config['pdo']);
+    self::$_initialized = true;
 
     // Turn on exceptions for the PDO connection
-
-    if (!isset($config['outputPath'])) {
-      throw new Exception('Clarinet needs to know where generated classes are'
-        . ' found in order to be able to do anything.');
-    }
-
-    // Store the output path for the generators and set the path in the
-    // autoloader so that generated classes are loaded properly
-    self::$outputPath = $outputPath = $config['outputPath'];
-    spl_autoload_register(function ($classname) use ($outputPath) {
-      $logicalPath = str_replace('\\', '/', $classname) . '.php';
-      $fullPath = "$outputPath/$logicalPath";
-      if (file_exists($fullPath)) {
-        require $fullPath;
-      }
-    });
-
-    if (isset($config['debug'])) {
-      self::$debug = $config['debug'];
-    }
-
-    self::$_initialized = true;
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    PdoWrapper::set($pdo);
   }
 
   /**
