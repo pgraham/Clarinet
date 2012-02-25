@@ -50,6 +50,12 @@ class ${actor} {
         }
       ${fi}
 
+      ${if:prop[type] = email}
+        if (!filter_var($val, FILTER_VALIDATE_EMAIL)) {
+          return "$val is not a valid email";
+        }
+      ${fi}
+
       // No validation errors
       return null;
     }

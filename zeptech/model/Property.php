@@ -26,6 +26,7 @@ class Property implements Identifiable {
   const TYPE_BOOLEAN   = 'boolean';
   const TYPE_DATE      = 'date';
   const TYPE_DECIMAL   = 'decimal';
+  const TYPE_EMAIL     = 'email';
   const TYPE_FLOAT     = 'float';
   const TYPE_INTEGER   = 'integer';
   const TYPE_STRING    = 'string';
@@ -36,6 +37,7 @@ class Property implements Identifiable {
     self::TYPE_BOOLEAN,
     self::TYPE_DATE,
     self::TYPE_DECIMAL,
+    self::TYPE_EMAIL,
     self::TYPE_FLOAT,
     self::TYPE_INTEGER,
     self::TYPE_STRING,
