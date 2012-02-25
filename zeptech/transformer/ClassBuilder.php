@@ -16,8 +16,8 @@ namespace clarinet\transformer;
 
 use \clarinet\model\Model;
 use \clarinet\model\Property;
-
-use \reed\generator\CodeTemplateLoader;
+use \pct\CodeTemplateParser;
+use \pct\TemplateValues;
 
 /**
  * This class generates the PHP code for a transformer class for model classes.
@@ -25,6 +25,8 @@ use \reed\generator\CodeTemplateLoader;
  * @author Philip Graham <philip@zeptech.ca>
  */
 class ClassBuilder {
+
+  private static $_template;
 
   /**
    * Generate a transformer class for the given model information.
@@ -34,12 +36,15 @@ class ClassBuilder {
    * @return string The model's transformer's class body.
    */
   public static function build(Model $model) {
-    $templateValues = self::_buildTemplateValues($model);
+    if (self::$_template === null) {
+      $parser = new CodeTemplateParser();
 
-    // Load templates
-    $templateLoader = CodeTemplateLoader::get(__DIR__);
-    $body = $templateLoader->load('transformer.php', $templateValues);
-    return $body;
+      $tmpl = file_get_contents(__DIR__ . '/transformer.php');
+      self::$_template = $parser->parse($tmpl);
+    }
+
+    $values = self::_buildTemplateValues($model);
+    return self::$_template->forValues(new TemplateValues($values));
   }
 
   /*
@@ -53,17 +58,19 @@ class ClassBuilder {
     foreach ($model->getProperties() AS $property) {
       $properties[] = array(
         'id'   => $property->getIdentifier(),
-        'idx'  => lcfirst($property->getIdentifier()),
+        'idx'  => self::_camelCaseToUnderscore($property->getIdentifier()),
         'type' => $property->getType()
       );
     }
 
     $relationships = array();
     foreach ($model->getRelationships() AS $relationship) {
+      $lhsProp = $relationship->getLhsProperty();
+
       $relationships[] = array(
         'type'          => $relationship->getType(),
         'name'          => $relationship->getLhsProperty(),
-        'idx'           => lcfirst($relationship->getLhsProperty()),
+        'idx'           => self::_camelCaseToUnderscore($lhsProp),
         'rhs'           => $relationship->getRhs()->getClass(),
         'rhsIdProperty' => $relationship->getRhs()->getId()->getIdentifier()
       );
@@ -79,11 +86,26 @@ class ClassBuilder {
       'class'           => $model->getClass(),
       'actor'           => $model->getActor(),
       'id'              => $id,
-      'idIdx'           => lcfirst($id),
+      'idIdx'           => self::_camelCaseToUnderscore($id),
       'properties'      => $properties,
       'relationships'   => $relationships,
       'from_db_id_cast' => $fromDbIdCast
     );
     return $templateValues;
+  }
+
+  private static function _camelCaseToUnderscore($s) {
+    $s = lcfirst($s);
+    return preg_replace_callback('/([A-Z]+)/', function ($matches) {
+      // Handle strings in the form CamelABBRCase => camel_abbr_case
+      $uc = $matches[1];
+      $len = strlen($uc);
+      if ($len > 1) {
+        return strtolower('_' . substr($uc, 0, -1) . '_' . substr($uc, -1));
+      }
+
+      // Simple case CamelCase => camel_case
+      return '_' . strtolower($uc);
+    }, $s);
   }
 }
