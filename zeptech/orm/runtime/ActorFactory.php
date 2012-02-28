@@ -113,7 +113,7 @@ class ActorFactory {
    * specified model class.
    */
   private function _load($modelClass) {
-    $ns = "zeptech\\dynamic\\clarinet\\$this->_actorType";
+    $ns = "zeptech\\dynamic\\orm\\$this->_actorType";
     $actorClass = str_replace('\\', '_', $modelClass);
     $fullyQualified = "$ns\\$actorClass";
     $actor = new $fullyQualified();

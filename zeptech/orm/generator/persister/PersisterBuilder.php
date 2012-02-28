@@ -90,8 +90,8 @@ class PersisterBuilder {
         'rhsIdProperty' => $rhs->getId()->getName(),
       );
 
-      switch (get_class($rel)) {
-        case 'clarinet\model\OneToMany':
+      switch ($rel->getType()) {
+        case 'one-to-many':
         $vals['rhsColumn'] = $rel->getRhsColumn();
         $vals['rhsIdColumn'] = $rhs->getId()->getColumn();
         $vals['deleteOrphan'] = $rel->deleteOrphans();
@@ -114,11 +114,15 @@ class PersisterBuilder {
         }
         break;
 
-        case 'clarinet\model\ManyToOne':
-        $vals['lhsColumn'] = $rel->getLhsColumn();
+        case 'many-to-one':
+        $lhsCol = $rel->getLhsColumn();
+        $vals['lhsColumn'] = $lhsCol;
+        $columnNames[] = "`$lhsCol`";
+        $valueNames[] = ":$lhsCol";
+        $sqlSetters[] = "`$lhsCol` = :$lhsCol";
         break;
 
-        case 'clarinet\model\ManyToMany':
+        case 'many-to-many':
         $vals['linkTable'] = $relationship->getLinkTable();
         $vals['lhsLinkColumn'] = $relationship->getLinkLhsId();
         $vals['rhsLinkColumn'] = $relationship->getLinkRhsId();
@@ -134,13 +138,6 @@ class PersisterBuilder {
       }
 
       $relationships[] = $vals;
-
-      $columnName = $rel->getLhsColumn();
-      if ($columnName !== null) {
-        $columnNames[] = "`$columnName`";
-        $valueNames[] = ":$columnName";
-        $sqlSetters[] = "`$columnName` = :$columnName";
-      }
     }
 
     $templateValues = Array

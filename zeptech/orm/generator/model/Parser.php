@@ -107,7 +107,9 @@ class Parser {
     try {
       $this->_class = new ReflectionClass($className);
     } catch (ReflectionException $e) {
-      throw new Exception("Unable to reflect $className: {$e->getMessage()}",
+      throw new Exception(
+        "Unable to reflect $className: {$e->getMessage()}",
+        0,
         $e);
     }
     $docComment = $this->_class->getDocComment();

@@ -33,7 +33,7 @@ class TransformerGenerator extends AbstractGenerator {
    *   the class to be namespaced, and autoloaded properly.
    */
   public function __construct($outputPath) {
-    parent::__construct($outputPath . '/clarinet/transformer');
+    parent::__construct($outputPath . '/zeptech/dynamic/orm/transformer');
   }
 
   /**

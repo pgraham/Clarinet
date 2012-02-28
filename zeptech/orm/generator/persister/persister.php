@@ -5,6 +5,7 @@ use \zeptech\orm\runtime\ActorFactory;
 use \zeptech\orm\runtime\Criteria;
 use \zeptech\orm\runtime\Persister;
 use \zeptech\orm\runtime\PdoWrapper;
+use \zeptech\orm\runtime\SaveLock;
 use \Exception;
 use \PDO;
 use \PDOException;
@@ -253,7 +254,7 @@ class ${actor} {
         $saveLock->forceRelease();
       }
 
-      throw new Exception("Error creating ${class_str}: {$e->getMessage()}", $e);
+      throw new Exception("Error creating ${class_str}: {$e->getMessage()}", 0, $e);
     }
   }
 

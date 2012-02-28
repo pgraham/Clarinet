@@ -52,12 +52,12 @@ abstract class AbstractGenerator {
     $model = Parser::getModel($className);
     $classBody = $this->_generate($model);
 
-    if (!file_exists($this->_outputPath)) {
-      mkdir($this->_outputPath, 0755, true);
-    }
-    $fileName = str_replace('\\', '_', $model->getClass()) . '.php';
+    $fileName = str_replace('\\', '/', $model->getClass()) . '.php';
 
     $fullPath = $this->_outputPath . '/' . $fileName;
+    if (!file_exists(dirname($fullPath))) {
+      mkdir(dirname($fullPath), 0755, true);
+    }
     $file = new SplFileObject($fullPath, 'w');
     $file->fwrite($classBody);
   }
