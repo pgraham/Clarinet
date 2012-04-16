@@ -14,9 +14,8 @@
  */
 namespace zeptech\orm\generator\persister;
 
-use \pct\CodeTemplateParser;
-use \pct\TemplateValues;
 use \zeptech\orm\generator\model\Model;
+use \zpt\pct\CodeTemplateParser;
 use \ReflectionClass;
 
 /**
@@ -45,7 +44,7 @@ class PersisterBuilder {
     }
 
     $values = self::_buildTemplateValues($model);
-    return self::$_template->forValues(new TemplateValues($values));
+    return self::$_template->forValues($values);
   }
 
   /*

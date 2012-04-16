@@ -14,10 +14,9 @@
  */
 namespace zeptech\orm\generator\validator;
 
-use \pct\CodeTemplateParser;
-use \pct\SubstitutionException;
-use \pct\TemplateValues;
 use \zeptech\orm\generator\model\Model;
+use \zpt\pct\CodeTemplateParser;
+use \zpt\pct\SubstitutionException;
 use \Exception;
 
 /**
@@ -47,7 +46,7 @@ class ClassBuilder {
     
     $values = self::_buildTemplateValues($model);
     try {
-      return self::$_template->forValues(new TemplateValues($values));
+      return self::$_template->forValues($values);
     } catch (SubstitutionException $e) {
       throw new Exception($e->getMessage() . ' at ' . __DIR__ . '/validator.tmpl.php:' . $e->getLineNum());
     }

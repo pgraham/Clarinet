@@ -14,8 +14,7 @@
  */
 namespace zeptech\orm\generator\transformer;
 
-use \pct\CodeTemplateParser;
-use \pct\TemplateValues;
+use \zpt\pct\CodeTemplateParser;
 use \zeptech\orm\generator\model\Model;
 use \zeptech\orm\generator\model\Property;
 
@@ -44,7 +43,7 @@ class ClassBuilder {
     }
 
     $values = self::_buildTemplateValues($model);
-    return self::$_template->forValues(new TemplateValues($values));
+    return self::$_template->forValues($values);
   }
 
   /*

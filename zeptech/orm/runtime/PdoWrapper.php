@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet
  */
 namespace zeptech\orm\runtime;
 
@@ -21,7 +20,6 @@ use \PDO;
  * This class decorates a PDO connection.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet
  */
 class PdoWrapper {
 
