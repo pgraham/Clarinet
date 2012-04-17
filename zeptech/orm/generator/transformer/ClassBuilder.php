@@ -55,11 +55,18 @@ class ClassBuilder {
 
     $properties  = array();
     foreach ($model->getProperties() AS $property) {
-      $properties[] = array(
+      $propertyValues = array(
         'id'   => $property->getIdentifier(),
         'idx'  => self::_camelCaseToUnderscore($property->getIdentifier()),
         'type' => $property->getType()
       );
+
+      $default = $property->getDefault();
+      if ($default !== null) {
+        $propertyValues['default'] = $default;
+      }
+
+      $properties[] = $propertyValues;
     }
 
     $relationships = array();

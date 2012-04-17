@@ -80,24 +80,44 @@ class ${actor} {
 
   /**
    * Transform the given array into a model.
+   * If a model instance is given, the contents of the given array will be
+   * merged into the entity.
    *
    * @param array $a
+   * @param entity $model
    */
-  public function fromArray(array $a) {
-    if (isset($a['${idIdx}'])) {
-      $persister = ActorFactory::getActor('persister', '${class}');
-      $model = $persister->getById($a['${idIdx}']);
-    } else {
-      $model = new \${class}();
+  public function fromArray(array $a, $model = null) {
+    if ($model === null) {
+      if (isset($a['${idIdx}'])) {
+        $persister = ActorFactory::getActor('persister', '${class}');
+        $model = $persister->getById($a['${idIdx}']);
+      } else {
+        $model = new \${class}();
+      }
     }
 
     ${each:properties AS property}
       if (isset($a['${property[idx]}'])) {
         $val = $a['${property[idx]}'];
 
-        ${if:property[type] = timestamp}
-          // Ensure proper format for timestamps
-          $val = date('Y-m-d H:i:s', strtotime($val));
+        ${if:property[default] ISSET}
+          if ($val === null) {
+            $val = ${property[default]};
+          }
+        ${fi}
+
+        ${if:property[type] = timestamp or property[type] = date}
+          try {
+            $date = new DateTime($val, new DateTimeZone('UTC'));
+            ${if:property[type] = timestamp}
+              $val = $date->format('Y-m-d H:i:s');
+            ${else}
+              $val = $date->format('Y-m-d');
+            ${fi}
+          } catch (Exception $e) {
+            // Swallow this exception and let the invalid value go through, it
+            // will get handled during model validation.
+          }
         ${fi}
         $model->set${property[id]}($val);
       }

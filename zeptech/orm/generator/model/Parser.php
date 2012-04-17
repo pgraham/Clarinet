@@ -16,6 +16,7 @@ namespace zeptech\orm\generator\model;
 
 // TODO Update to use php-annotations
 use \reed\reflection\Annotations;
+use \reed\String;
 use \Exception;
 use \ReflectionClass;
 use \ReflectionException;
@@ -213,14 +214,6 @@ class Parser {
     return $this->_model;
   }
 
-  /* Ensure that the model has a setter for the given property */
-  private function _ensureSetter($propertyName) {
-    if (!$this->_class->hasMethod("set$propertyName")) {
-      $this->_fail("{$this->_className}: Entity getters must have a"
-        . " matching setter");
-    }
-  }
-
   /*
    * Reset the instances cached Model object, clear the static cache and throw an 
    * exception with the given message.
@@ -234,12 +227,7 @@ class Parser {
 
   /* Parse a method annotated with @Id */
   private function _parseId($model, $methodName, $annotations) {
-    if (substr($methodName, 0, 3) !== 'get') {
-      $this->_fail("{$this->_className}: Only a getter can be marked as"
-        . " the id");
-    }
-    $propertyName = substr($methodName, 3);
-    $this->_ensureSetter($propertyName);
+    $propertyName = $this->_parsePropertyName($methodName, 'the id');
 
     if (isset($annotations['column'])) {
       if (isset($annotations['enumerated'])) {
@@ -263,20 +251,12 @@ class Parser {
 
   /* Parse a method that is annotated with @Column */
   private function _parseColumn($model, $methodName, $annotations) {
-    if (substr($methodName, 0, 3) !== 'get') {
-      $this->_fail("{$this->_className}: Only getters can be marked as"
-        . " columns");
-    }
-    $propertyName = substr($methodName, 3);
-    $this->_ensureSetter($propertyName);
+    $propertyName = $this->_parsePropertyName($methodName, 'columns');
 
     if (isset($annotations['column']['name'])) {
       $column = $annotations['column']['name'];
     } else {
-      // If no column name has been specified assume that the column is the
-      // lowercased equivalent of the property name
-      // TODO - Update this to expand camel casing to underscores
-      $column = strtolower($propertyName);
+      $column = String::fromCamelCase($propertyName);
     }
     $property = new Property($model, $propertyName, $column);
 
@@ -315,12 +295,9 @@ class Parser {
 
   /* Parse a method that is annotated with @ManyToMany */
   private function _parseManyToMany($methodName, $annotations, $model) {
-    if (substr($methodName, 0, 3) !== 'get') {
-      $this->_fail("{$this->_className}: Only getters can be marked as"
-        . " a many-to-many relationship");
-    }
-    $property = substr($methodName, 3);
-    $this->_ensureSetter($property);
+    $propertyName = $this->_parsePropertyName(
+      $methodName,
+      'a many-to-many relationship');
 
     // Make sure that a related entity is declared and get the model info for
     // that entity
@@ -352,7 +329,7 @@ class Parser {
       $linkRhsId = $rhs->getTable() . '_' .$rhs->getId()->getColumn();
     }
 
-    $rel = new ManyToMany($lhs, $rhs, $property, $linkTable, $linkLhsId,
+    $rel = new ManyToMany($lhs, $rhs, $propertyName, $linkTable, $linkLhsId,
       $linkRhsId);
 
     // Parse the order by property for retrieving related entities.
@@ -370,12 +347,9 @@ class Parser {
 
   /* Parse a method that is annotated with @ManyToOne */
   private function _parseManyToOne($methodName, $annotations) {
-    if (substr($methodName, 0, 3) !== 'get') {
-      $this->_fail("{$this->_className}: Only getters can be marked as"
-        . " a many-to-one relationship");
-    }
-    $property = substr($methodName, 3);
-    $this->_ensureSetter($property);
+    $propertyName = $this->_parsePropertyName(
+      $methodName,
+      'a many-to-one relationship');
 
     if (!isset($annotations['manytoone']['entity'])) {
       $this->_fail("{$this->_className}::$methodName: Many-to-one"
@@ -392,17 +366,14 @@ class Parser {
       $column = $rhs->getTable() . '_' . $rhs->getId()->getColumn();
     }
 
-    return new ManyToOne($lhs, $rhs, $property, $column);
+    return new ManyToOne($lhs, $rhs, $propertyName, $column);
   }
 
   /* Parse a method that is annotated with @OneToMany */
   private function _parseOneToMany($methodName, $annotations) {
-    if (substr($methodName, 0, 3) !== 'get') {
-      $this->_fail("{$this->_className}: Only getters can be marked as"
-        . " a one-to-many relationship");
-    }
-    $property = substr($methodName, 3);
-    $this->_ensureSetter($property);
+    $propertyName = $this->_parsePropertyName(
+      $methodName,
+      'a many-to-one relationship');
 
     if (!isset($annotations['onetomany']['entity'])) {
       $this->_fail("{$this->_className}::$methodName: One-to-many"
@@ -421,7 +392,7 @@ class Parser {
       $rhsColumn = $lhs->getTable() . '_' . $lhs->getId()->getColumn();
     }
 
-    $rel = new OneToMany($lhs, $rhs, $property, $rhsColumn);
+    $rel = new OneToMany($lhs, $rhs, $propertyName, $rhsColumn);
 
     // Parse the order by property for retrieving related entities.
     if (isset($annotations['onetomany']['order'])) {
@@ -441,5 +412,23 @@ class Parser {
     $rel->deleteOrphans($deleteOrphans); 
 
     return $rel;
+  }
+
+  /*
+   * Check that the name method is a getter, that is has a matching setter and
+   * parse the property name.
+   */ 
+  private function _parsePropertyName($methodName, $type) {
+    if (substr($methodName, 0, 3) !== 'get') {
+      $this->_fail("{$this->_className}: Only a getter can be marked as $type");
+    }
+
+    $propertyName = substr($methodName, 3);
+    if (!$this->_class->hasMethod("set$propertyName")) {
+      $this->_fail("{$this->_className}: $methodName does not have a matching "
+        . "setter.");
+    }
+
+    return lcfirst($propertyName);
   }
 }

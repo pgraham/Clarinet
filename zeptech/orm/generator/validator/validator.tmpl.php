@@ -1,6 +1,9 @@
 <?php
 namespace zeptech\dynamic\orm\validator;
 
+use \zeptech\orm\runtime\ValidationException;
+use \DateTime;
+use \DateTimeZone;
 use \Exception;
 
 /**
@@ -48,11 +51,15 @@ class ${actor} {
         if (!in_array($val, $accepted)) {
           return "$val is not an accepted value for ${prop[name]}. Accepted values are: ${join:prop[values]:,}";
         }
-      ${fi}
-
-      ${if:prop[type] = email}
+      ${elseif:prop[type] = email}
         if (!filter_var($val, FILTER_VALIDATE_EMAIL)) {
-          return "$val is not a valid email";
+          return "'$val' is not a valid email.";
+        }
+      ${elseif:prop[type] = date}
+        try {
+          $date = new DateTime($val, new DateTimeZone('UTC'));
+        } catch (Exception $e) {
+          return "'$val' is not a valid date.";
         }
       ${fi}
 

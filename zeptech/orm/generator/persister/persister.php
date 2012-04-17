@@ -4,6 +4,7 @@ namespace zeptech\dynamic\orm\persister;
 use \zeptech\orm\runtime\ActorFactory;
 use \zeptech\orm\runtime\Criteria;
 use \zeptech\orm\runtime\Persister;
+use \zeptech\orm\runtime\PdoExceptionWrapper;
 use \zeptech\orm\runtime\PdoWrapper;
 use \zeptech\orm\runtime\SaveLock;
 use \Exception;
@@ -113,8 +114,9 @@ class ${actor} {
 
       return (int) $stmt->fetchColumn();
     } catch (PDOException $e) {
-      throw new Exception("Error retrieving SELECT count: {$e->getMessage()}".
-        "\n\n$sql\n", $e);
+      // TODO - Create a PDOExceptionWrapper that parses the error message in
+      //        order to present an error suitable for users
+      throw new PdoExceptionWrapper($e, '${actor}');
     }
   }
 
@@ -213,7 +215,7 @@ class ${actor} {
           // Update or save the collection
           ${if:rel[mirrored]}
            foreach ($related AS $rel) {
-             $rel->set${rel[rhsProperty]($model);
+             $rel->set${rel[rhsProperty]}($model);
              $persister->save($model);
            }
           ${else}
@@ -254,7 +256,7 @@ class ${actor} {
         $saveLock->forceRelease();
       }
 
-      throw new Exception("Error creating ${class_str}: {$e->getMessage()}", 0, $e);
+      throw new PdoExceptionWrapper($e, '${actor}');
     }
   }
 
@@ -315,7 +317,7 @@ class ${actor} {
     } catch (PDOException $e) {
       $this->_pdo->rollback();
 
-      throw new Exception("Error deleting ${class_str}: {$e->getMessage()}", $e);
+      throw new PdoExceptionWrapper($e, '${actor}');
     }
   }
 
@@ -478,7 +480,7 @@ class ${actor} {
 
       return $result;
     } catch (PDOException $e) {
-      throw new Exception("Error retrieving ${class_str} instances: {$e->getMessage()}\n\n$sql\n", $e);
+      throw new PdoExceptionWrapper($e, '${actor}');
     }
   }
 
@@ -670,7 +672,7 @@ class ${actor} {
       $this->_pdo->rollback();
       $saveLock->forceRelease();
 
-      throw new Exception("Error updating ${class_str}: {$e->getMessage()}", $e);
+      throw new PdoExceptionWrapper($e, '${actor}');
     }
   }
 }
