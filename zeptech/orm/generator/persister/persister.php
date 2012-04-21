@@ -439,6 +439,8 @@ class ${actor} {
             $c->addEquals('${rel[rhsColumn]}', $id);
             ${if:rel[orderByCol] ISSET}
               $c->addSort('${rel[orderByCol]}', '${rel[orderByDir]}');
+            ${else}
+              $c->addSort('${rel[rhsIdProperty]}', 'asc');
             ${fi}
 
             $persister = Persister::get('${rel[rhs]}');

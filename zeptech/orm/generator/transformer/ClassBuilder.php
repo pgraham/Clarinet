@@ -57,7 +57,7 @@ class ClassBuilder {
     foreach ($model->getProperties() AS $property) {
       $propertyValues = array(
         'id'   => $property->getIdentifier(),
-        'idx'  => self::_camelCaseToUnderscore($property->getIdentifier()),
+        'idx'  => $property->getIdentifier(),
         'type' => $property->getType()
       );
 
@@ -72,13 +72,14 @@ class ClassBuilder {
     $relationships = array();
     foreach ($model->getRelationships() AS $relationship) {
       $lhsProp = $relationship->getLhsProperty();
+      $rhs = $relationship->getRhs();
 
       $relationships[] = array(
         'type'          => $relationship->getType(),
-        'name'          => $relationship->getLhsProperty(),
-        'idx'           => self::_camelCaseToUnderscore($lhsProp),
-        'rhs'           => $relationship->getRhs()->getClass(),
-        'rhsIdProperty' => $relationship->getRhs()->getId()->getIdentifier()
+        'name'          => $lhsProp,
+        'idx'           => $lhsProp,
+        'rhs'           => $rhs->getClass(),
+        'rhsIdProperty' => $rhs->getId()->getIdentifier()
       );
     }
 

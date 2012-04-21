@@ -93,13 +93,14 @@ class QueryBuilder extends AbstractGenerator {
         'col' => $prop->getColumn()
       );
     }
-    $tmplValues['properties'] = $props;
 
     $rels = array();
     foreach ($model->getRelationships() as $rel) {
+      $relName = $rel->getLhsProperty();
       $rhs = $rel->getRhs();
+
       $relVals = array(
-        'name' => $rel->getLhsProperty(),
+        'name' => $relName,
         'tbl' => $rhs->getTable(),
         'props' => array()
       );
@@ -109,9 +110,16 @@ class QueryBuilder extends AbstractGenerator {
       }
 
       if ($rel instanceof ManyToOne) {
+        $lhsCol = $rel->getLhsColumn();
+
         $relVals['type'] = 'many-to-one';
-        $relVals['lhs_col'] = $rel->getLhsColumn();
+        $relVals['lhs_col'] = $lhsCol;
         $relVals['rhs_id_col'] = $rhs->getId()->getColumn();
+
+        $props[] = array(
+          'name' => $relName,
+          'col' => $lhsCol,
+        );
 
       } else if ($rel instanceof OneToMany) {
         $relVals['type'] = 'one-to-many';
@@ -130,6 +138,8 @@ class QueryBuilder extends AbstractGenerator {
 
       $rels[] = $relVals;
     }
+
+    $tmplValues['properties'] = $props;
     $tmplValues['relationships'] = $rels;
 
     return $this->_tmpl->forValues($tmplValues);

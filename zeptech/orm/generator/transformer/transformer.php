@@ -1,11 +1,13 @@
 <?php
 namespace zeptech\dynamic\orm\transformer;
 
-use \zeptech\orm\runtime\ActorFactory;
 use \zeptech\orm\runtime\Criteria;
+use \zeptech\orm\runtime\Persister;
+use \zeptech\orm\runtime\Transformer;
 use \DateTime;
 use \DateTimeZone;
 use \Exception;
+use \StdClass;
 
 /**
  * This is a transformer class generate by Clarinet.  Do NOT modify this file.
@@ -89,7 +91,7 @@ class ${actor} {
   public function fromArray(array $a, $model = null) {
     if ($model === null) {
       if (isset($a['${idIdx}'])) {
-        $persister = ActorFactory::getActor('persister', '${class}');
+        $persister = Persister::get('${class}');
         $model = $persister->getById($a['${idIdx}']);
       } else {
         $model = new \${class}();
@@ -97,12 +99,18 @@ class ${actor} {
     }
 
     ${each:properties AS property}
-      if (isset($a['${property[idx]}'])) {
+      if (array_key_exists('${property[idx]}', $a)) {
         $val = $a['${property[idx]}'];
 
         ${if:property[default] ISSET}
           if ($val === null) {
-            $val = ${property[default]};
+            ${if:property[type] = timestamp and property[default] = current_time}
+              $val = date('Y-m-d H:i:s');
+            ${elseif:property[type] = date and property[default] = current_date}
+              $val = date('Y-m-d');
+            ${else}
+              $val = ${property[default]};
+            ${fi}
           }
         ${fi}
 
@@ -121,21 +129,17 @@ class ${actor} {
         ${fi}
         $model->set${property[id]}($val);
       }
+
     ${done}
 
     ${each:relationships AS relationship}
-    
       ${if:relationship[type] = many-to-many or relationship[type] = one-to-many}
-
         if (isset($a['${relationship[idx]}'])) {
-          $relIds = $a['${relationship[idx]}'];
+          $rels = $a['${relationship[idx]}'];
 
-          $c = new Criteria();
-          $c->addIn('${relationship[rhsIdProperty]}', $relIds);
+          $transformer = Transformer::get('${relationship[rhs]}');
+          $relVal = $transformer->fromCollection($rels);
 
-          $persister = ActorFactory::getActor('persister',
-            '${relationship[rhs]}');
-          $relVal = $persister->retrieve($c);
           $model->set${relationship[name]}($relVal);
         }
 
@@ -145,8 +149,7 @@ class ${actor} {
           $relId = $a['${relationship[idx]}'];
 
           if ($relId !== null) {
-            $persister = ActorFactory::getActor('persister',
-              '${relationship[rhs]}');
+            $persister = Persister::get('${relationship[rhs]}');
             $relVal = $persister->getById($relId);
             $model->set${relationship[name]}($relVal);
           }
@@ -166,10 +169,23 @@ class ${actor} {
    */
   public function fromCollection(array $a) {
     $models = array();
-    foreach ($a AS $modelArray) {
-      $models[] = $this->fromArray($modelArray);
+    foreach ($a AS $model) {
+      if ($model instanceof StdClass) {
+        $models[] = $this->fromObject($model);
+      } else if (is_array($model)) {
+        $models[] = $this->fromArray($model);
+      }
     }
     return $models;
+  }
+
+  /**
+   * Transform a StdClass instance into a model.
+   *
+   * @param StdClass $obj
+   */
+  public function fromObject(StdClass $obj) {
+    return $this->fromArray((array) $obj);
   }
 
   /**
