@@ -23,7 +23,7 @@ use \zeptech\orm\generator\persister\PersisterBuilder;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class PersisterGenerator extends AbstractGenerator {
+class PersisterGenerator extends AbstractModelGenerator {
 
   /**
    * Creates a new PersisterGenerator that outputs generated classes to
@@ -45,7 +45,7 @@ class PersisterGenerator extends AbstractGenerator {
    *   to be generated.
    * @return string The PHP code for a persister.
    */
-  protected function _generate(Model $model) {
+  protected function _generateForModel(Model $model) {
     return PersisterBuilder::build($model);
   }
 }

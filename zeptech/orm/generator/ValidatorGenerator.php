@@ -22,7 +22,7 @@ use \zeptech\orm\generator\validator\ClassBuilder;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class ValidatorGenerator extends AbstractGenerator {
+class ValidatorGenerator extends AbstractModelGenerator {
 
   /**
    * Creates a new ValidatorGenerator that outputs generated classes to
@@ -45,7 +45,7 @@ class ValidatorGenerator extends AbstractGenerator {
    *   is to be generated.
    * @return string The PHP code for a validator.
    */
-  protected function _generate(Model $model) {
+  protected function _generateForModel(Model $model) {
     return ClassBuilder::build($model);
   }
 }

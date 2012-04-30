@@ -22,7 +22,7 @@ use \zeptech\orm\generator\transformer\ClassBuilder;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class TransformerGenerator extends AbstractGenerator {
+class TransformerGenerator extends AbstractModelGenerator {
 
   /**
    * Creates a new TransformerGenerator that outputs generated classes to
@@ -44,7 +44,7 @@ class TransformerGenerator extends AbstractGenerator {
    *   is to be generated.
    * @return string The PHP code for a transformer.
    */
-  protected function _generate(Model $model) {
+  protected function _generateForModel(Model $model) {
     return ClassBuilder::build($model);
   }
 }

@@ -16,7 +16,7 @@ namespace zeptech\orm\generator;
 
 use \zeptech\orm\generator\model\Model;
 use \zeptech\orm\generator\model\Parser;
-use \SplFileObject;
+use \zpt\pct\AbstractGenerator;
 
 /**
  * This class provides functionality common to all persisters.  This includes
@@ -25,22 +25,7 @@ use \SplFileObject;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-abstract class AbstractGenerator {
-
-  private $_outputPath;
-
-  /**
-   * Create a new generator that outputs to the given path.
-   *
-   * @param string $outputPath The path for where to output the code.  This
-   *   path must be writable by the current user.
-   */
-  public function __construct($outputPath) {
-    $this->_outputPath = $outputPath;
-    if (substr($this->_outputPath, -1) == '/') {
-      $this->_outputPath = substr($this->_outputPath, 0, -1);
-    }
-  }
+abstract class AbstractModelGenerator extends AbstractGenerator {
 
   /**
    * Generate the code.  This method delegates to the implementation for the
@@ -48,18 +33,9 @@ abstract class AbstractGenerator {
    *
    * @param string $className The entity for which to generate code.
    */
-  public function generate($className) {
+  protected function _generate($className) {
     $model = Parser::getModel($className);
-    $classBody = $this->_generate($model);
-
-    $fileName = str_replace('\\', '/', $model->getClass()) . '.php';
-
-    $fullPath = $this->_outputPath . '/' . $fileName;
-    if (!file_exists(dirname($fullPath))) {
-      mkdir(dirname($fullPath), 0755, true);
-    }
-    $file = new SplFileObject($fullPath, 'w');
-    $file->fwrite($classBody);
+    return $this->_generateForModel($model);
   }
 
   /**
@@ -68,5 +44,5 @@ abstract class AbstractGenerator {
    * @param Model $model Parsed model information.
    * @return string The PHP code for the generated actor.
    */
-  protected abstract function _generate(Model $model);
+  protected abstract function _generateForModel(Model $model);
 }

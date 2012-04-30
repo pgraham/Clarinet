@@ -18,7 +18,7 @@ use \zeptech\orm\generator\model\ManyToMany;
 use \zeptech\orm\generator\model\ManyToOne;
 use \zeptech\orm\generator\model\Model;
 use \zeptech\orm\generator\model\OnceToMany;
-use \zeptech\orm\generator\AbstractGenerator;
+use \zeptech\orm\generator\AbstractModelGenerator;
 use \zpt\pct\CodeTemplateParser;
 
 /**
@@ -32,7 +32,7 @@ use \zpt\pct\CodeTemplateParser;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class QueryBuilder extends AbstractGenerator {
+class QueryBuilder extends AbstractModelGenerator {
 
   private static $_cache = array();
 
@@ -81,7 +81,7 @@ class QueryBuilder extends AbstractGenerator {
    * @param Model $model
    * @return string The PHP code for a query builder.
    */
-  protected function _generate(Model $model) {
+  protected function _generateForModel(Model $model) {
     $tmplValues = array(
       'actor' => $model->getActor()
     );
