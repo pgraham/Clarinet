@@ -17,6 +17,7 @@ namespace zeptech\orm\generator\transformer;
 use \zpt\pct\CodeTemplateParser;
 use \zeptech\orm\generator\model\Model;
 use \zeptech\orm\generator\model\Property;
+use \zeptech\orm\generator\model\Relationship;
 
 /**
  * This class generates the PHP code for a transformer class for model classes.
@@ -73,14 +74,23 @@ class ClassBuilder {
     foreach ($model->getRelationships() AS $relationship) {
       $lhsProp = $relationship->getLhsProperty();
       $rhs = $relationship->getRhs();
+      $type = $relationship->getType();
 
-      $relationships[] = array(
-        'type'          => $relationship->getType(),
+      $rel = array(
+        'type'          => $type,
         'name'          => $lhsProp,
         'idx'           => $lhsProp,
         'rhs'           => $rhs->getClass(),
-        'rhsIdProperty' => $rhs->getId()->getIdentifier()
+        'rhsIdProperty' => $rhs->getId()->getIdentifier(),
       );
+
+      if ($type === Relationship::TYPE_ONETOMANY ||
+          $type === Relationship::TYPE_MANYTOMANY)
+      {
+        $rel['fetch'] = $relationship->getFetchPolicy();
+      }
+
+      $relationships[] = $rel;
     }
 
     $fromDbIdCast = '';

@@ -44,11 +44,18 @@ class ${actor} {
 
         ${if:relationship[type] = many-to-many or relationship[type] = one-to-many }
 
-          $relIds = array();
-          foreach ($relVal AS $rel) {
-            $relIds[] = $rel->get${relationship[rhsIdProperty]}();
-          }
-          $a['${relationship[idx]}'] = $relIds;
+          $rels = array();
+          ${if:relationship[fetch] = eager}
+            $transformer = Transformer::get('${relationship[rhs]}');
+            foreach ($relVal as $rel) {
+              $rels[] = $transformer->asArray($rel);
+            }
+          ${else}
+            foreach ($relVal as $rel) {
+              $rels[] = $rel->get${relationship[rhsIdProperty]}();
+            }
+          ${fi}
+          $a['${relationship[idx]}'] = $rels;
 
         ${elseif:relationship[type] = many-to-one}
 

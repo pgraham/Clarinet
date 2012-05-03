@@ -27,6 +27,7 @@ class ManyToMany extends AbstractRelationship {
   private $_linkLhsId;
   private $_linkRhsId;
   private $_orderBy;
+  private $_fetchPolicy;
 
   /**
    * Create a new Many-to-many relationship representation.  The left side of
@@ -50,6 +51,17 @@ class ManyToMany extends AbstractRelationship {
     $this->_linkTable = $linkTable;
     $this->_linkLhsId = $linkLhsId;
     $this->_linkRhsId = $linkRhsId;
+  }
+
+  /**
+   * Getter for the relationship's fetch policy.  Will be either 'lazy' or
+   * 'eager'.  This can be specified as the 'fetch' parameter of the
+   * relationship's declaring annotation.
+   *
+   * @return string Either 'lazy' or 'eager'
+   */
+  public function getFetchPolicy() {
+    return $this->_fetchPolicy;
   }
 
   /**
@@ -88,6 +100,20 @@ class ManyToMany extends AbstractRelationship {
    */
   public function getOrderBy() {
     return $this->_orderBy;
+  }
+
+  /**
+   * Setter for the relationship's fetch policy, can be either 'lazy' or
+   * 'eager'.  This is currently only honoured by the transformer.  All
+   * relationships are retrieved eagerly by the persister, but this will change
+   * in the future when proxies are introduced.
+   *
+   * @param string $fetchPolicy Either 'lazy' or 'eager'
+   */
+  public function setFetchPolicy($fetchPolicy) {
+    if (!in_array($fetchPolicy, array('lazy', 'eager'))) {
+      throw new Exception("Invalid fetch policy: $fetchPolicy");
+    }
   }
 
   /**

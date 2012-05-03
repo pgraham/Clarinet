@@ -640,7 +640,7 @@ class ${actor} {
             ${if:rel[deleteOrphan]}
               $orphanStmt = $this->_pdo->prepare("DELETE FROM ${rel[rhsTable]} WHERE ${rel[rhsIdColumn]} = :relId");
             ${else}
-              $orphanStmt = $this->_pdo->prepare("UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = null WHERE ${rel[rhsIdColumn]} = : relId");
+              $orphanStmt = $this->_pdo->prepare("UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = null WHERE ${rel[rhsIdColumn]} = :relId");
             ${fi}
             foreach ($current AS $cur) {
               if (!in_array($cur->get${rel[rhsIdProperty]}(), $relIds)) {

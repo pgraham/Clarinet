@@ -333,14 +333,21 @@ class Parser {
       $linkRhsId);
 
     // Parse the order by property for retrieving related entities.
-    if (isset($annotations['onetomany']['order'])) {
-      $orderBy = $annotations['onetomany']['order'];
+    if (isset($annotations['manytomany']['order'])) {
+      $orderBy = $annotations['manytomany']['order'];
       $dir = 'ASC';
-      if (isset($annotations['onetomany']['dir'])) {
-        $dir = $annotations['onetomany']['dir'];
+      if (isset($annotations['manytomany']['dir'])) {
+        $dir = $annotations['manytomany']['dir'];
       }
       $rel->setOrderBy($orderBy, $dir);
     }
+
+    // Parse the fetch policy if defined.  If not 'lazy' is used.
+    $fetchPolicy = 'lazy';
+    if (isset($annotations['manytomany']['fetch'])) {
+      $fetchPolicy = $annotations['manytomany']['fetch'];
+    }
+    $rel->setFetchPolicy($fetchPolicy);
 
     return $rel;
   }
@@ -410,6 +417,13 @@ class Parser {
       $deleteOrphans = (bool) $annotations['onetomany']['deleteorphans'];
     }
     $rel->deleteOrphans($deleteOrphans); 
+
+    // Parse the fetch policy if defined.  If not 'lazy' is used.
+    $fetchPolicy = 'lazy';
+    if (isset($annotations['onetomany']['fetch'])) {
+      $fetchPolicy = $annotations['onetomany']['fetch'];
+    }
+    $rel->setFetchPolicy($fetchPolicy);
 
     return $rel;
   }
