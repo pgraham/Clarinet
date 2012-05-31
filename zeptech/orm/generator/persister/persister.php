@@ -302,16 +302,16 @@ class ${actor} {
         // ---------------------------------------------------------------------
       ${done}
 
-      if ($startTransaction) {
-        $this->_pdo->commit();
-      }
+      ${if:onDelete}
+        $model->onDelete();
+      ${fi}
 
       $this->_cache[$id] = null;
       $model->set${id_property}(null);
 
-      ${if:onDelete}
-        $model->onDelete();
-      ${fi}
+      if ($startTransaction) {
+        $this->_pdo->commit();
+      }
 
       return $rowCount;
     } catch (PDOException $e) {
