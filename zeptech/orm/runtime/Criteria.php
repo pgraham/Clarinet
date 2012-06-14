@@ -14,6 +14,8 @@
  */
 namespace zeptech\orm\runtime;
 
+use \Exception;
+
 /**
  * This class encapsulates a set of criteria for a SELECT statement.
  *
@@ -43,8 +45,12 @@ class Criteria {
   // Constants representing all of the valid sorts directions
   // 
 
+  /** Standard ASCending sort */
   const SORT_ASC = 'asc';
+  /** Standard DESCending sort */
   const SORT_DESC = 'desc';
+  /** ASCending sort but with NULL values at the end */
+  const SORT_NULLS_LAST = 'nullslast';
 
   /*
    * Array of supported predicate values that by-pass parameterization.  The
@@ -69,6 +75,15 @@ class Criteria {
     self::OP_LESS_THAN,
     self::OP_LESS_EQUALS,
     self::OP_LIKE
+  );
+
+  /*
+   * Array of valid sort directions.
+   */
+  private static $_availSorts = array(
+    self::SORT_ASC,
+    self::SORT_DESC,
+    self::SORT_NULLS_LAST
   );
 
   /*
@@ -476,7 +491,7 @@ class Criteria {
    * @param string $op The operator for the predicate.  Must be one of the
    *   supported operators, defined by the OP_* constants.
    * @param string $transform A function which returns a transformation to
-   *   apply to the preciates column. [Optional]
+   *   apply to the predicates column. [Optional]
    * @return $this
    */
   public function addPredicate($column, $value, $op, $transform = null) {
@@ -560,7 +575,7 @@ class Criteria {
    */
   public function addSort($sort, $direction = 'asc') {
     $direction = strtolower($direction);
-    if ($direction !== self::SORT_ASC && $direction !== self::SORT_DESC) {
+    if (!in_array($direction, self::$_availSorts)) {
       throw new Exception("Invalid sort direction: $direction");
     }
 
@@ -569,7 +584,15 @@ class Criteria {
     }
 
     foreach ($sort AS $col) {
-      $this->_sorts[] = self::escapeFieldName(trim($col)) . " $direction";
+      $escCol = self::escapeFieldName(trim($col));
+      if ($direction === self::SORT_NULLS_LAST) {
+
+        //$this->_sorts[] = "CASE $escCol WHEN NULL THEN 1 ELSE 0 END";
+        $this->_sorts[] = "ISNULL($escCol)";
+        $this->_sorts[] = "$escCol";
+      } else {
+        $this->_sorts[] =  "$escCol $direction";
+      }
     }
 
     return $this;
