@@ -18,12 +18,12 @@ class ${actor} {
     $this->_c = new Criteria();
   }
 
-  public function addFilter($field, $value) {
+  public function addFilter($field, $value, $op = '=') {
     if (strpos($field, '.') !== false) {
       list($rel, $prop) = explode('.', $field);
-      $this->_addRelFilter($rel, $prop, $value);
+      $this->_addRelFilter($rel, $prop, $value, $op);
     } else {
-      $this->_addPropFilter($field, $value);
+      $this->_addPropFilter($field, $value, $op);
     }
   }
 
@@ -44,12 +44,12 @@ class ${actor} {
     $this->_c->setLimit($limit, $offset);
   }
 
-  private function _addPropFilter($propName, $value) {
+  private function _addPropFilter($propName, $value, $op) {
     $prop = $this->_getProp($propName);
     if ($prop !== null) {
-      $this->_c->addEquals($prop['col'], $value);
+      $this->_c->addPredicate($prop['col'], $value, $op);
     } else {
-      $this->_c->addEquals($propName, $value);
+      $this->_c->addPredicate($propName, $value, $op);
     }
   }
 
@@ -62,17 +62,17 @@ class ${actor} {
     }
   }
 
-  private function _addRelFilter($relName, $propName, $value) {
+  private function _addRelFilter($relName, $propName, $value, $op) {
     $rel = $this->_getRel($relName);
     if ($rel === null || !isset($rel['props'][$propName])) {
-      $this->_c->addEquals("$relName.$propName", $value);
+      $this->_c->addPredicate("$relName.$propName", $value, $op);
     } else {
 
       $tbl = $rel['tbl'];
       $col = $rel['props'][$propName];
       
       $this->_addRel($rel);
-      $this->_c->addEquals("$tbl.$col", $value);
+      $this->_c->addPredicate("$tbl.$col", $value, $op);
     }
   }
 
