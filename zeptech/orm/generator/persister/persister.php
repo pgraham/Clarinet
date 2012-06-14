@@ -7,6 +7,7 @@ use \zeptech\orm\runtime\Persister;
 use \zeptech\orm\runtime\PdoExceptionWrapper;
 use \zeptech\orm\runtime\PdoWrapper;
 use \zeptech\orm\runtime\SaveLock;
+use \zeptech\orm\QueryBuilder;
 use \Exception;
 use \PDO;
 use \PDOException;
@@ -342,6 +343,15 @@ class ${actor} {
       }
     }
     return $this->_cache[$id];
+  }
+
+  /**
+   * Get a new query builder instance for the model handled by this persister.
+   *
+   * @return QueryBuilder
+   */
+  public function getQueryBuilder() {
+    return QueryBuilder::get('${class}');
   }
 
   /**
