@@ -30,6 +30,8 @@ class PdoExceptionWrapper extends Exception {
   const MSG_RE = '/SQLSTATE\[([\d\w]{5})\]: (.+)/';
   const ERROR_MSG_RE = '/(.+):\s*(\d+)\s*(.+)$/';
 
+  private $_sql;
+
   private $_sqlState;
   private $_sqlMsg;
 
@@ -44,10 +46,15 @@ class PdoExceptionWrapper extends Exception {
    *
    * @param PDOException $pdoe
    */
-  public function __construct(PDOException $pdoe) {
-    parent::__construct();
+  public function __construct(PDOException $pdoe, $sql) {
+    parent::__construct($pdoe->getMessage());
 
     $this->_parseMessage($pdoe->getMessage());
+    $this->_sql = $sql;
+  }
+
+  public function getSql() {
+    return $this->_sql;
   }
 
   public function getSqlState() {
