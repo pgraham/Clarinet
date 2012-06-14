@@ -44,12 +44,9 @@ class QueryBuilder extends AbstractModelGenerator {
    * @param string $modelName
    */
   public static function get($modelName) {
-    if (!array_key_exists($modelName, self::$_cache)) {
-      $actor = str_replace('\\', '_', $modelName);
-      $fq = "zeptech\\dynamic\\orm\\querybuilder\\$actor";
-      self::$_cache[$modelName] = new $fq();
-    }
-    return self::$_cache[$modelName];
+    $actor = str_replace('\\', '_', $modelName);
+    $fq = "zeptech\\dynamic\\orm\\querybuilder\\$actor";
+    return new $fq();
   }
 
   /*
