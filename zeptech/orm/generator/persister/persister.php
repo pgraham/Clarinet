@@ -117,7 +117,7 @@ class ${actor} {
     } catch (PDOException $e) {
       // TODO - Create a PDOExceptionWrapper that parses the error message in
       //        order to present an error suitable for users
-      throw new PdoExceptionWrapper($e, '${actor}');
+      throw new PdoExceptionWrapper($e, $sql);
     }
   }
 
@@ -399,8 +399,8 @@ class ${actor} {
     $c->clearSelects()
       ->setDistinct(true);
     $sql = $c->__toString();
-    try {
 
+    try {
       $stmt = $this->_pdo->prepare($sql);
       $stmt->setFetchMode(PDO::FETCH_ASSOC);
 
@@ -492,7 +492,7 @@ class ${actor} {
 
       return $result;
     } catch (PDOException $e) {
-      throw new PdoExceptionWrapper($e, '${actor}');
+      throw new PdoExceptionWrapper($e, $sql);
     }
   }
 
