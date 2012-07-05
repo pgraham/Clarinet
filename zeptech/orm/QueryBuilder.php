@@ -34,18 +34,17 @@ use \zpt\pct\CodeTemplateParser;
  */
 class QueryBuilder extends AbstractModelGenerator {
 
-  private static $_cache = array();
+  protected static $actorNamespace = 'zeptech\dynamic\orm\querybuilder';
 
   /**
-   * Retrieve a QueryBuilder instance for the specified model.  There must
-   * already be a generated QueryBuilder for the given model and a loader for
-   * the namespace \zeptech\dynamic must be registered.
+   * Override the static get method to not use a cache.  A new querybuilder is
+   * returned everytime.
    *
-   * @param string $modelName
+   * @override
    */
   public static function get($modelName) {
     $actor = str_replace('\\', '_', $modelName);
-    $fq = "zeptech\\dynamic\\orm\\querybuilder\\$actor";
+    $fq = static::$actorNamespace . "\\$actor";
     return new $fq();
   }
 
@@ -55,20 +54,8 @@ class QueryBuilder extends AbstractModelGenerator {
    * ===========================================================================
    */
 
-  private $_tmpl;
-
-  /**
-   * Create a new QueryBuilderGenerator that outputs generated classes to
-   * $outputPath/zeptech/dynamic/orm/querybuilder
-   *
-   * @param string $outputPath
-   */
-  public function __construct($outputPath) {
-    parent::__construct($outputPath .  '/zeptech/dynamic/orm/querybuilder');
-
-    $parser = new CodeTemplateParser();
-    $this->_tmpl = $parser->parse(
-      file_get_contents(__DIR__ . '/queryBuilder.tmpl.php'));
+  protected function getTemplatePath() {
+    return __DIR__ . '/queryBuilder.tmpl.php';
   }
 
   /**
@@ -78,7 +65,7 @@ class QueryBuilder extends AbstractModelGenerator {
    * @param Model $model
    * @return string The PHP code for a query builder.
    */
-  protected function _generateForModel(Model $model) {
+  protected function getValuesForModel(Model $model) {
     $tmplValues = array(
       'actor' => $model->getActor()
     );
@@ -139,6 +126,6 @@ class QueryBuilder extends AbstractModelGenerator {
     $tmplValues['properties'] = $props;
     $tmplValues['relationships'] = $rels;
 
-    return $this->_tmpl->forValues($tmplValues);
+    return $tmplValues;
   }
 }

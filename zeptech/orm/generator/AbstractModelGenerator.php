@@ -33,9 +33,9 @@ abstract class AbstractModelGenerator extends AbstractGenerator {
    *
    * @param string $className The entity for which to generate code.
    */
-  protected function _generate($className) {
+  protected function getValues($className) {
     $model = Parser::getModel($className);
-    return $this->_generateForModel($model);
+    return $this->getValuesForModel($model);
   }
 
   /**
@@ -44,5 +44,5 @@ abstract class AbstractModelGenerator extends AbstractGenerator {
    * @param Model $model Parsed model information.
    * @return string The PHP code for the generated actor.
    */
-  protected abstract function _generateForModel(Model $model);
+  protected abstract function getValuesForModel(Model $model);
 }

@@ -14,8 +14,10 @@
  */
 namespace zeptech\orm\generator;
 
+use \reed\String;
 use \zeptech\orm\generator\model\Model;
-use \zeptech\orm\generator\transformer\ClassBuilder;
+use \zeptech\orm\generator\model\Property;
+use \zeptech\orm\generator\model\Relationship;
 
 /**
  * Generator for model transformer classes.
@@ -24,16 +26,10 @@ use \zeptech\orm\generator\transformer\ClassBuilder;
  */
 class TransformerGenerator extends AbstractModelGenerator {
 
-  /**
-   * Creates a new TransformerGenerator that outputs generated classes to
-   * $outputPath/clarinet/transformer
-   *
-   * @param string $outputPath The base output path for generated files.  Class
-   *   files will be output in sub directories of this class that will allow
-   *   the class to be namespaced, and autoloaded properly.
-   */
-  public function __construct($outputPath) {
-    parent::__construct($outputPath . '/zeptech/dynamic/orm/transformer');
+  protected static $actorNamespace = 'zeptech\dynamic\orm\transformer';
+
+  protected function getTemplatePath() {
+    return __DIR__ . '/transformer/transformer.php';
   }
 
   /**
@@ -44,7 +40,63 @@ class TransformerGenerator extends AbstractModelGenerator {
    *   is to be generated.
    * @return string The PHP code for a transformer.
    */
-  protected function _generateForModel(Model $model) {
-    return ClassBuilder::build($model);
+  protected function getValuesForModel(Model $model) {
+    $id = $model->getId()->getName();;
+
+    $properties  = array();
+    foreach ($model->getProperties() AS $property) {
+      $propertyValues = array(
+        'id'   => $property->getIdentifier(),
+        'idx'  => $property->getIdentifier(),
+        'type' => $property->getType()
+      );
+
+      $default = $property->getDefault();
+      if ($default !== null) {
+        $propertyValues['default'] = $default;
+      }
+
+      $properties[] = $propertyValues;
+    }
+
+    $relationships = array();
+    foreach ($model->getRelationships() AS $relationship) {
+      $lhsProp = $relationship->getLhsProperty();
+      $rhs = $relationship->getRhs();
+      $type = $relationship->getType();
+
+      $rel = array(
+        'type'          => $type,
+        'name'          => $lhsProp,
+        'idx'           => $lhsProp,
+        'rhs'           => $rhs->getClass(),
+        'rhsIdProperty' => $rhs->getId()->getIdentifier(),
+      );
+
+      if ($type === Relationship::TYPE_ONETOMANY ||
+          $type === Relationship::TYPE_MANYTOMANY)
+      {
+        $rel['fetch'] = $relationship->getFetchPolicy();
+      }
+
+      $relationships[] = $rel;
+    }
+
+    $fromDbIdCast = '';
+    if ($model->getId()->getType() == Property::TYPE_INTEGER) {
+      $fromDbIdCast = '(int) ';
+    }
+
+    $templateValues = Array
+    (
+      'class'           => $model->getClass(),
+      'actor'           => $model->getActor(),
+      'id'              => $id,
+      'idIdx'           => String::fromCamelCase($id),
+      'properties'      => $properties,
+      'relationships'   => $relationships,
+      'from_db_id_cast' => $fromDbIdCast
+    );
+    return $templateValues;
   }
 }

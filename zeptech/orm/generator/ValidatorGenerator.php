@@ -15,7 +15,6 @@
 namespace zeptech\orm\generator;
 
 use \zeptech\orm\generator\model\Model;
-use \zeptech\orm\generator\validator\ClassBuilder;
 
 /**
  * Generator for model validator classes.
@@ -24,18 +23,11 @@ use \zeptech\orm\generator\validator\ClassBuilder;
  */
 class ValidatorGenerator extends AbstractModelGenerator {
 
-  /**
-   * Creates a new ValidatorGenerator that outputs generated classes to
-   * $outputPath/clarinet/validator
-   *
-   * @param string $outputPath The base output path for generated files.  Class
-   *   files will be output in sub directories of this class that will allow
-   *   the class to be namespaced, and autoloaded properly.
-   */
-  public function __construct($outputPath) {
-    parent::__construct($outputPath . '/zeptech/dynamic/orm/validator');
-  }
+  protected static $actorNamespace = 'zeptech\dynamic\orm\validator';
 
+  protected function getTemplatePath() {
+    return __DIR__ . '/validator/validator.tmpl.php';
+  }
 
   /**
    * Generates the PHP Code for a validator actor for the given model
@@ -45,7 +37,27 @@ class ValidatorGenerator extends AbstractModelGenerator {
    *   is to be generated.
    * @return string The PHP code for a validator.
    */
-  protected function _generateForModel(Model $model) {
-    return ClassBuilder::build($model);
+  protected function getValuesForModel(Model $model) {
+    $properties = array();
+
+    foreach ($model->getProperties() AS $property) {
+      $prop = array();
+      $prop['name'] = $property->getName();
+      $prop['type'] = $property->getType();
+      if ($property->isEnumerated()) {
+        $prop['values'] = $property->getValues();
+      }
+
+      $prop['notNull'] = $property->notNull();
+
+      $properties[] = $prop;
+    }
+
+    return array(
+      'class'     => $model->getClass(),
+      'actor'     => $model->getActor(),
+
+      'properties' => $properties
+    );
   }
 }
