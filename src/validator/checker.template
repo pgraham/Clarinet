@@ -1,4 +1,0 @@
-    $msg = $this->${method_name}(${var_name});
-    if ($msg !== null) {
-      $msgs[] = $msg;
-    }

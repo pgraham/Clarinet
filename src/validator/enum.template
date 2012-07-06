@@ -1,6 +1,0 @@
-  private function _checkEnum${property}(${var_name}) {
-    if (!in_array(${var_name}, explode(',', '${values}'))) {
-      return "${var_name} is not an accepted value for a ${model}'s ${property} property. Accepted values are: ${values}";
-    }
-    return null;
-  }
