@@ -14,10 +14,10 @@
  */
 namespace zeptech\orm\generator;
 
-use \reed\String;
 use \zeptech\orm\generator\model\Model;
 use \zeptech\orm\generator\model\Property;
 use \zeptech\orm\generator\model\Relationship;
+use \zpt\util\String;
 
 /**
  * Generator for model transformer classes.
