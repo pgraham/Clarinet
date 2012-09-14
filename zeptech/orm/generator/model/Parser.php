@@ -15,7 +15,7 @@
 namespace zeptech\orm\generator\model;
 
 // TODO Update to use php-annotations
-use \reed\reflection\Annotations;
+use \zeptech\anno\Annotations;
 use \zpt\util\String;
 use \Exception;
 use \ReflectionClass;
