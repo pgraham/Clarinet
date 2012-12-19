@@ -63,6 +63,11 @@ class PersisterGenerator extends AbstractModelGenerator {
       $sqlSetters[] = "`$col` = :$col";
     }
 
+    $collections = array();
+    foreach ($model->getCollections() as $col) {
+      $collections[] = $col->asArray();
+    }
+
     $relationships = array();
     foreach ($model->getRelationships() AS $rel) {
       $lhs = $rel->getLhs();
@@ -139,6 +144,7 @@ class PersisterGenerator extends AbstractModelGenerator {
       'id_column'              => $model->getId()->getColumn(),
 
       'properties'             => $properties,
+      'collections'            => $collections,
       'relationships'          => $relationships,
 
       'column_names'           => $columnNames,

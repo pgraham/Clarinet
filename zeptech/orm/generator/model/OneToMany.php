@@ -26,8 +26,8 @@ class OneToMany extends AbstractRelationship {
   private $_rhsColumn;
   private $_rhsProperty;
   private $_orderBy;
-  private $_deleteOrphans;
-  private $_fetchPolicy;
+  private $_deleteOrphans = false;
+  private $_fetchPolicy = 'lazy';
 
   /**
    * Creates a new one-to-many relationship representation.
@@ -95,6 +95,8 @@ class OneToMany extends AbstractRelationship {
    * 'eager'.  This is currently only honoured by the transformer.  All
    * relationships are retrieved eagerly by the persister, but this will change
    * in the future when proxies are introduced.
+   *
+   * TODO This is not currently supported
    *
    * @param string $fetchPolicy Either 'lazy' or 'eager'
    */

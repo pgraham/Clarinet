@@ -177,6 +177,10 @@ class ${actor} {
       $model->set${id_property}($id);
       $this->_cache[$id] = $model;
 
+      ${each:collections as col}
+        $this->insertCollection_${col[property]}($id, $model->get${col[property]}());
+      ${done}
+
       $saveLock = SaveLock::acquire();
       $saveLock->lock($model);
 
@@ -284,6 +288,12 @@ class ${actor} {
 
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
+
+      #{ each: collections as col
+      ${each:collections as col}
+        $this->deleteCollection_${col[property]}($id);
+      ${done}
+      #} each
 
       ${each:relationships AS rel}
         // ---------------------------------------------------------------------
@@ -440,6 +450,13 @@ class ${actor} {
           ${fi}
         ${done}
 
+        // Populate collections
+        #{ each: collections as col
+        ${each:collections as col}
+          $this->retrieveCollection_${col[property]}($id, $model);
+        ${done}
+        #} each
+
         // Populate any relationships
         ${each:relationships AS rel}
           // -------------------------------------------------------------------
@@ -574,6 +591,16 @@ class ${actor} {
         $rowCount = $this->_update->rowCount();
       ${fi}
 
+      #-- Update each of the model's collections by first removing the existing
+      #-- persisted collection and replacing it with what is in the model
+      #{ each: collections as col
+      ${each:collections as col}
+          $this->removeCollection_${col[property]}($id);
+          $this->insertCollection_${col[property]}($id, $model->get${col[property]}());
+      ${done}
+      #} each
+
+
       ${each:relationships as rel}
         // ---------------------------------------------------------------------
         // Save related ${rel[rhs]} entities
@@ -681,10 +708,131 @@ class ${actor} {
       ${fi}
       return $rowCount;
     } catch (PDOException $e) {
+      error_log($e->getMessage());
+      error_log($e->getTraceAsString());
       $this->_pdo->rollback();
       $saveLock->forceRelease();
 
       throw new PdoExceptionWrapper($e, '${actor}');
     }
   }
+
+  #-- Create methods for removing each of the model's collections
+  #{ each: collection as col
+  ${each:collections as col}
+    private function removeCollection_${col[property]}($id) {
+      $stmt = $this->_pdo->prepare(
+        'DELETE FROM ${col[link]}
+         WHERE ${col[idCol]} = :id');
+      $stmt->execute(array('id' => $id));
+        
+    }
+  ${done}
+  #} done
+
+  #-- Create methods for persisting each of the model's collections
+  #{ each: collections as col
+  ${each:collections as col}
+    private function insertCollection_${col[property]}($id, $collection) {
+      ${if:col[type] = set}
+      #{ if: col[type] = set
+        $stmt = $this->_pdo->prepare(
+          "INSERT INTO ${col[link]}
+           (${collection[idCol]}, ${col[valCol]})
+           VALUES (:id, :val)");
+
+        // TODO Update this to use bulk insert
+        foreach ($collection as $val) {
+          $stmt->execute(array(
+            'id' => $id,
+            'val' => $val
+          ));
+        }
+
+      ${elseif:col[type] = list}
+      #} { elseif: col[type] = list
+        $stmt = $this->_pdo->prepare(
+          "INSERT INTO ${col[link]}
+           (${col[idCol]}, ${col[valCol]}, ${col[seqCol]})
+           VALUES (:id, :val, :seq)");
+
+        // TODO Update this to use bulk insert
+        foreach ($collection as $seq => $val) {
+          $stmt->execute(array(
+            'id' => $id,
+            'val' => $val,
+            'seq' => $seq
+          ));
+        }
+
+      ${elseif:col[type] = map}
+      #} { elseif: col[type] = map
+        $stmt = $this->_pdo->prepare(
+          "INSERT INTO ${col[link]}
+           (${col[idCol]}, ${col[keyCol]}, ${col[valCol]})
+           VALUES (:id, :key, :val)");
+
+        // TODO Update this to use bulk insert
+        foreach ($collection as $key => $val) {
+          $stmt->execute(array(
+            'id' => $id,
+            'key' => $key,
+            'val' => $val
+          ));
+        }
+
+      ${fi}
+      #} if
+    }
+  ${done}
+  #} each
+
+  #-- Create methods for retrieve each of the model's collections
+  #{ each: collections as col
+  ${each: collections as col}
+    private function retrieveCollection_${col[property]}($id, $model) {
+      #{ if: col[type] = set
+      ${if:col[type] = set}
+        $stmt = $this->_pdo->prepare(
+          'SELECT ${col[valCol]} FROM ${col[link]} WHERE ${col[idCol]} = :id');
+        $stmt->execute(array('id' => $id));
+
+        $collection = array();
+        foreach ($stmt as $row) {
+          $collection[] = $row['${col[valCol]}'];
+        }
+        $model->set${col[property]}($collection);
+        
+      #}{ else if: col[type] = list
+      ${elseif:col[type] = list}
+        $stmt = $this->_pdo->prepare(
+          'SELECT ${col[valCol]} FROM ${col[link]} WHERE ${col[idCol]} = :id
+           ORDER BY ${col[seqCol]}');
+        $stmt->execute(array('id' => $id));
+        
+        $collection = array();
+        foreach ($stmt as $row) {
+          $collection[] = $row['${col[valCol]}'];
+        }
+        $model->set${col[property]}($collection);
+
+      #}{ else if: col[type] = map
+      ${elseif:col[type] = map}
+        $stmt = $this->_pdo->prepare(
+          'SELECT ${col[keyCol]}, ${col[valCol]}
+           FROM ${col[link]}
+           WHERE ${col[idCol]} = :id');
+        $stmt->execute(array('id' => $id));
+
+        $collection = array();
+        foreach ($stmt as $row) {
+          $collection[$row['${col[keyCol]}']] = $row['${col[valCol]}'];
+        }
+        $model->set${col[property]}($collection);
+
+      ${fi}
+      #} if
+    }
+  ${done}
+  #} each
 }

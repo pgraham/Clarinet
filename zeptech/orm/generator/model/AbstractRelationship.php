@@ -21,7 +21,7 @@ namespace zeptech\orm\generator\model;
  * @author Philip Graham <philip@zeptech.ca>
  * @package clarinet/model
  */
-abstract class AbstractRelationship implements Relationship, Identifiable {
+abstract class AbstractRelationship implements Relationship {
 
   /** Model for the entity on the left side of the relationship */
   protected $_lhs;
@@ -53,15 +53,15 @@ abstract class AbstractRelationship implements Relationship, Identifiable {
     $this->_rhs = $rhs;
     $this->_lhsProperty = $lhsProperty;
 
-    $this->_identifier = $lhs->getIdentifier() . '-' . $rhs->getIdentifier();
+    $this->_identifier = $lhs->getName() . '-' . $rhs->getName();
   }
 
   /**
-   * Getter for the Identifiable instance's unique identifier.
+   * Getter for the unique name identifying this relationship.
    *
    * @return string
    */
-  public function getIdentifier() {
+  public function getName() {
     return $this->_identifier;
   }
 

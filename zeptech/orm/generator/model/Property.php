@@ -21,7 +21,7 @@ use \Exception;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class Property implements Identifiable {
+class Property {
 
   const TYPE_BOOLEAN   = 'boolean';
   const TYPE_DATE      = 'date';
@@ -56,13 +56,11 @@ class Property implements Identifiable {
   /**
    * Create a new persisted property representation.
    *
-   * @param Model $model The model to which this property belongs.
    * @param string $name The name of the property.
    * @param string $column The name of the column in the database table in which
    *   instances are persisted.
    */
-  public function __construct(Model $model, $name, $column) {
-    $this->_model = $model;
+  public function __construct($name, $column) {
     $this->_name = $name;
     $this->_column = $column;
 
@@ -91,17 +89,6 @@ class Property implements Identifiable {
    */
   public function getDefault() {
     return $this->_default;
-  }
-
-  /**
-   * Getter for the identifiable instance's identifier.
-   *
-   * // TODO This will not be unique among all Indentifiable instances, only
-   *         among Property instances belonging to the same model.  This is
-   *         sufficient for now but may not be in the future.
-   */
-  public function getIdentifier() {
-    return $this->_name;
   }
 
   /**
@@ -174,11 +161,21 @@ class Property implements Identifiable {
   }
 
   /**
+   * Setter for the model that this property belongs to.
+   *
+   * @param Model $model
+   */
+  public function setModel(Model $model) {
+    $this->_model = $model;
+  }
+
+  /**
    * Setter for the type of the property.
    *
    * @param string $type One of this class's TYPE_ constants
    */
   public function setType($type) {
+    $type = strtolower($type);
     if (!in_array($type, self::$ALL_TYPES)) {
       throw new Exception("Unsupported property type: $type");
     }

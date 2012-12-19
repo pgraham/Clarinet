@@ -14,6 +14,8 @@
  */
 namespace zeptech\orm\generator\model;
 
+use \zpt\orm\model\Collection;
+use \Exception;
 use \InvalidArgumentException;
 
 /**
@@ -41,10 +43,13 @@ class Model implements Identifiable {
   private $_id;
 
   /* The model's properties. */
-  private $_properties = Array();
+  private $_properties = array();
 
   /* The model's relationships. */
-  private $_relationships = Array();
+  private $_relationships = array();
+
+  /* THe model's associated collections. */
+  private $_collections = array();
 
   /* The name of the table where model entities are persisted. */
   private $_table;
@@ -85,12 +90,21 @@ class Model implements Identifiable {
   }
 
   /**
+   * Add a collection property to the list.
+   *
+   * @param Collection $collection Persisted collection.
+   */
+  public function addCollection(Collection $collection) {
+    $this->_collections[$collection->getName()] = $collection;
+  }
+
+  /**
    * Add a Property object to the list of the model's persisted properties.
    *
    * @param Property $property Persisted property.
    */
   public function addProperty(Property $property) {
-    $this->_properties[$property->getIdentifier()] = $property;
+    $this->_properties[$property->getName()] = $property;
   }
 
   /**
@@ -99,7 +113,7 @@ class Model implements Identifiable {
    * @param Relationship $relationship Entity relationship.
    */
   public function addRelationship(Relationship $relationship) {
-    $this->_relationships[$relationship->getIdentifier()] = $relationship;
+    $this->_relationships[$relationship->getName()] = $relationship;
   }
 
   /**
@@ -121,6 +135,15 @@ class Model implements Identifiable {
    */
   public function getClass() {
     return $this->_class;
+  }
+
+  /**
+   * Getter for the model's collection mappings.
+   *
+   * @return array
+   */
+  public function getCollections() {
+    return $this->_collections;
   }
 
   /**

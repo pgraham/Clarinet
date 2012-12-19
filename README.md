@@ -147,7 +147,8 @@ is annotated with either @ManyToOne, @OneToMany or @ManyToMany. As with id and
 column getter, they must be accompanied by a setter. Each of the relationship
 annotations require an 'entity' parameter which is the name of the
 entity on the right side of the relationship. All relationships have a left side
-and a right.  The left side is the entity which declares relationship.  
+and a right.  The left side is the entity which declares relationship.
+Relationships which are declared on both sides are called *mirrored*.
 
 ```php
 <?php
@@ -208,6 +209,11 @@ parameter.  The default direction is ASC.
 Clarinet is licensed under the 3-clause BSD license, the text of which can be
 found in the file LICENSE.txt in the same directory as this file.
 
+### Collections
+
+Clarinet supports collection relationships for storing array properties. There
+are three supported collection types, @Set, @List and @Map
+
 ## Actor Generation
 
 Clarinet uses the
@@ -246,17 +252,3 @@ Clarinet::init(array(
   'debug' => true/false, // Wether or not to generate actors when fist requested
 ));
 ```
-
-* * *
-Note: For those familiar with
-[PSR0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md).
-Clarinet is not compatible with this standard since generated classes are in the
-same base namespace as its source files.
-
-There are plans to change this but until this happens, any autoloader registered
-for classes in the clarinet\\ namespace cannot fail if a requested class is not
-found as the class may be a generated class located in a different base path.
-
-Clarinet will register its own autoloader for generated classes.
-* * *
-

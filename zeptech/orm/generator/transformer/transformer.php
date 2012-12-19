@@ -33,8 +33,15 @@ class ${actor} {
     $a['${idIdx}'] = $model->get${id}();
 
     ${each:properties AS property}
-      $a['${property[idx]}'] = $model->get${property[id]}();
+      $a['${property[id]}'] = $model->get${property[id]}();
     ${done}
+
+    #-- 
+    #{ each: collections as col
+    ${each:collections as col}
+      $a['${col[property]}'] = $model->get${col[property]}();
+    ${done}
+    #} each
 
     ${each:relationships AS relationship}
       $relVal = $model->get${relationship[name]}();
@@ -106,8 +113,8 @@ class ${actor} {
     }
 
     ${each:properties AS property}
-      if (array_key_exists('${property[idx]}', $a)) {
-        $val = $a['${property[idx]}'];
+      if (array_key_exists('${property[id]}', $a)) {
+        $val = $a['${property[id]}'];
 
         ${if:property[default] ISSET}
           if ($val === null) {
@@ -138,6 +145,15 @@ class ${actor} {
       }
 
     ${done}
+
+    #-- Add each collection into the model
+    #{ each: collections as col
+    ${each:collections as col}
+      if (array_key_exists('${col[property]}', $a)) {
+        $model->set${col[property]}($a['${col[property]}']);
+      }
+    ${done}
+    #} each
 
     ${each:relationships AS relationship}
       ${if:relationship[type] = many-to-many or relationship[type] = one-to-many}

@@ -15,7 +15,7 @@
 namespace zeptech\orm\generator;
 
 use \zeptech\orm\generator\model\Model;
-use \zeptech\orm\generator\model\Parser;
+use \zpt\orm\model\ModelCache;
 use \zpt\pct\AbstractGenerator;
 
 /**
@@ -27,6 +27,12 @@ use \zpt\pct\AbstractGenerator;
  */
 abstract class AbstractModelGenerator extends AbstractGenerator {
 
+  private $modelCache;
+
+  public function setModelCache(ModelCache $modelCache) {
+    $this->modelCache = $modelCache;
+  }
+
   /**
    * Generate the code.  This method delegates to the implementation for the
    * acutal generation then outputs to the specified path.
@@ -34,7 +40,7 @@ abstract class AbstractModelGenerator extends AbstractGenerator {
    * @param string $className The entity for which to generate code.
    */
   protected function getValues($className) {
-    $model = Parser::getModel($className);
+    $model = $this->modelCache->get($className);
     return $this->getValuesForModel($model);
   }
 
@@ -45,4 +51,5 @@ abstract class AbstractModelGenerator extends AbstractGenerator {
    * @return string The PHP code for the generated actor.
    */
   protected abstract function getValuesForModel(Model $model);
+
 }

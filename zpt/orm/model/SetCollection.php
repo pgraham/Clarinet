@@ -10,22 +10,26 @@
  * the link below.
  * =============================================================================
  *
- * This file sets up the environment for running tests.
- *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
+namespace zpt\orm\model;
 
-require 'SplClassLoader.php';
+/**
+ * This class encapsulates a set property mapping for a model.
+ *
+ * @author Philip Graham <philip@zeptech.ca>
+ */
+class SetCollection extends Collection
+{
 
-// Initialize Mockery
-// -----------------------------------------------------------------------------
-require 'Mockery/Loader.php';
-require 'Hamcrest/Hamcrest.php';
-$loader = new \Mockery\Loader();
-$loader->register();
-
-// Register loader for clarinet classes
-$ormPath = realpath(__DIR__ . '/..');
-
-$ldr = new SplClassLoader('zeptech\orm', $ormPath);
-$ldr->register();
+  public function __construct($property, $linkTable, $idColumn $valueColumn)
+  {
+      parent::__construct(
+          'set',
+          $property,
+          $linkTable,
+          $idColumn,
+          $valueColumn
+      );
+  }
+}

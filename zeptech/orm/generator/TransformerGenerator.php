@@ -46,8 +46,7 @@ class TransformerGenerator extends AbstractModelGenerator {
     $properties  = array();
     foreach ($model->getProperties() AS $property) {
       $propertyValues = array(
-        'id'   => $property->getIdentifier(),
-        'idx'  => $property->getIdentifier(),
+        'id'   => $property->getName(),
         'type' => $property->getType()
       );
 
@@ -57,6 +56,11 @@ class TransformerGenerator extends AbstractModelGenerator {
       }
 
       $properties[] = $propertyValues;
+    }
+
+    $collections = array();
+    foreach ($model->getCollections() as $col) {
+      $collections[] = $col->asArray();
     }
 
     $relationships = array();
@@ -70,7 +74,7 @@ class TransformerGenerator extends AbstractModelGenerator {
         'name'          => $lhsProp,
         'idx'           => $lhsProp,
         'rhs'           => $rhs->getClass(),
-        'rhsIdProperty' => $rhs->getId()->getIdentifier(),
+        'rhsIdProperty' => $rhs->getId()->getName(),
       );
 
       if ($type === Relationship::TYPE_ONETOMANY ||
@@ -94,6 +98,7 @@ class TransformerGenerator extends AbstractModelGenerator {
       'id'              => $id,
       'idIdx'           => String::fromCamelCase($id),
       'properties'      => $properties,
+      'collections'     => $collections,
       'relationships'   => $relationships,
       'from_db_id_cast' => $fromDbIdCast
     );
