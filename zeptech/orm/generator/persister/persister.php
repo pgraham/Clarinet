@@ -42,12 +42,15 @@ class ${actor} {
   private $_pdo = null;
 
   /* PDOStatement for inserting new entities into the database */
+  private $createSql;
   private $_create = null;
 
   /* PDOStatement for updating existing entities. */
+  private $updateSql;
   private $_update = null;
 
   /* PDOStatement for deleting existing entities. */
+  private $deleteSql;
   private $_delete = null;
 
   /**
@@ -56,18 +59,25 @@ class ${actor} {
   public function __construct() {
     $this->_pdo = PdoWrapper::get();
 
-    $this->_create = $this->_pdo->prepare(
-      "INSERT INTO ${table} (${join:column_names:,}) VALUES (${join:value_names:,})");
+    $this->createSql =
+      "INSERT INTO ${table}
+       (${join:column_names:,})
+       VALUES
+       (${join:value_names:,})";
+    $this->_create = $this->_pdo->prepare($this->createSql);
 
     ${if:has_update}
-      $this->_update = $this->_pdo->prepare(
-        "UPDATE ${table} SET ${join:sql_setters:,} WHERE ${id_column} = :id");
+      $this->updateSql = 
+        "UPDATE ${table}
+         SET ${join:sql_setters:,}
+         WHERE ${id_column} = :id";
+      $this->_update = $this->_pdo->prepare($this->updateSql);
     ${else}
       $this->_update = null;
     ${fi}
 
-    $this->_delete = $this->_pdo->prepare(
-      "DELETE FROM ${table} WHERE ${id_column} = :id");
+    $this->deleteSql = "DELETE FROM ${table} WHERE ${id_column} = :id";
+    $this->_delete = $this->_pdo->prepare($this->deleteSql);
   }
 
   /**
@@ -107,17 +117,20 @@ class ${actor} {
       ->selectCount()     // Setup the select list to only select COUNT(*)
       ->setLimit(null);   // Remove any limit on the criteria
     $sql = $c->__toString();
+    $params = $c->getParameters();
+
     try {
 
       $stmt = $this->_pdo->prepare($sql);
-      $params = $c->getParameters();
       $stmt->execute($params);
 
       return (int) $stmt->fetchColumn();
     } catch (PDOException $e) {
       // TODO - Create a PDOExceptionWrapper that parses the error message in
       //        order to present an error suitable for users
-      throw new PdoExceptionWrapper($e, $sql);
+      $e = new PdoExceptionWrapper($e, '${class}');
+      $e->setSql($sql, $params);
+      throw $e;
     }
   }
 
@@ -172,11 +185,16 @@ class ${actor} {
         ${fi}
       ${done}
 
+      $sql = $this->createSql; // If there is an exception this is handy to know
       $this->_create->execute($params);
+
       $id = $this->_pdo->lastInsertId();
       $model->set${id_property}($id);
       $this->_cache[$id] = $model;
 
+      // TODO Figure out a way of getting sql into any exceptions
+      $sql = null;
+      $params = null;
       ${each:collections as col}
         $this->insertCollection_${col[property]}($id, $model->get${col[property]}());
       ${done}
@@ -195,19 +213,26 @@ class ${actor} {
           if ($related !== null) {
             foreach($related AS $rel) {
               if ($rel->get${rhsIdProperty}() === null) {
+                $persister->save($rel);
               }
             }
           }
 
           // Delete all link entries for this entity
-          $deleteStmt = $this->_pdo->prepare("DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id");
-          $deleteStmt->execute(array('id' => $id));
+          $sql = "DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id";
+          $params = array('id' => $id);
+          $this->_pdo->prepare($sql)->execute($params);
 
           // Create new link entries for all related entities
           if ($related !== null) {
-            $createStmt = $this->_pdo->prepare("INSERT INTO ${rel[linkTable]} (${rel[lhsLinkColumn]}, ${rel[rhsLinkColumn]}) VALUES (:lhsId, :rhsId)");
+            $sql = "INSERT INTO ${rel[linkTable]} (${rel[lhsLinkColumn]}, ${rel[rhsLinkColumn]}) VALUES (:lhsId, :rhsId)";
+            $createStmt = $this->_pdo->prepare($sql);
             foreach ($related AS $rel) {
-              $createStmt->execute(array('lhsId' => $id, 'rhsId' => $rel->get${rel[rhsIdProperty]}()));
+              $params = array(
+                'lhsId' => $id,
+                'rhsId' => $rel->get${rel[rhsIdProperty]}()
+              );
+              $createStmt->execute($params);
             }
           }
 
@@ -224,15 +249,23 @@ class ${actor} {
              $persister->save($model);
            }
           ${else}
-            $updateStmt = $this->_pdo->prepare("UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = :id WHERE ${rel[rhsIdColumn]} = :relId");
             foreach ($related AS $rel) {
               if ($rel->get${rel[rhsIdProperty]}() === null) {
                 $persister->create($rel);
               }
-              $updateStmt->execute(array(
+            }
+
+            $sql = "UPDATE ${rel[rhsTable]}
+                    SET ${rel[rhsColumn]} = :id
+                    WHERE ${rel[rhsIdColumn]} = :relId";
+            $updateStmt = $this->_pdo->prepare($sql);
+
+            foreach ($related AS $rel) {
+              $params = array(
                 'id' => $id,
                 'relId' => $rel->get${rel[rhsIdProperty]}()
-              ));
+              );
+              $updateStmt->execute($params);
 
               // Clear the cache of the RHS entity as it may contain a stale id
               $persister->clearCache($rel->get${rel[rhsIdProperty]}());
@@ -261,7 +294,9 @@ class ${actor} {
         $saveLock->forceRelease();
       }
 
-      throw new PdoExceptionWrapper($e, '${actor}');
+      $e = new PdoExceptionWrapper($e, '${class}');
+      $e->setSql($sql, $params);
+      throw $e;
     }
   }
 
@@ -276,7 +311,7 @@ class ${actor} {
       throw new Exception("Can't delete ${class_str} because it does not have an id");
     }
 
-    $params = Array();
+    $params = array();
     $params[':id'] = $id;
 
     ${if:beforeDelete}
@@ -286,6 +321,7 @@ class ${actor} {
     try {
       $startTransaction = $this->_pdo->beginTransaction();
 
+      $sql = $this->deleteSql; // Set SQL in case there is an exception
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
 
@@ -306,8 +342,10 @@ class ${actor} {
           }
 
         ${elseif:rel[type] = many-to-many}
-          $deleteStmt = $this->_pdo->prepare('DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id');
-          $deleteStmt->execute(array('id' => $id));
+          $sql = 'DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id';
+          $params = array('id' => $id);
+          $deleteStmt = $this->_pdo->prepare($sql);
+          $deleteStmt->execute($params);
 
         ${fi}
         // ---------------------------------------------------------------------
@@ -328,7 +366,9 @@ class ${actor} {
     } catch (PDOException $e) {
       $this->_pdo->rollback();
 
-      throw new PdoExceptionWrapper($e, '${actor}');
+      $e = new PdoExceptionWrapper($e, '${class}');
+      $e->setSql($sql, $params);
+      throw $e;
     }
   }
 
@@ -409,12 +449,11 @@ class ${actor} {
     $c->clearSelects()
       ->setDistinct(true);
     $sql = $c->__toString();
+    $params = $c->getParameters();
 
     try {
       $stmt = $this->_pdo->prepare($sql);
       $stmt->setFetchMode(PDO::FETCH_ASSOC);
-
-      $params = $c->getParameters();
       $stmt->execute($params);
 
       $transformer = ActorFactory::getActor('transformer', '${class}');
@@ -452,6 +491,9 @@ class ${actor} {
 
         // Populate collections
         #{ each: collections as col
+        // TODO Figure out a way of getting SQL into any exceptions
+        $sql = null;
+        $params = null;
         ${each:collections as col}
           $this->retrieveCollection_${col[property]}($id, $model);
         ${done}
@@ -509,7 +551,9 @@ class ${actor} {
 
       return $result;
     } catch (PDOException $e) {
-      throw new PdoExceptionWrapper($e, $sql);
+      $e = new PdoExceptionWrapper($e, '${class}');
+      $e->setSql($sql, $params);
+      throw $e;
     }
   }
 
@@ -587,6 +631,7 @@ class ${actor} {
       ${done}
 
       ${if:has_update}
+        $sql = $this->updateSql;
         $this->_update->execute($params);
         $rowCount = $this->_update->rowCount();
       ${fi}
@@ -594,6 +639,9 @@ class ${actor} {
       #-- Update each of the model's collections by first removing the existing
       #-- persisted collection and replacing it with what is in the model
       #{ each: collections as col
+      // TODO Figure out a way of getting the SQL and params into any exception
+      $sql = null;
+      $params = null;
       ${each:collections as col}
           $this->removeCollection_${col[property]}($id);
           $this->insertCollection_${col[property]}($id, $model->get${col[property]}());
@@ -612,19 +660,27 @@ class ${actor} {
           if ($related !== null) {
             foreach($related AS $rel) {
               if ($rel->get${rhsIdProperty}() === null) {
+                $persister->save($rel);
               }
             }
           }
 
           // Delete all link entries for this entity
-          $deleteStmt = $this->_pdo->prepare("DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id");
-          $deleteStmt->execute(array('id' => $id));
+          $sql = "DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id";
+          $params = array('id' => $id);
+          $deleteStmt = $this->_pdo->prepare($sql);
+          $deleteStmt->execute($params);
 
           // Create new link entries for all related entities
           if ($related !== null) {
-            $createStmt = $this->_pdo->prepare("INSERT INTO ${rel[linkTable]} (${rel[lhsLinkColumn]}, ${rel[rhsLinkColumn]}) VALUES (:lhsId, :rhsId)");
+            $sql = "INSERT INTO ${rel[linkTable]} (${rel[lhsLinkColumn]}, ${rel[rhsLinkColumn]}) VALUES (:lhsId, :rhsId)";
+            $createStmt = $this->_pdo->prepare();
             foreach ($related AS $rel) {
-              $createStmt->execute(array('lhsId' => $id, 'rhsId' => $rel->get${rel[rhsIdProperty]}()));
+              $params = array(
+                'lhsId' => $id,
+                'rhsId' => $rel->get${rel[rhsIdProperty]}()
+              );
+              $createStmt->execute($params);
             }
           }
 
@@ -645,10 +701,10 @@ class ${actor} {
 
           // Update or save the collection
           ${if:rel[mirrored]}
-           foreach ($related AS $rel) {
-             $rel->set${rel[rhsProperty]($model);
-             $persister->save($model);
-           }
+            foreach ($related AS $rel) {
+              $rel->set${rel[rhsProperty]($model);
+              $persister->save($model);
+            }
             foreach ($current AS $cur) {
               if (!in_array($cur->get${rel[rhsIdProperty]}(), $relIds)) {
                 ${if:rel[deleteOrphan]}
@@ -660,28 +716,36 @@ class ${actor} {
               }
             }
           ${else}
-            $updateStmt = $this->_pdo->prepare("UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = :id WHERE ${rel[rhsIdColumn]} = :relId");
             foreach ($related AS $rel) {
               if ($rel->get${rel[rhsIdProperty]}() === null) {
                 $persister->create($rel);
               }
-              $updateStmt->execute(array(
+            }
+
+            $sql = "UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = :id WHERE ${rel[rhsIdColumn]} = :relId";
+            $updateStmt = $this->_pdo->prepare($sql);
+            foreach ($related AS $rel) {
+              $params = array(
                 'id' => $id,
                 'relId' => $rel->get${rel[rhsIdProperty]}()
-              ));
+              );
+              $updateStmt->execute($params);
 
               // Clear the cache of the RHS entity as it may contain a stale id
               $persister->clearCache($rel->get${rel[rhsIdProperty]}());
             }
 
             ${if:rel[deleteOrphan]}
-              $orphanStmt = $this->_pdo->prepare("DELETE FROM ${rel[rhsTable]} WHERE ${rel[rhsIdColumn]} = :relId");
+              $sql = "DELETE FROM ${rel[rhsTable]} WHERE ${rel[rhsIdColumn]} = :relId";
+              $orphanStmt = $this->_pdo->prepare($sql);
             ${else}
-              $orphanStmt = $this->_pdo->prepare("UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = null WHERE ${rel[rhsIdColumn]} = :relId");
+              $sql = "UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = null WHERE ${rel[rhsIdColumn]} = :relId";
+              $orphanStmt = $this->_pdo->prepare($sql);
             ${fi}
             foreach ($current AS $cur) {
               if (!in_array($cur->get${rel[rhsIdProperty]}(), $relIds)) {
-                $orphanStmt->execute(array('relId' => $cur->get${rel[rhsIdProperty]}()));
+                $params = array('relId' => $cur->get${rel[rhsIdProperty]}());
+                $orphanStmt->execute($params);
               }
 
               $persister->clearCache($rel->get${rel[rhsIdProperty]}());
@@ -708,12 +772,12 @@ class ${actor} {
       ${fi}
       return $rowCount;
     } catch (PDOException $e) {
-      error_log($e->getMessage());
-      error_log($e->getTraceAsString());
       $this->_pdo->rollback();
       $saveLock->forceRelease();
 
-      throw new PdoExceptionWrapper($e, '${actor}');
+      $e = new PdoExceptionWrapper($e, '${class}');
+      $e->setSql($sql, $params);
+      throw $e;
     }
   }
 

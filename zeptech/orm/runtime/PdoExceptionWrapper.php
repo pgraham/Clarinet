@@ -32,6 +32,7 @@ class PdoExceptionWrapper extends Exception
     const ERROR_MSG_RE = '/(.+):\s*(\d+)\s*(.+)$/';
 
     private $sql;
+    private $params;
 
     private $sqlState;
     private $sqlMsg;
@@ -40,19 +41,27 @@ class PdoExceptionWrapper extends Exception
     private $mysqlCode;
     private $mysqlMsg;
 
+    private $modelClass;
+
     /**
      * Parse information that can be usedto create an exception with a user
      * readable error message.
      *
-     *
      * @param PDOException $pdoe
+     * @param string $modelClass The model class for which this exception was
+     *                           generated.
      */
-    public function __construct(PDOException $pdoe, $sql)
+    public function __construct(PDOException $pdoe, $modelClass)
     {
         parent::__construct($pdoe->getMessage(), $pdoe->getCode(), $pdoe);
 
-        $this->_parseMessage($pdoe->getMessage());
-        $this->sql = $sql;
+        $this->parseMessage($pdoe->getMessage());
+        $this->modelClass = $modelClass;
+    }
+
+    public function getParams()
+    {
+        return $this->params;
     }
 
     public function getSql()
@@ -85,7 +94,17 @@ class PdoExceptionWrapper extends Exception
         return $this->mysqlMsg;
     }
 
-    private function _parseMessage($msg)
+    public function getModelClass()
+    {
+      return $this->modelClass;
+    }
+
+    public function setSql($sql, array $params = null) {
+      $this->sql = $sql;
+      $this->params = $params
+    }
+
+    private function parseMessage($msg)
     {
         if (preg_match(self::MSG_RE, $msg, $matches)) {
             $this->sqlState = $matches[1];
