@@ -25,68 +25,77 @@ use \PDOException;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class PdoExceptionWrapper extends Exception {
+class PdoExceptionWrapper extends Exception
+{
 
-  const MSG_RE = '/SQLSTATE\[([\d\w]{5})\]: (.+)/';
-  const ERROR_MSG_RE = '/(.+):\s*(\d+)\s*(.+)$/';
+    const MSG_RE = '/SQLSTATE\[([\d\w]{5})\]: (.+)/';
+    const ERROR_MSG_RE = '/(.+):\s*(\d+)\s*(.+)$/';
 
-  private $_sql;
+    private $sql;
 
-  private $_sqlState;
-  private $_sqlMsg;
+    private $sqlState;
+    private $sqlMsg;
 
-  private $_mysqlClass;
-  private $_mysqlCode;
-  private $_mysqlMsg;
+    private $mysqlClass;
+    private $mysqlCode;
+    private $mysqlMsg;
 
-  /**
-   * Parse information that can be usedto create an exception with a user
-   * readable error message.
-   *
-   *
-   * @param PDOException $pdoe
-   */
-  public function __construct(PDOException $pdoe, $sql) {
-    parent::__construct($pdoe->getMessage());
+    /**
+     * Parse information that can be usedto create an exception with a user
+     * readable error message.
+     *
+     *
+     * @param PDOException $pdoe
+     */
+    public function __construct(PDOException $pdoe, $sql)
+    {
+        parent::__construct($pdoe->getMessage(), $pdoe->getCode(), $pdoe);
 
-    $this->_parseMessage($pdoe->getMessage());
-    $this->_sql = $sql;
-  }
-
-  public function getSql() {
-    return $this->_sql;
-  }
-
-  public function getSqlState() {
-    return $this->_sqlState;
-  }
-
-  public function getSqlMsg() {
-    return $this->_sqlMsg;
-  }
-
-  public function getMysqlClass() {
-    return $this->_mysqlClass;
-  }
-
-  public function getMysqlCode() {
-    return $this->_mysqlCode;
-  }
-
-  public function getMysqlMsg() {
-    return $this->_mysqlMsg;
-  }
-
-  private function _parseMessage($msg) {
-    if (preg_match(self::MSG_RE, $msg, $matches)) {
-      $this->_sqlState = $matches[1];
-      $this->_sqlMsg = $matches[2];
-
-      if (preg_match(self::ERROR_MSG_RE, $this->_sqlMsg, $matches)) {
-        $this->_mysqlClass = $matches[1];
-        $this->_mysqlCode = $matches[2];
-        $this->_mysqlMsg = $matches[3];
-      }
+        $this->_parseMessage($pdoe->getMessage());
+        $this->sql = $sql;
     }
-  }
+
+    public function getSql()
+    {
+        return $this->sql;
+    }
+
+    public function getSqlState()
+    {
+        return $this->sqlState;
+    }
+
+    public function getSqlMsg()
+    {
+        return $this->sqlMsg;
+    }
+
+    public function getMysqlClass()
+    {
+        return $this->mysqlClass;
+    }
+
+    public function getMysqlCode()
+    {
+        return $this->mysqlCode;
+    }
+
+    public function getMysqlMsg()
+    {
+        return $this->mysqlMsg;
+    }
+
+    private function _parseMessage($msg)
+    {
+        if (preg_match(self::MSG_RE, $msg, $matches)) {
+            $this->sqlState = $matches[1];
+            $this->sqlMsg = $matches[2];
+
+            if (preg_match(self::ERROR_MSG_RE, $this->sqlMsg, $matches)) {
+                $this->mysqlClass = $matches[1];
+                $this->mysqlCode = $matches[2];
+                $this->mysqlMsg = $matches[3];
+            }
+        }
+    }
 }
