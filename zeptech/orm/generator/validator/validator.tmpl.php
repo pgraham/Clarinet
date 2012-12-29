@@ -25,7 +25,7 @@ class ${actor} {
     ${done}
 
     if (count($msgs) > 0) {
-      $ex = new ValidationException($msgs);
+      $ex = new ValidationException($msgs, '${class}');
       if ($e !== false) {
         $e = $ex;
       } else {

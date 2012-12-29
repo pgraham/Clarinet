@@ -24,16 +24,23 @@ use \Exception;
 class ValidationException extends Exception
 {
 
+    private $modelClass;
     private $msgs;
 
-    public function __construct(array $msgs)
+    public function __construct(array $msgs, $modelClass)
     {
         parent::__construct();
         $this->msgs = $msgs;
+        $this->modelClass = $modelClass;
     }
 
     public function getMessages()
     {
         return $this->msgs;
+    }
+
+    public function getModelClass()
+    {
+        return $this->modelClass;
     }
 }
