@@ -21,17 +21,19 @@ use \Exception;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class ValidationException extends Exception {
+class ValidationException extends Exception
+{
 
-  private $_msgs;
+    private $msgs;
 
-  public function __construct(array $msgs) {
-    parent::__construct();
+    public function __construct(array $msgs)
+    {
+        parent::__construct();
+        $this->msgs = $msgs;
+    }
 
-    $this->_msgs = $msgs;
-  }
-
-  public function getMessages() {
-    return $this->_msgs;
-  }
+    public function getMessages()
+    {
+        return $this->msgs;
+    }
 }
