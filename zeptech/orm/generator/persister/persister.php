@@ -327,7 +327,7 @@ class ${actor} {
 
       #{ each: collections as col
       ${each:collections as col}
-        $this->deleteCollection_${col[property]}($id);
+        $this->removeCollection_${col[property]}($id);
       ${done}
       #} each
 
