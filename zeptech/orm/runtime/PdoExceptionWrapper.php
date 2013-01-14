@@ -53,7 +53,7 @@ class PdoExceptionWrapper extends Exception
      */
     public function __construct(PDOException $pdoe, $modelClass)
     {
-        parent::__construct($pdoe->getMessage(), $pdoe->getCode(), $pdoe);
+        parent::__construct($pdoe->getMessage(), null, $pdoe);
 
         $this->parseMessage($pdoe->getMessage());
         $this->modelClass = $modelClass;
@@ -101,7 +101,7 @@ class PdoExceptionWrapper extends Exception
 
     public function setSql($sql, array $params = null) {
       $this->sql = $sql;
-      $this->params = $params
+      $this->params = $params;
     }
 
     private function parseMessage($msg)
