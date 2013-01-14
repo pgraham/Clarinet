@@ -53,7 +53,7 @@ abstract class AbstractRelationship implements Relationship {
     $this->_rhs = $rhs;
     $this->_lhsProperty = $lhsProperty;
 
-    $this->_identifier = $lhs->getName() . '-' . $rhs->getName();
+    $this->_identifier = $lhs->getActor() . '-' . $rhs->getActor();
   }
 
   /**
