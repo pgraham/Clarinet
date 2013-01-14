@@ -46,7 +46,9 @@ class ColumnParser extends BaseMethodParser
   {
     $propertyName = $this->getPropertyName($method);
 
-    if (isset($annos['column']['name'])) {
+    if (is_string($annos['column'])) {
+      $column = $annos['column'];
+    } elseif (isset($annos['column']['name'])) {
       $column = $annos['column']['name'];
     } else {
       $column = $this->namingStrategy->getColumnName($propertyName);
