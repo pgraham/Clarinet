@@ -23,7 +23,7 @@ use \zeptech\orm\generator\model\Model;
  */
 class ValidatorGenerator extends AbstractModelGenerator {
 
-  protected static $actorNamespace = 'zeptech\dynamic\orm\validator';
+  public static $actorNamespace = 'zpt\dyn\orm\validator';
 
   protected function getTemplatePath() {
     return __DIR__ . '/validator/validator.tmpl.php';

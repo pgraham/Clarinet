@@ -26,7 +26,7 @@ use \zpt\util\String;
  */
 class TransformerGenerator extends AbstractModelGenerator {
 
-  protected static $actorNamespace = 'zeptech\dynamic\orm\transformer';
+  public static $actorNamespace = 'zpt\dyn\orm\transformer';
 
   protected function getTemplatePath() {
     return __DIR__ . '/transformer/transformer.php';

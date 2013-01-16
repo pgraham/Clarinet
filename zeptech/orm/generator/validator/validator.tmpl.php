@@ -1,5 +1,5 @@
 <?php
-namespace zeptech\dynamic\orm\validator;
+namespace zpt\dyn\orm\validator;
 
 use \zeptech\orm\runtime\ValidationException;
 use \DateTime;

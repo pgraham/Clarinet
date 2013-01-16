@@ -34,7 +34,7 @@ use \zpt\pct\CodeTemplateParser;
  */
 class QueryBuilder extends AbstractModelGenerator {
 
-  protected static $actorNamespace = 'zeptech\dynamic\orm\querybuilder';
+  public static $actorNamespace = 'zpt\dyn\orm\qb';
 
   /**
    * Override the static get method to not use a cache.  A new querybuilder is

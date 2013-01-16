@@ -1,5 +1,5 @@
 <?php
-namespace zeptech\dynamic\orm\querybuilder;
+namespace zpt\dyn\orm\qb;
 
 use \zeptech\orm\runtime\Criteria;
 

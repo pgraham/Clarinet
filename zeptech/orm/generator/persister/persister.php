@@ -1,5 +1,5 @@
 <?php
-namespace zeptech\dynamic\orm\persister;
+namespace zpt\dyn\orm\persister;
 
 use \zeptech\orm\runtime\ActorFactory;
 use \zeptech\orm\runtime\Criteria;

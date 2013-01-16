@@ -25,7 +25,7 @@ use \ReflectionClass;
  */
 class PersisterGenerator extends AbstractModelGenerator {
 
-  protected static $actorNamespace = 'zeptech\dynamic\orm\persister';
+  public static $actorNamespace = 'zpt\dyn\orm\persister';
 
   protected function getTemplatePath() {
     return __DIR__ . '/persister/persister.php';

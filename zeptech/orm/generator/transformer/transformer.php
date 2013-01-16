@@ -1,5 +1,5 @@
 <?php
-namespace zeptech\dynamic\orm\transformer;
+namespace zpt\dyn\orm\transformer;
 
 use \zeptech\orm\runtime\Criteria;
 use \zeptech\orm\runtime\Persister;
