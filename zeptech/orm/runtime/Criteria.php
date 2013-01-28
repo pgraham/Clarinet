@@ -515,7 +515,7 @@ class Criteria {
       if ($op === self::OP_EQUALS) {
         return $this->addIsNull($column);
       } else if ($op === self::OP_NOT_EQUALS) {
-        return $this->addIsNoNull($column);
+        return $this->addIsNotNull($column);
       } else {
         throw new Exception("Invalid predicate: $op with NULL value");
       }
