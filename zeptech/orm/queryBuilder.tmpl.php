@@ -25,23 +25,26 @@ class ${actor} {
     } else {
       $this->_addPropFilter($field, $value, $op);
     }
+    return $this;
   }
 
-  public function addSort($field, $dir) {
+  public function addSort($field, $dir = 'asc') {
     if (strpos($field, '.') !== false) {
       list($rel, $prop) = explode('.', $field);
       $this->_addRelSort($rel, $prop, $dir);
     } else {
       $this->_addPropSort($field, $dir);
     }
+    return $this;
   }
 
   public function getCriteria() {
     return $this->_c;
   }
 
-  public function setLimit($limit, $offset) {
+  public function setLimit($limit, $offset = 0) {
     $this->_c->setLimit($limit, $offset);
+    return $this;
   }
 
   private function _addPropFilter($propName, $value, $op) {
