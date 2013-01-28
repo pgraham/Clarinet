@@ -77,12 +77,6 @@ class TransformerGenerator extends AbstractModelGenerator {
         'rhsIdProperty' => $rhs->getId()->getName(),
       );
 
-      if ($type === Relationship::TYPE_ONETOMANY ||
-          $type === Relationship::TYPE_MANYTOMANY)
-      {
-        $rel['fetch'] = $relationship->getFetchPolicy();
-      }
-
       $relationships[] = $rel;
     }
 

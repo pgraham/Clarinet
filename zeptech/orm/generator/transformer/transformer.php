@@ -36,7 +36,6 @@ class ${actor} {
       $a['${property[id]}'] = $model->get${property[id]}();
     ${done}
 
-    #-- 
     #{ each: collections as col
     ${each:collections as col}
       $a['${col[property]}'] = $model->get${col[property]}();
@@ -48,29 +47,23 @@ class ${actor} {
       if ($relVal === null) {
         $a['${relationship[idx]}'] = null;
       } else {
-
-        ${if:relationship[type] = many-to-many or relationship[type] = one-to-many }
-
+        $transformer = Transformer::get('${relationship[rhs]}');
+        ${if:relationship[type] = many-to-many}
           $rels = array();
-          ${if:relationship[fetch] = eager}
-            $transformer = Transformer::get('${relationship[rhs]}');
-            foreach ($relVal as $rel) {
-              $rels[] = $transformer->asArray($rel);
-            }
-          ${else}
-            foreach ($relVal as $rel) {
-              $rels[] = $rel->get${relationship[rhsIdProperty]}();
-            }
-          ${fi}
+          foreach ($relVal as $rel) {
+            $rels[] = $rel->get${relationship[rhsIdProperty]}();
+          }
           $a['${relationship[idx]}'] = $rels;
-
+        ${elseif:relationship[type] = one-to-many}
+          $rels = array();
+          foreach ($relVal as $rel) {
+            $rels[] = $transformer->asArray($rel);
+          }
+          $a['${relationship[idx]}'] = $rels;
         ${elseif:relationship[type] = many-to-one}
-
           $relId = $relVal->get${relationship[rhsIdProperty]}();
           $a['${relationship[idx]}'] = $relId;
-
         ${fi}
-
       }
 
     ${done}

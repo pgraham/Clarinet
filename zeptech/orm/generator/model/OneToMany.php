@@ -27,7 +27,6 @@ class OneToMany extends AbstractRelationship {
   private $_rhsProperty;
   private $_orderBy;
   private $_deleteOrphans = false;
-  private $_fetchPolicy = 'lazy';
 
   /**
    * Creates a new one-to-many relationship representation.
@@ -43,8 +42,6 @@ class OneToMany extends AbstractRelationship {
   public function __construct($lhs, $rhs, $lhsProperty, $rhsColumn) {
     parent::__construct($lhs, $rhs, $lhsProperty);
     $this->_rhsColumn = $rhsColumn;
-
-    $this->_fetchPolicy = 'lazy';
   }
 
   /**
@@ -59,17 +56,6 @@ class OneToMany extends AbstractRelationship {
       $this->_deleteOrphans = $deleteOrphans;
     }
     return $this->_deleteOrphans;
-  }
-
-  /**
-   * Getter for the relationship's fetch policy.  Will be either 'lazy' or
-   * 'eager'.  This can be specified as the 'fetch' parameter of the
-   * relationship's declaring annotation.
-   *
-   * @return string Either 'lazy' or 'eager'
-   */
-  public function getFetchPolicy() {
-    return $this->_fetchPolicy;
   }
 
   /**
@@ -88,24 +74,6 @@ class OneToMany extends AbstractRelationship {
    */
   public function getRhsColumn() {
     return $this->_rhsColumn;
-  }
-
-  /**
-   * Setter for the relationship's fetch policy, can be either 'lazy' or
-   * 'eager'.  This is currently only honoured by the transformer.  All
-   * relationships are retrieved eagerly by the persister, but this will change
-   * in the future when proxies are introduced.
-   *
-   * TODO This is not currently supported
-   *
-   * @param string $fetchPolicy Either 'lazy' or 'eager'
-   */
-  public function setFetchPolicy($fetchPolicy) {
-    if (!in_array($fetchPolicy, array('lazy', 'eager'))) {
-      throw new Exception("Invalid fetch policy: $fetchPolicy");
-    }
-
-    $this->_fetchPolicy = $fetchPolicy;
   }
 
   /**
