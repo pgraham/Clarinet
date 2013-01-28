@@ -94,8 +94,10 @@ class ${actor} {
    *
    * @param array $a
    * @param entity $model
+   * @param array $whiteList List of parameters to set in the model. Only useful
+   *   if a model is given or an ID is specified in $a.
    */
-  public function fromArray(array $a, $model = null) {
+  public function fromArray(array $a, $model = null, array $whiteList = null) {
     if ($model === null) {
       if (isset($a['${idIdx}'])) {
         $persister = Persister::get('${class}');
@@ -106,35 +108,37 @@ class ${actor} {
     }
 
     ${each:properties AS property}
-      if (array_key_exists('${property[id]}', $a)) {
-        $val = $a['${property[id]}'];
+      if ($whiteList === null || in_array('${property[id]}', $whiteList)) {
+        if (array_key_exists('${property[id]}', $a)) {
+          $val = $a['${property[id]}'];
 
-        ${if:property[default] ISSET}
-          if ($val === null) {
-            ${if:property[type] = timestamp and property[default] = current_time}
-              $val = date('Y-m-d H:i:s');
-            ${elseif:property[type] = date and property[default] = current_date}
-              $val = date('Y-m-d');
-            ${else}
-              $val = ${property[default]};
-            ${fi}
-          }
-        ${fi}
+          ${if:property[default] ISSET}
+            if ($val === null) {
+              ${if:property[type] = timestamp and property[default] = current_time}
+                $val = date('Y-m-d H:i:s');
+              ${elseif:property[type] = date and property[default] = current_date}
+                $val = date('Y-m-d');
+              ${else}
+                $val = ${property[default]};
+              ${fi}
+            }
+          ${fi}
 
-        ${if:property[type] = timestamp or property[type] = date}
-          try {
-            $date = new DateTime($val, new DateTimeZone('UTC'));
-            ${if:property[type] = timestamp}
-              $val = $date->format('Y-m-d H:i:s');
-            ${else}
-              $val = $date->format('Y-m-d');
-            ${fi}
-          } catch (Exception $e) {
-            // Swallow this exception and let the invalid value go through, it
-            // will get handled during model validation.
-          }
-        ${fi}
-        $model->set${property[id]}($val);
+          ${if:property[type] = timestamp or property[type] = date}
+            try {
+              $date = new DateTime($val, new DateTimeZone('UTC'));
+              ${if:property[type] = timestamp}
+                $val = $date->format('Y-m-d H:i:s');
+              ${else}
+                $val = $date->format('Y-m-d');
+              ${fi}
+            } catch (Exception $e) {
+              // Swallow this exception and let the invalid value go through, it
+              // will get handled during model validation.
+            }
+          ${fi}
+          $model->set${property[id]}($val);
+        }
       }
 
     ${done}
@@ -142,32 +146,38 @@ class ${actor} {
     #-- Add each collection into the model
     #{ each: collections as col
     ${each:collections as col}
-      if (array_key_exists('${col[property]}', $a)) {
-        $model->set${col[property]}($a['${col[property]}']);
+      if ($whiteList === null || in_array('${col[property]}', $whiteList)) {
+        if (array_key_exists('${col[property]}', $a)) {
+          $model->set${col[property]}($a['${col[property]}']);
+        }
       }
     ${done}
     #} each
 
     ${each:relationships AS relationship}
       ${if:relationship[type] = many-to-many or relationship[type] = one-to-many}
-        if (isset($a['${relationship[idx]}'])) {
-          $rels = $a['${relationship[idx]}'];
+        if ($whiteList === null || in_array('${relationship[idx]}', $whiteList)) {
+          if (isset($a['${relationship[idx]}'])) {
+            $rels = $a['${relationship[idx]}'];
 
-          $transformer = Transformer::get('${relationship[rhs]}');
-          $relVal = $transformer->fromCollection($rels);
+            $transformer = Transformer::get('${relationship[rhs]}');
+            $relVal = $transformer->fromCollection($rels);
 
-          $model->set${relationship[name]}($relVal);
+            $model->set${relationship[name]}($relVal);
+          }
         }
 
       ${elseif:relationship[type] = many-to-one}
 
-        if (isset($a['${relationship[idx]}'])) {
-          $relId = $a['${relationship[idx]}'];
+        if ($whiteList === null || in_array('${relationship[idx]}', $whiteList)) {
+          if (isset($a['${relationship[idx]}'])) {
+            $relId = $a['${relationship[idx]}'];
 
-          if ($relId !== null) {
-            $persister = Persister::get('${relationship[rhs]}');
-            $relVal = $persister->getById($relId);
-            $model->set${relationship[name]}($relVal);
+            if ($relId !== null) {
+              $persister = Persister::get('${relationship[rhs]}');
+              $relVal = $persister->getById($relId);
+              $model->set${relationship[name]}($relVal);
+            }
           }
         }
 
@@ -183,13 +193,13 @@ class ${actor} {
    *
    * @param array $a
    */
-  public function fromCollection(array $a) {
+  public function fromCollection(array $a, array $whiteList = null) {
     $models = array();
     foreach ($a AS $model) {
       if ($model instanceof StdClass) {
-        $models[] = $this->fromObject($model);
+        $models[] = $this->fromObject($model, $whiteList);
       } else if (is_array($model)) {
-        $models[] = $this->fromArray($model);
+        $models[] = $this->fromArray($model, $whiteList);
       }
     }
     return $models;
@@ -200,8 +210,11 @@ class ${actor} {
    *
    * @param StdClass $obj
    */
-  public function fromObject(StdClass $obj) {
-    return $this->fromArray((array) $obj);
+  public function fromObject(StdClass $obj = null, array $whiteList = null) {
+    if ($obj === null) {
+      return null;
+    }
+    return $this->fromArray((array) $obj, $whiteList);
   }
 
   /**
