@@ -27,7 +27,11 @@ class ${actor} {
    *
    * @param ${class} $model The model instance to convert.
    */
-  public function asArray(\${class} $model) {
+  public function asArray(\${class} $model = null) {
+    if ($model === null) {
+      return null;
+    }
+
     $a = array();
 
     $a['${idIdx}'] = $model->get${id}();
