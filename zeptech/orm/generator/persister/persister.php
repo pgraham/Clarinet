@@ -188,7 +188,8 @@ class ${actor} {
       $sql = $this->createSql; // If there is an exception this is handy to know
       $this->_create->execute($params);
 
-      $id = $this->_pdo->lastInsertId();
+      $transformer = ActorFactory::getActor('transformer', '${class}');
+      $id = $transformer->idFromDb($this->_pdo->lastInsertId());
       $model->set${id_property}($id);
       $this->_cache[$id] = $model;
 
