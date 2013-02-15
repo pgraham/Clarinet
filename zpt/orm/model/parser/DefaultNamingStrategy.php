@@ -16,7 +16,7 @@ namespace zpt\orm\model\parser;
 
 use \zeptech\anno\AnnotationFactory;
 use \zeptech\orm\generator\model\Model;
-use \zpt\util\String;
+use \zpt\util\StringUtils;
 use \ReflectionMethod;
 
 /**
@@ -52,7 +52,7 @@ class DefaultNamingStrategy implements NamingStrategy
    */
   public function getColumnName($property)
   {
-    return String::fromCamelCase($property);
+    return StringUtils::fromCamelCase($property);
   }
 
   /**

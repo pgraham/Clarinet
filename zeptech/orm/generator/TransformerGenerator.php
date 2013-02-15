@@ -17,7 +17,7 @@ namespace zeptech\orm\generator;
 use \zeptech\orm\generator\model\Model;
 use \zeptech\orm\generator\model\Property;
 use \zeptech\orm\generator\model\Relationship;
-use \zpt\util\String;
+use \zpt\util\StringUtils;
 
 /**
  * Generator for model transformer classes.
@@ -90,7 +90,7 @@ class TransformerGenerator extends AbstractModelGenerator {
       'class'           => $model->getClass(),
       'actor'           => $model->getActor(),
       'id'              => $id,
-      'idIdx'           => String::fromCamelCase($id),
+      'idIdx'           => StringUtils::fromCamelCase($id),
       'properties'      => $properties,
       'collections'     => $collections,
       'relationships'   => $relationships,
