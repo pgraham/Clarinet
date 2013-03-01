@@ -1,3 +1,6 @@
 test/mock/gen
 phpdoc.ini
 commit.txt
+
+# Vim undo files
+*.un~
