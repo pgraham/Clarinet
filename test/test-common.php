@@ -29,3 +29,6 @@ $ormPath = realpath(__DIR__ . '/..');
 
 $ldr = new SplClassLoader('zeptech\orm', $ormPath);
 $ldr->register();
+
+$ldr = new SplClassLoader('zpt\orm', $ormPath);
+$ldr->register();
