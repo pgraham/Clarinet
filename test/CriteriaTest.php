@@ -13,9 +13,9 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test
  */
-namespace clarinet\test;
+namespace zpt\orm\test;
 
-use \clarinet\Criteria;
+use \zpt\orm\Criteria;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/test-common.php';

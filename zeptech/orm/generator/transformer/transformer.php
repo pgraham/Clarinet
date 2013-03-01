@@ -1,9 +1,9 @@
 <?php
 namespace zpt\dyn\orm\transformer;
 
-use \zeptech\orm\runtime\Criteria;
 use \zeptech\orm\runtime\Persister;
 use \zeptech\orm\runtime\Transformer;
+use \zpt\orm\Criteria;
 use \DateTime;
 use \DateTimeZone;
 use \Exception;
