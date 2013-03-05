@@ -14,7 +14,7 @@
  */
 namespace zpt\orm\model\parser;
 
-use \zeptech\anno\Annotations;
+use \zpt\anno\Annotations;
 use \zeptech\orm\generator\model\ManyToMany;
 use \zeptech\orm\generator\model\ManyToOne;
 use \zeptech\orm\generator\model\OneToMany;
@@ -69,18 +69,21 @@ class RelationshipParser extends BaseMethodParser
     $lhs = $this->modelCache->get($method->getDeclaringClass()->getName());
     $rhs = $this->modelCache->get($anno['entity']);
 
-    $linkTable = $anno['table'];
-    if ($linkTable === null) {
+    if (isset($anno['table'])) {
+      $linkTable = $anno['table'];
+    } else {
       $linkTable = $this->namingStrategy->getLinkTable($lhs, $rhs);
     }
 
-    $lhsLinkCol = $anno['localId'];
-    if ($lhslinkCol === null) {
+    if (isset($anno['localId'])) {
+      $lhsLinkCol = $anno['localId'];
+    } else {
       $lhsLinkCol = $this->namingStrategy->getLinkColumn($lhs);
     }
 
-    $rhsLinkCol = $anno['foreignId'];
-    if ($rhsLinkCol === null) {
+    if (isset($anno['foreignId'])) {
+      $rhsLinkCol = $anno['foreignId'];
+    } else {
       $rhsLinkCol = $this->namingStrategy->getLinkColumn($rhs);
     }
 
@@ -88,8 +91,9 @@ class RelationshipParser extends BaseMethodParser
       $lhs,
       $rhs,
       $propertyName,
-      $linkLhsId,
-      $linkRhsId
+      $linkTable,
+      $lhsLinkCol,
+      $rhsLinkCol
     );
 
     if (isset($anno['order'])) {

@@ -14,7 +14,7 @@
  */
 namespace zpt\orm\model\parser;
 
-use \zeptech\anno\AnnotationFactory;
+use \zpt\anno\AnnotationFactory;
 use \zpt\orm\model\ModelCache;
 use \ReflectionMethod;
 

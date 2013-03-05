@@ -14,8 +14,8 @@
  */
 namespace zpt\orm\model\parser;
 
-use \zeptech\anno\AnnotationFactory;
 use \zeptech\orm\generator\model\Model;
+use \zpt\anno\AnnotationFactory;
 use \zpt\orm\model\ModelCache;
 use \Exception;
 use \ReflectionClass;
@@ -97,7 +97,7 @@ class ModelParser
     $model->setTable($table);
 
     // Cache the model before parsing in order to avoid infinite
-    // recursions when delegates attempt to retrieve the model
+    // recursions when associated entities attempt to retrieve the model
     $this->modelCache->set($className, $model);
 
     // Find the id column.  This is done before parsing other column types since

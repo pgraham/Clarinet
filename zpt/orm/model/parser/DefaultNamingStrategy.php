@@ -14,8 +14,8 @@
  */
 namespace zpt\orm\model\parser;
 
-use \zeptech\anno\AnnotationFactory;
 use \zeptech\orm\generator\model\Model;
+use \zpt\anno\AnnotationFactory;
 use \zpt\util\StringUtils;
 use \ReflectionMethod;
 
