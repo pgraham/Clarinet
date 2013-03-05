@@ -29,9 +29,7 @@ To start, each model class must annotated with @Entity:
 
 ```php
 <?php
-/**
- * @Entity(table = simple_entity)
- */
+/** @Entity(table = simple_entity) */
 class SimpleEntity {
   // ...
 }
@@ -52,17 +50,15 @@ getter/setter pair similar to the following:
 <?php
 class SimpleEntity {
 
-  private $_id;
+  private $id;
 
-  /**
-   * @Id
-   */
+  /** @Id */
   public function getId() {
-    return $this->_id;
+    return $this->id;
   }
 
   public function setId($id) {
-    $this->_id = $id;
+    $this->id = $id;
   }
 }
 ```
@@ -96,17 +92,18 @@ something like this:
 <?php
 class SimpleEntity {
 
-  private $_name;
+  private $id;
+  private $name;
 
-  /**
-   * @Column(name = name)
-   */
+  // Id getter/setter ...
+
+  /** @Column(name = name) */
   public function getName() {
-    return $this->_name;
+    return $this->name;
   }
 
-  public fucntion setName($name) {
-    $this->_name = $name;
+  public function setName($name) {
+    $this->name = $name;
   }
 }
 ```
@@ -123,7 +120,7 @@ getXXX().  So the previous sample could be written as:
    * @Column
    */
   public function getName() {
-    return $this->_name;
+    return $this->name;
   }
 
 ```
@@ -132,7 +129,7 @@ Other supported annotations for columns:
 
   - _@Type_: The type of data contained by the property. In addition to standard
     database type, Clarinet provides support for some types (such as email)
-    which provide an additional addtional abstraction to standard database
+    which provide an addtional abstraction to standard database
     types. These types are enforced at runtime by a Validator actor.
   - _@Enumerated_: If a column only supports a finite list of values, those
     values can be defined using the values parameter of an _@enumerated_
@@ -154,11 +151,9 @@ Relationships which are declared on both sides are called *mirrored*.
 <?php
   // ...
 
-  /**
-   * @OneToMany( entity = Category )
-   */
+  /** @OneToMany( entity = Category ) */
   public function getCategories() {
-    return $this->_categories;
+    return $this->categories;
   }
 ```
 
@@ -183,6 +178,13 @@ above would be 'simple_entity_id'. To specify the column do the following:
   }
 ```
 
+**NOTE** For uni-directional one-to-many mappings, one of two conditions must
+hold in order to avoid errors. Either the *one* side ID column in the *many*
+table must be nullable or the the id must be populated in the *many* entity
+programatically before saving. This is because without a bi-directional
+many-to-one mapping, there is no way for the ORM to know which property in the
+many side maps to the one side ID.
+
 #### Ordering
 
 For one-to-many and many-to-many relationships, the order in which the related
@@ -196,9 +198,7 @@ parameter.  The default direction is ASC.
 
   // ...
 
-  /**
-   * @OneToMany( entity = Category, order = name, dir = asc )
-   */
+  /** @OneToMany( entity = Category, order = name, dir = asc ) */
   public function getCategories() {
     return $this->_categories;
   }
@@ -232,23 +232,21 @@ to be initialized.
 
 ```php
 <?php
-sql_autoload_register(function ($classname) {
-  if (substr($classname, 0, 9) !== "clarinet\\") {
-    return;
-  }
-
-  $basePath = '/path/to/clarinet/src';
-  $relPath = str_replace('\\', '/', $className) . '.php';
-  $fullPath = "$basePath/$relPath";
-  if (!file_exists($fullPath)) {
-    require $fullPath;
-  }
-});
-
-Clarinet::init(array(
-  'pdo' => $db, // PDO object connected to the database where model are persisted
-  'outputPath' => $out, // Path where generated files are output.
-                        // Needs to be writeable by web server for dev mode
-  'debug' => true/false, // Wether or not to generate actors when fist requested
-));
+use zeptech\orm\runtime\Clarinet;
+$pdo = new PDO(/*...*/);
+Clarinet::init($pdo);
 ```
+
+### Generating actors
+
+TODO
+
+### Actors
+
+#### Instantiation
+
+TODO
+
+#### Usage
+
+TODO
