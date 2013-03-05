@@ -13,6 +13,8 @@
     ],
     "autoload": {
 	"psr-0": {
+	    "zeptech\\orm": "",
+	    "zpt\\orm": ""
 	}
     },
     "require": {
