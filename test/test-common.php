@@ -27,8 +27,20 @@ $loader->register();
 // Register loader for clarinet classes
 $ormPath = realpath(__DIR__ . '/..');
 
+// Register an autoloader for test classes. This will be used to load the
+// mocks
+$ldr = new SplClassLoader('zpt\orm\test', __DIR__);
+$ldr->register();
+
+// Register autoloaders for source classes
 $ldr = new SplClassLoader('zeptech\orm', $ormPath);
 $ldr->register();
 
 $ldr = new SplClassLoader('zpt\orm', $ormPath);
 $ldr->register();
+
+$ldr = new SplClassLoader('zpt\dyn\orm', __DIR__ . '/zpt/orm/test/mock/gen');
+$ldr->register();
+
+// Register autoloader for composer dependencies
+require_once "$ormPath/vendor/autoload.php";

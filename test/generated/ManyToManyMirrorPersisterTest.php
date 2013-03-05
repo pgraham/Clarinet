@@ -13,12 +13,12 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test/generated
  */
-namespace clarinet\test\generated;
 
-use \clarinet\test\mock\ManyToManyMirrorLhsEntity;
-use \clarinet\test\mock\ManyToManyMirrorRhsEntity;
-use \clarinet\ActorFactory;
-
+use \zeptech\orm\runtime\ActorFactory;
+use \zpt\orm\test\mock\ManyToManyMirrorLhsEntity;
+use \zpt\orm\test\mock\ManyToManyMirrorRhsEntity;
+use \zpt\orm\test\Db;
+use \zpt\orm\test\Generator;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/../test-common.php';
@@ -50,7 +50,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $modelName = 'clarinet\test\mock\ManyToManyMirrorLhsEntity';
+    $modelName = 'zpt\orm\test\mock\ManyToManyMirrorLhsEntity';
     $this->_persister = ActorFactory::getActor('persister', $modelName);
   }
 

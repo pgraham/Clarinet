@@ -115,13 +115,13 @@ class PersisterGenerator extends AbstractModelGenerator {
         break;
 
         case 'many-to-many':
-        $vals['linkTable'] = $relationship->getLinkTable();
-        $vals['lhsLinkColumn'] = $relationship->getLinkLhsId();
-        $vals['rhsLinkColumn'] = $relationship->getLinkRhsId();
-        $vals['rhsTable'] = $relationship->getRhs()->getTable();
-        $vals['rhsIdColumn'] = $relationship->getRhs()->getId()->getColumn();
+        $vals['linkTable'] = $rel->getLinkTable();
+        $vals['lhsLinkColumn'] = $rel->getLinkLhsId();
+        $vals['rhsLinkColumn'] = $rel->getLinkRhsId();
+        $vals['rhsTable'] = $rhs->getTable();
+        $vals['rhsIdColumn'] = $rhs->getId()->getColumn();
 
-        $orderBy = $relationship->getOrderBy();
+        $orderBy = $rel->getOrderBy();
         if ($orderBy !== null) {
           $vals['orderByCol'] = $orderBy['col'];
           $vals['orderByDir'] = $orderBy['dir'];

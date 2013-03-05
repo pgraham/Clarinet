@@ -13,12 +13,13 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test/generated
  */
-namespace clarinet\test\generated;
 
-use \clarinet\test\mock\ManyToOneMirrorEntity;
-use \clarinet\test\mock\OneToManyMirrorEntity;
-use \clarinet\ActorFactory;
-use \clarinet\Criteria;
+use \zeptech\orm\runtime\ActorFactory;
+use \zpt\orm\test\mock\ManyToOneMirrorEntity;
+use \zpt\orm\test\mock\OneToManyMirrorEntity;
+use \zpt\orm\test\Db;
+use \zpt\orm\test\Generator;
+use \zpt\orm\Criteria;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/../test-common.php';
@@ -50,9 +51,9 @@ class OneToManyMirrorPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $modelName = 'clarinet\test\mock\OneToManyMirrorEntity';
+    $modelName = 'zpt\orm\test\mock\OneToManyMirrorEntity';
     $actorName = str_replace('\\', '_', $modelName);
-    $className = "clarinet\\persister\\" . $actorName;
+    $className = "zpt\\dyn\\orm\\persister\\" . $actorName;
     $this->_persister = new $className();
   }
 
@@ -90,7 +91,7 @@ class OneToManyMirrorPersisterTest extends TestCase {
 
     // Ensure that only 10 rhs entities have been created
     $persister = ActorFactory::getActor('persister',
-      'clarinet\test\mock\ManyToOneMirrorEntity');
+      'zpt\orm\test\mock\ManyToOneMirrorEntity');
     $rhs = $persister->retrieve();
     $this->assertEquals(10, count($rhs));
 

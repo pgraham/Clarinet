@@ -13,9 +13,9 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test/generated
  */
-namespace clarinet\test\generated;
-
-use \clarinet\test\mock\SimpleEntity;
+use \zpt\orm\test\mock\SimpleEntity;
+use \zpt\orm\test\Db;
+use \zpt\orm\test\Generator;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/../test-common.php';
@@ -43,9 +43,9 @@ class SimpleEntityPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a persister
-    $modelName = 'clarinet\test\mock\SimpleEntity';
+    $modelName = 'zpt\orm\test\mock\SimpleEntity';
     $actorName = str_replace('\\' ,'_', $modelName);
-    $className = "clarinet\\persister\\$actorName";
+    $className = "zpt\\dyn\\orm\\persister\\$actorName";
     $this->_persister = new $className();
   }
 
@@ -65,7 +65,7 @@ class SimpleEntityPersisterTest extends TestCase {
 
     $retrieved = $this->_persister->getById($id);
     $this->assertNotNull($retrieved);
-    $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $retrieved);
+    $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $retrieved);
     $this->assertEquals('Entity', $retrieved->getName());
     $this->assertEquals('EntityValue', $retrieved->getValue());
 

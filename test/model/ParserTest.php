@@ -13,9 +13,11 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test
  */
-namespace clarinet\test\model;
 
-use \clarinet\model\Parser;
+use \zpt\anno\AnnotationFactory;
+use \zpt\orm\model\parser\DefaultNamingStrategy;
+use \zpt\orm\model\ModelCache;
+use \zpt\orm\model\parser\ModelParser;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/../test-common.php';
@@ -28,11 +30,29 @@ require_once __DIR__ . '/../test-common.php';
  */
 class ParserTest extends TestCase {
 
+  private $modelParser;
+  private $modelCache;
+
   /**
    * Clear the cache of parsed model's before each test.
    */
   protected function setUp() {
-    Parser::clearCache();
+    $annotationFactory = new AnnotationFactory();
+
+    $namingStrategy = new DefaultNamingStrategy();
+    $namingStrategy->setAnnotationFactory($annotationFactory);
+
+    $this->modelParser = new ModelParser();
+    $this->modelCache = new ModelCache();
+
+    $this->modelCache->setModelParser($this->modelParser);
+
+    $this->modelParser->setModelCache($this->modelCache);
+    $this->modelParser->setAnnotationFactory($annotationFactory);
+    $this->modelParser->setNamingStrategy($namingStrategy);
+
+    $this->modelParser->init();
+
   }
   
   /**
@@ -40,12 +60,12 @@ class ParserTest extends TestCase {
    * a mock\SimpleEntity model.
    */
   public function testParseSimpleEntity() {
-    $info = Parser::getModel('clarinet\test\mock\SimpleEntity');
+    $info = $this->modelParser->parse('zpt\orm\test\mock\SimpleEntity');
     $msg = print_r($info, true);
 
-    $this->assertInstanceOf('clarinet\model\Model', $info, $msg);
+    $this->assertInstanceOf('zeptech\orm\generator\model\Model', $info, $msg);
 
-    $this->assertEquals('clarinet\test\mock\SimpleEntity', $info->getClass(),
+    $this->assertEquals('zpt\orm\test\mock\SimpleEntity', $info->getClass(),
       $msg);
     $this->assertEquals('simple_entity', $info->getTable(), $msg);
 
@@ -54,22 +74,22 @@ class ParserTest extends TestCase {
     $name = null;
     $value = null;
     foreach ($properties AS $property) {
-      $this->assertInstanceOf('clarinet\model\Property', $property, $msg);
+      $this->assertInstanceOf('zeptech\orm\generator\model\Property', $property, $msg);
 
-      if ($property->getName() == 'Name') {
+      if ($property->getName() === 'name') {
         $name = $property;
-      } else if ($property->getName() == 'Value') {
+      } else if ($property->getName() === 'value') {
         $value = $property;
       }
     }
-    $this->assertNotNull($name, $msg);
-    $this->assertNotNull($value, $msg);
-    $this->assertEquals('name', $name->getColumn(), $msg);
-    $this->assertEquals('value', $value->getColumn(), $msg);
+    $this->assertNotNull($name);
+    $this->assertNotNull($value);
+    $this->assertEquals('name', $name->getColumn());
+    $this->assertEquals('value', $value->getColumn());
 
     $id = $info->getId();;
-    $this->assertInstanceOf('clarinet\model\Property', $id, $msg);
-    $this->assertEquals('Id', $id->getName(), $msg);
+    $this->assertInstanceOf('zeptech\orm\generator\model\Property', $id, $msg);
+    $this->assertEquals('id', $id->getName(), $msg);
     $this->assertEquals('id', $id->getColumn(), $msg);
   }
 
@@ -78,14 +98,14 @@ class ParserTest extends TestCase {
    * entity that declares a one-to-many relationship.
    */
   public function testParseOneToManyRelationship() {
-    $info = Parser::getModel('clarinet\test\mock\OneToManyEntity');
+    $info = $this->modelParser->parse('zpt\orm\test\mock\OneToManyEntity');
 
     $relationships = $info->getRelationships();
     $this->assertInternalType('array', $relationships);
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('clarinet\model\OneToMany', $relationship);
+    $this->assertInstanceOf('zeptech\orm\generator\model\OneToMany', $relationship);
   }
 
   /**
@@ -93,14 +113,14 @@ class ParserTest extends TestCase {
    * entity that declares a many-to-one relationship.
    */
   public function testParseManyToOneRelationship() {
-    $info = Parser::getModel('clarinet\test\mock\ManyToOneEntity');
+    $info = $this->modelParser->parse('zpt\orm\test\mock\ManyToOneEntity');
 
     $relationships = $info->getRelationships();
     $this->assertInternalType('array', $relationships);
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('clarinet\model\ManyToOne', $relationship);
+    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToOne', $relationship);
   }
 
   /**
@@ -108,27 +128,27 @@ class ParserTest extends TestCase {
    * of entities that declare both sides of a one-to-many relationship.
    */
   public function testParseOneToManyMirroredRelationship() {
-    $info = Parser::getModel('clarinet\test\mock\OneToManyMirrorEntity');
+    $info = $this->modelParser->parse('zpt\orm\test\mock\OneToManyMirrorEntity');
 
     // The parsing process should have parsed and cached the mirror entity.
     $this->assertTrue(
-      Parser::isCached('clarinet\test\mock\ManyToOneMirrorEntity'));
+      $this->modelCache->isCached('zpt\orm\test\mock\ManyToOneMirrorEntity'));
 
     $relationships = $info->getRelationships();
     $this->assertInternalType('array', $relationships);
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('clarinet\model\OneToMany', $relationship);
+    $this->assertInstanceOf('zeptech\orm\generator\model\OneToMany', $relationship);
 
-    $info = Parser::getModel('clarinet\test\mock\ManyToOneMirrorEntity');
+    $info = $this->modelParser->parse('zpt\orm\test\mock\ManyToOneMirrorEntity');
 
     $relationships = $info->getRelationships();
     $this->assertInternalType('array', $relationships);
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('clarinet\model\ManyToOne', $relationship);
+    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToOne', $relationship);
   }
 
   /**
@@ -136,18 +156,17 @@ class ParserTest extends TestCase {
    * entity that declares a many-to-many relationship.
    */
   public function testParseManyToManyRelationship() {
-    $parser = new Parser('clarinet\test\mock\ManyToManyEntity');
-    $info = $parser->parse();
+    $info = $this->modelParser->parse('zpt\orm\test\mock\ManyToManyEntity');
 
     $this->assertTrue(
-      Parser::isCached('clarinet\test\mock\SimpleEntity'));
+      $this->modelCache->isCached('zpt\orm\test\mock\SimpleEntity'));
 
     $relationships = $info->getRelationships();
     $this->assertInternalType('array', $relationships);
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('clarinet\model\ManyToMany', $relationship);
+    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToMany', $relationship);
   }
 
   /**
@@ -155,26 +174,25 @@ class ParserTest extends TestCase {
    * entities that declare both sides of a many-to-many relationship.
    */
   public function testMarseManyToManyTwoSidedRelationship() {
-    $parser = new Parser('clarinet\test\mock\ManyToManyMirrorLhsEntity');
-    $info = $parser->parse();
+    $info = $this->modelParser->parse('zpt\orm\test\mock\ManyToManyMirrorLhsEntity');
 
     $this->assertTrue(
-      Parser::isCached('clarinet\test\mock\ManyToManyMirrorRhsEntity'));
+      $this->modelCache->isCached('zpt\orm\test\mock\ManyToManyMirrorRhsEntity'));
 
     $relationships = $info->getRelationships();
     $this->assertInternalType('array', $relationships);
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('clarinet\model\ManyToMany', $relationship);
+    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToMany', $relationship);
 
-    $info = Parser::getModel('clarinet\test\mock\ManyToManyMirrorRhsEntity');
+    $info = $this->modelParser->parse('zpt\orm\test\mock\ManyToManyMirrorRhsEntity');
 
     $relationships = $info->getRelationships();
     $this->assertInternalType('array', $relationships);
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('clarinet\model\ManyToMany', $relationship);
+    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToMany', $relationship);
   }
 }

@@ -2,12 +2,12 @@
 namespace zpt\dyn\orm\persister;
 
 use \zeptech\orm\runtime\ActorFactory;
-use \zeptech\orm\runtime\Criteria;
 use \zeptech\orm\runtime\Persister;
 use \zeptech\orm\runtime\PdoExceptionWrapper;
 use \zeptech\orm\runtime\PdoWrapper;
 use \zeptech\orm\runtime\SaveLock;
 use \zeptech\orm\QueryBuilder;
+use \zpt\orm\Criteria;
 use \Exception;
 use \PDO;
 use \PDOException;
@@ -213,7 +213,7 @@ class ${actor} {
           $related = $model->get${rel[lhsProperty]}();
           if ($related !== null) {
             foreach($related AS $rel) {
-              if ($rel->get${rhsIdProperty}() === null) {
+              if ($rel->get${rel[rhsIdProperty]}() === null) {
                 $persister->save($rel);
               }
             }
@@ -520,7 +520,7 @@ class ${actor} {
           ${elseif:rel[type] = many-to-many}
             $c = new Criteria();
             $c->addSelect('${rel[rhsTable]}.*');
-            $c->addJoin('${rel[linkTable]}', '${rel[rhsIdColumn]}', '${rel[rhsLinkColumn]}');
+            $c->addInnerJoin('${rel[linkTable]}', '${rel[rhsIdColumn]}', '${rel[rhsLinkColumn]}');
             $c->addEquals('${rel[lhsLinkColumn]}', $id);
             ${if:rel[orderByCol] ISSET}
               $c->addSort('${rel[orderByCol]}', '${rel[orderByDir]}');
@@ -660,7 +660,7 @@ class ${actor} {
           $related = $model->get${rel[lhsProperty]}();
           if ($related !== null) {
             foreach($related AS $rel) {
-              if ($rel->get${rhsIdProperty}() === null) {
+              if ($rel->get${rel[rhsIdProperty]}() === null) {
                 $persister->save($rel);
               }
             }
@@ -675,7 +675,7 @@ class ${actor} {
           // Create new link entries for all related entities
           if ($related !== null) {
             $sql = "INSERT INTO ${rel[linkTable]} (${rel[lhsLinkColumn]}, ${rel[rhsLinkColumn]}) VALUES (:lhsId, :rhsId)";
-            $createStmt = $this->_pdo->prepare();
+            $createStmt = $this->_pdo->prepare($sql);
             foreach ($related AS $rel) {
               $params = array(
                 'lhsId' => $id,

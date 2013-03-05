@@ -13,12 +13,12 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test/generated
  */
-namespace clarinet\test\generated;
 
-use \clarinet\Criteria;
-use \clarinet\test\mock\OneToManyEntity;
-use \clarinet\test\mock\OneToManyRhs;
-
+use \zpt\orm\test\mock\OneToManyEntity;
+use \zpt\orm\test\mock\OneToManyRhs;
+use \zpt\orm\test\Generator;
+use \zpt\orm\test\Db;
+use \zpt\orm\Criteria;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/../test-common.php';
@@ -50,9 +50,9 @@ class OneToManyPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $modelName = 'clarinet\test\mock\OneToManyEntity';
+    $modelName = 'zpt\orm\test\mock\OneToManyEntity';
     $actorName = str_replace('\\', '_', $modelName);
-    $className = "clarinet\\persister\\" . $actorName;
+    $className = "zpt\\dyn\\orm\\persister\\" . $actorName;
     $this->_persister = new $className();
   }
 
@@ -86,7 +86,7 @@ class OneToManyPersisterTest extends TestCase {
 
     foreach ($one->getMany() AS $o) {
       $this->assertNotNull($o);
-      $this->assertInstanceOf('clarinet\test\mock\OneToManyRhs', $o);
+      $this->assertInstanceOf('zpt\orm\test\mock\OneToManyRhs', $o);
       $this->assertNotNull($o->getId());
     }
   }
@@ -115,7 +115,7 @@ class OneToManyPersisterTest extends TestCase {
 
     $retrieved = $persister->getById($id);
     $this->assertNotNull($retrieved);
-    $this->assertInstanceOf('clarinet\test\mock\OneToManyEntity', $retrieved);
+    $this->assertInstanceOf('zpt\orm\test\mock\OneToManyEntity', $retrieved);
 
     $many = $retrieved->getMany();
     $this->assertInternalType('array', $many);
@@ -195,9 +195,9 @@ class OneToManyPersisterTest extends TestCase {
     $retrieved = $this->_persister->getById($id);
     $this->assertNull($retrieved);
 
-    $modelName = 'clarinet\test\mock\OneToManyRhs';
+    $modelName = 'zpt\orm\test\mock\OneToManyRhs';
     $actorName = str_replace('\\', '_', $modelName);
-    $className = "clarinet\\persister\\" . $actorName;
+    $className = "zpt\\dyn\orm\\persister\\" . $actorName;
     $rhsPersister = new $className();
 
     $c = new Criteria();

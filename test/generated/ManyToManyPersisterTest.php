@@ -13,11 +13,12 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test/generated
  */
-namespace clarinet\test\generated;
 
-use \clarinet\test\mock\ManyToManyEntity;
-use \clarinet\test\mock\SimpleEntity;
-use \clarinet\PdoWrapper;
+use \zeptech\orm\runtime\PdoWrapper;
+use \zpt\orm\test\mock\ManyToManyEntity;
+use \zpt\orm\test\mock\SimpleEntity;
+use \zpt\orm\test\Db;
+use \zpt\orm\test\Generator;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 require_once __DIR__ . '/../test-common.php';
@@ -49,9 +50,9 @@ class ManyToManyPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $modelName = 'clarinet\test\mock\ManyToManyEntity';
+    $modelName = 'zpt\orm\test\mock\ManyToManyEntity';
     $actorName = str_replace('\\', '_', $modelName);
-    $className = "clarinet\\persister\\$actorName";
+    $className = "zpt\dyn\orm\\persister\\$actorName";
     $this->_persister = new $className();
   }
 
@@ -137,18 +138,18 @@ class ManyToManyPersisterTest extends TestCase {
 
     $retrieved1 = $this->_persister->getById($id1);
     $this->assertNotNull($retrieved1);
-    $this->assertInstanceOf('clarinet\test\mock\ManyToManyEntity', $retrieved1);
+    $this->assertInstanceOf('zpt\orm\test\mock\ManyToManyEntity', $retrieved1);
 
     $retrieved2 = $this->_persister->getById($id2);
     $this->assertNotNull($retrieved2);
-    $this->assertInstanceOf('clarinet\test\mock\ManyToManyEntity', $retrieved2);
+    $this->assertInstanceOf('zpt\orm\test\mock\ManyToManyEntity', $retrieved2);
 
     $many1 = $retrieved1->getMany();
     $this->assertInternalType('array', $many1);
     $this->assertEquals(10, count($many1));
     foreach ($many1 AS $e) {
       $this->assertNotNull($e);
-      $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $e);
+      $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $e);
       
       $e->setName('New' . $e->getName());
       $e->setValue('New' . $e->getValue());
@@ -159,7 +160,7 @@ class ManyToManyPersisterTest extends TestCase {
     $this->assertEquals(10, count($many2));
     foreach ($many2 AS $e) {
       $this->assertNotnull($e);
-      $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $e);
+      $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $e);
       $this->assertRegExp('/^NewEntity\d+$/', $e->getName());
       $this->assertRegExp('/^NewEntity\d+Value$/', $e->getValue());
     }
@@ -207,18 +208,18 @@ class ManyToManyPersisterTest extends TestCase {
 
     $retrieved1 = $persister->getById($id1);
     $this->assertNotNull($retrieved1);
-    $this->assertInstanceOf('clarinet\test\mock\ManyToManyEntity', $retrieved1);
+    $this->assertInstanceOf('zpt\orm\test\mock\ManyToManyEntity', $retrieved1);
 
     $retrieved2 = $persister->getById($id2);
     $this->assertNotNull($retrieved2);
-    $this->assertInstanceOf('clarinet\test\mock\ManyToManyEntity', $retrieved2);
+    $this->assertInstanceOf('zpt\orm\test\mock\ManyToManyEntity', $retrieved2);
 
     $many1 = $retrieved1->getMany();
     $this->assertInternalType('array', $many1);
     $this->assertEquals(10, count($many1));
     foreach ($many1 AS $e) {
       $this->assertNotNull($e);
-      $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $e);
+      $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $e);
       $this->assertRegExp('/^NewEntity\d+$/', $e->getName());
       $this->assertRegExp('/^NewEntity\d+Value$/', $e->getValue());
     }
@@ -228,7 +229,7 @@ class ManyToManyPersisterTest extends TestCase {
     $this->assertEquals(10, count($many2));
     foreach ($many2 AS $e) {
       $this->assertNotnull($e);
-      $this->assertInstanceOf('clarinet\test\mock\SimpleEntity', $e);
+      $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $e);
       $this->assertRegExp('/^Entity\d+$/', $e->getName());
       $this->assertRegExp('/^Entity\d+Value$/', $e->getValue());
     }

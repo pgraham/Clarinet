@@ -17,7 +17,7 @@ namespace clarinet\test;
 
 use \PDO;
 
-use \clarinet\PdoWrapper;
+use \zeptech\orm\runtime\PdoWrapper;
 
 use \PHPUnit_Framework_TestCase as TestCase;
 
