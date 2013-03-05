@@ -4,3 +4,7 @@ commit.txt
 
 # Vim undo files
 *.un~
+
+# Composer files
+composer.lock
+vendor/
