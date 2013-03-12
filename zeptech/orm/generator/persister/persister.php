@@ -6,7 +6,7 @@ use \zeptech\orm\runtime\Persister;
 use \zeptech\orm\runtime\PdoExceptionWrapper;
 use \zeptech\orm\runtime\PdoWrapper;
 use \zeptech\orm\runtime\SaveLock;
-use \zeptech\orm\QueryBuilder;
+use \zpt\orm\actor\QueryBuilder;
 use \zpt\orm\Criteria;
 use \Exception;
 use \PDO;
