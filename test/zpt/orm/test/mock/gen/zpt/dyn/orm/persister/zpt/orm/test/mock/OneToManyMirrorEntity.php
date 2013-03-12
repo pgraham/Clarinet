@@ -54,16 +54,14 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
   private $_delete = null;
 
   /**
-  * Create a new persister for zpt\orm\test\mock\OneToManyMirrorEntity entities.
+  * Create a new persister for ${class} entities.
   */
   public function __construct() {
     $this->_pdo = PdoWrapper::get();
 
     $this->createSql =
       "INSERT INTO one_to_many_mirror
-      (`name`)
-      VALUES
-      (:name)";
+      (`name`) VALUES (:name)";
     $this->_create = $this->_pdo->prepare($this->createSql);
 
     $this->updateSql =
@@ -133,7 +131,7 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
   /**
   * Insert the given entity into the database.
   *
-  * @param zpt\orm\test\mock\OneToManyMirrorEntity $model
+  * @param ${class} $model
   */
   public function create(\zpt\orm\test\mock\OneToManyMirrorEntity $model) {
     $validator = ActorFactory::getActor('validator', 'zpt\orm\test\mock\OneToManyMirrorEntity');
@@ -152,9 +150,7 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
       $model->setid(self::CREATE_MARKER);
 
       $params = Array();
-
-      $params[':name'] = $model->getname();
-
+      $params['name'] = $model->getname();
 
 
 
@@ -173,8 +169,7 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
       $saveLock = SaveLock::acquire();
       $saveLock->lock($model);
 
-      // ---------------------------------------------------------------------
-      // Save related zpt\orm\test\mock\ManyToOneMirrorEntity entities
+      // Save related zpt\orm\test\mock\ManyToOneMirrorEntity entities -------------------------------
       $persister = Persister::get('zpt\orm\test\mock\ManyToOneMirrorEntity');
       $related = $model->getmany();
       if ($related === null) {
@@ -230,7 +225,7 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
   /**
   * Delete the given entity.
   *
-  * @param zpt\orm\test\mock\OneToManyMirrorEntity $model
+  * @param ${class} $model
   */
   public function delete(\zpt\orm\test\mock\OneToManyMirrorEntity $model) {
     $id = $model->getid();
@@ -249,11 +244,9 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
 
-      #{ each: collections as col
-      #} each
 
       // ---------------------------------------------------------------------
-      // Delete related  entities
+      // Delete related zpt\orm\test\mock\ManyToOneMirrorEntity entities
       $persister = Persister::get('zpt\orm\test\mock\ManyToOneMirrorEntity');
       $related = $model->getmany();
       foreach ($related AS $rel) {
@@ -287,7 +280,7 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
   * @param integer $id
   * @return zpt\orm\test\mock\OneToManyMirrorEntity
   */
-  public function getById($id, $debug = false) {
+  public function getById($id) {
     if (!isset($this->_cache[$id])) {
       $c = new Criteria();
       $c->addEquals('id', $id);
@@ -342,7 +335,7 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
   *
   * @param Criteria $c
   */
-  public function retrieve(Criteria $c = null, $debug = false) {
+  public function retrieve(Criteria $c = null) {
     if ($c === null) {
       $c = new Criteria();
     }
@@ -358,10 +351,6 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
       ->setDistinct(true);
     $sql = $c->__toString();
     $params = $c->getParameters();
-    if ($debug) {
-      echo "$sql\n";
-      print_r($params);
-    }
 
     try {
       $stmt = $this->_pdo->prepare($sql);
@@ -392,11 +381,8 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
 
 
         // Populate collections
-        #{ each: collections as col
-        // TODO Figure out a way of getting SQL into any exceptions
         $sql = null;
         $params = null;
-        #} each
 
         // Populate any relationships
         // -------------------------------------------------------------------
@@ -426,7 +412,7 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
   * Saves the given instance by either creating it if it does not have an ID or
   * updating if it does.
   *
-  * @param zpt\orm\test\mock\OneToManyMirrorEntity $model
+  * @param ${class} $model
   */
   public function save(\zpt\orm\test\mock\OneToManyMirrorEntity $model) {
     $id = $model->getid();
@@ -440,9 +426,9 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
   /**
   * Update the given entity.
   *
-  * @param zpt\orm\test\mock\OneToManyMirrorEntity $model
+  * @param ${class} $model
   */
-  public function update(\zpt\orm\test\mock\OneToManyMirrorEntity $model, $debug = false) {
+  public function update(\zpt\orm\test\mock\OneToManyMirrorEntity $model) {
     $id = $model->getid();
     if ($id === null) {
       throw new Exception("Can't update zpt\\orm\\test\\mock\\OneToManyMirrorEntity because it does not have an id");
@@ -477,11 +463,9 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
 
       #-- Update each of the model's collections by first removing the existing
       #-- persisted collection and replacing it with what is in the model
-      #{ each: collections as col
       // TODO Figure out a way of getting the SQL and params into any exception
       $sql = null;
       $params = null;
-      #} each
 
 
       // ---------------------------------------------------------------------
@@ -553,14 +537,8 @@ class zpt_orm_test_mock_OneToManyMirrorEntity {
   }
 
   #-- Create methods for removing each of the model's collections
-  #{ each: collection as col
-  #} done
 
   #-- Create methods for persisting each of the model's collections
-  #{ each: collections as col
-  #} each
 
   #-- Create methods for retrieve each of the model's collections
-  #{ each: collections as col
-  #} each
 }

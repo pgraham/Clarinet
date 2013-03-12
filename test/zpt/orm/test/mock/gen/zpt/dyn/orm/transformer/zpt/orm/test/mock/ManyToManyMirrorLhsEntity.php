@@ -25,7 +25,7 @@ class zpt_orm_test_mock_ManyToManyMirrorLhsEntity {
   /**
   * Transform the given model object into an array.
   *
-  * @param zpt\orm\test\mock\ManyToManyMirrorLhsEntity $model The model instance to convert.
+  * @param ${class} $model The model instance to convert.
   */
   public function asArray(\zpt\orm\test\mock\ManyToManyMirrorLhsEntity $model = null) {
     if ($model === null) {
@@ -38,8 +38,6 @@ class zpt_orm_test_mock_ManyToManyMirrorLhsEntity {
 
     $a['name'] = $model->getname();
 
-    #{ each: collections as col
-    #} each
 
     $relVal = $model->getmany();
     if ($relVal === null) {
@@ -58,9 +56,9 @@ class zpt_orm_test_mock_ManyToManyMirrorLhsEntity {
   }
 
   /**
-  * Transform an array of zpt\orm\test\mock\ManyToManyMirrorLhsEntity instances into an array.
+  * Transform an array of ${class} instances into an array.
   *
-  * @param zpt\orm\test\mock\ManyToManyMirrorLhsEntity[] $models
+  * @param ${class}[] $models
   */
   public function asCollection(array $models) {
     $a = array();
@@ -104,8 +102,6 @@ class zpt_orm_test_mock_ManyToManyMirrorLhsEntity {
 
 
     #-- Add each collection into the model
-    #{ each: collections as col
-    #} each
 
     if ($whiteList === null || in_array('many', $whiteList)) {
       if (isset($a['many'])) {

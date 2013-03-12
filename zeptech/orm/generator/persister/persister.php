@@ -17,7 +17,7 @@ use \PDOException;
  * Instead, modify the model class of this persister, then run the clarinet
  * generator to re-generate this file.
  */
-class ${actor} {
+class /*# actor */ {
 
   /**
    * Entities that in the process of being created are marked with this id so
@@ -60,23 +60,21 @@ class ${actor} {
     $this->_pdo = PdoWrapper::get();
 
     $this->createSql =
-      "INSERT INTO ${table}
-       (${join:column_names:,})
-       VALUES
-       (${join:value_names:,})";
+      "INSERT INTO /*# table */
+       (/*# join:column_names:, */) VALUES (/*# join:value_names:, */)";
     $this->_create = $this->_pdo->prepare($this->createSql);
 
-    ${if:has_update}
+    #{ if has_update
       $this->updateSql = 
-        "UPDATE ${table}
-         SET ${join:sql_setters:,}
-         WHERE ${id_column} = :id";
+        "UPDATE /*# table */
+         SET /*# join:sql_setters:, */
+         WHERE /*# id_column */ = :id";
       $this->_update = $this->_pdo->prepare($this->updateSql);
-    ${else}
+    #{ else
       $this->_update = null;
-    ${fi}
+    #}
 
-    $this->deleteSql = "DELETE FROM ${table} WHERE ${id_column} = :id";
+    $this->deleteSql = "DELETE FROM /*# table */ WHERE /*# id_column */ = :id";
     $this->_delete = $this->_pdo->prepare($this->deleteSql);
   }
 
@@ -109,7 +107,7 @@ class ${actor} {
     }
 
     if ($c->getTable() === null) {
-      $c->setTable('${table}');
+      $c->setTable('/*# table */');
     }
 
 
@@ -128,7 +126,7 @@ class ${actor} {
     } catch (PDOException $e) {
       // TODO - Create a PDOExceptionWrapper that parses the error message in
       //        order to present an error suitable for users
-      $e = new PdoExceptionWrapper($e, '${class}');
+      $e = new PdoExceptionWrapper($e, '/*# class */');
       $e->setSql($sql, $params);
       throw $e;
     }
@@ -139,142 +137,145 @@ class ${actor} {
    *
    * @param ${class} $model
    */
-  public function create(\${class} $model) {
-    $validator = ActorFactory::getActor('validator', '${class}');
+  public function create(\/*# class */ $model) {
+    $validator = ActorFactory::getActor('validator', '/*# class */');
     if (!$validator->validate($model, $e)) {
       throw $e;
     }
 
-    if ($model->get${id_property}() !== null) {
-      return $model->get${id_property}();
+    if ($model->get/*# id_property */() !== null) {
+      return $model->get/*# id_property */();
     }
 
-    ${if:beforeCreate}
+    #{ if beforeCreate
       $model->beforeCreate();
-    ${fi}
+    #}
 
     try {
       $startTransaction = $this->_pdo->beginTransaction();
 
-      $model->set${id_property}(self::CREATE_MARKER);
+      $model->set/*# id_property */(self::CREATE_MARKER);
 
       $params = Array();
-      ${each:properties as prop}
+      #{ each properties as prop
+        #{ if prop[type] = boolean
+          $params['/*# prop[col] */'] = $model->get/*# prop[name] */() ? 1 : 0;
+        #{ else
+          $params['/*# prop[col] */'] = $model->get/*# prop[name] */();
+        #}
+      #}
 
-        ${if:prop[type] = boolean}
-          $params[':${prop[col]}'] = $model->get${prop[name]}() ? 1 : 0;
-        ${else}
-          $params[':${prop[col]}'] = $model->get${prop[name]}();
-        ${fi}
-
-      ${done}
-
-      ${each:relationships as rel}
-        ${if:rel[type] = many-to-one}
-          // Populate ${rel[rhs]} parameter
-          $rhs = $model->get${rel[lhsProperty]}();
+      #{ each relationships as rel
+        #{ if rel[type] = many-to-one
+          // Populate /*# rel[rhs] */ parameter --------------------------------
+          $rhs = $model->get/*# rel[lhsProperty] */();
           $rhsId = null;
           if ($rhs !== null) {
-            $rhsId = $rhs->get${rel[rhsIdProperty]}();
+            $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
             if ($rhsId === null) {
-              $persister = Persister::get('${rel[rhs]}');
+              $persister = Persister::get('/*# rel[rhs] */');
               $rhsId = $persister->create($rhs);
             }
           }
-          $params[':${rel[lhsColumn]}'] = $rhsId;
-        ${fi}
-      ${done}
+          $params[':/*# rel[lhsColumn] */'] = $rhsId;
+          // -------------------------------------------------------------------
+        #}
+      #}
 
       $sql = $this->createSql; // If there is an exception this is handy to know
       $this->_create->execute($params);
 
-      $transformer = ActorFactory::getActor('transformer', '${class}');
+      $transformer = ActorFactory::getActor('transformer', '/*# class */');
       $id = $transformer->idFromDb($this->_pdo->lastInsertId());
-      $model->set${id_property}($id);
+      $model->set/*# id_property */($id);
       $this->_cache[$id] = $model;
 
       // TODO Figure out a way of getting sql into any exceptions
       $sql = null;
       $params = null;
-      ${each:collections as col}
-        $this->insertCollection_${col[property]}($id, $model->get${col[property]}());
-      ${done}
+      #{ each collections as col
+        $this->insertCollection_/*# col[property] */(
+          $id,
+          $model->get/*# col[property] */()
+        );
+      #}
 
       $saveLock = SaveLock::acquire();
       $saveLock->lock($model);
 
-      ${each:relationships as rel}
-        // ---------------------------------------------------------------------
-        // Save related ${rel[rhs]} entities
-        $persister = Persister::get('${rel[rhs]}');
-        ${if:rel[type] = many-to-many}
+      #{ each relationships as rel
+        // Save related /*# rel[rhs] */ entities -------------------------------
+        $persister = Persister::get('/*# rel[rhs] */');
+        $related = $model->get/*# rel[lhsProperty] */();
+        #{ if rel[type] = many-to-many
           // If any of the related entities are new, save them to ensure that
           // they have an id, then update them.
-          $related = $model->get${rel[lhsProperty]}();
           if ($related !== null) {
             foreach($related AS $rel) {
-              if ($rel->get${rel[rhsIdProperty]}() === null) {
+              if ($rel->get/*# rel[rhsIdProperty] */() === null) {
                 $persister->save($rel);
               }
             }
           }
 
           // Delete all link entries for this entity
-          $sql = "DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id";
+          $sql = "DELETE FROM /*# rel[linkTable] */
+                  WHERE /*# rel[lhsLinkColumn] */ = :id";
           $params = array('id' => $id);
           $this->_pdo->prepare($sql)->execute($params);
 
           // Create new link entries for all related entities
           if ($related !== null) {
-            $sql = "INSERT INTO ${rel[linkTable]} (${rel[lhsLinkColumn]}, ${rel[rhsLinkColumn]}) VALUES (:lhsId, :rhsId)";
+            $sql = "INSERT INTO /*# rel[linkTable] */
+                    (/*# rel[lhsLinkColumn] */, /*# rel[rhsLinkColumn] */)
+                    VALUES (:lhsId, :rhsId)";
             $createStmt = $this->_pdo->prepare($sql);
             foreach ($related AS $rel) {
               $params = array(
                 'lhsId' => $id,
-                'rhsId' => $rel->get${rel[rhsIdProperty]}()
+                'rhsId' => $rel->get/*# rel[rhsIdProperty] */()
               );
               $createStmt->execute($params);
             }
           }
 
-        ${elseif:rel[type] = one-to-many}
-          $related = $model->get${rel[lhsProperty]}();
+        #{ elseif rel[type] = one-to-many
           if ($related === null) {
             $related = array();
           }
 
           // Update or save the collection
-          ${if:rel[mirrored]}
+          #{ if rel[mirrored]
            foreach ($related AS $rel) {
-             $rel->set${rel[rhsProperty]}($model);
+             $rel->set/*# rel[rhsProperty] */($model);
              $persister->save($model);
            }
-          ${else}
+          #{ else
             foreach ($related AS $rel) {
-              if ($rel->get${rel[rhsIdProperty]}() === null) {
+              if ($rel->get/*# rel[rhsIdProperty] */() === null) {
                 $persister->create($rel);
               }
             }
 
-            $sql = "UPDATE ${rel[rhsTable]}
-                    SET ${rel[rhsColumn]} = :id
-                    WHERE ${rel[rhsIdColumn]} = :relId";
+            $sql = "UPDATE /*# rel[rhsTable] */
+                    SET /*# rel[rhsColumn] */ = :id
+                    WHERE /*# rel[rhsIdColumn] */ = :relId";
             $updateStmt = $this->_pdo->prepare($sql);
 
             foreach ($related AS $rel) {
               $params = array(
                 'id' => $id,
-                'relId' => $rel->get${rel[rhsIdProperty]}()
+                'relId' => $rel->get/*# rel[rhsIdProperty] */()
               );
               $updateStmt->execute($params);
 
               // Clear the cache of the RHS entity as it may contain a stale id
-              $persister->clearCache($rel->get${rel[rhsIdProperty]}());
+              $persister->clearCache($rel->get/*# rel[rhsIdProperty] */());
             }
-          ${fi}
-        ${fi}
+          #}
+        #}
         // ---------------------------------------------------------------------
-      ${done}
+      #}
 
       if ($startTransaction) {
         $this->_pdo->commit();
@@ -282,20 +283,20 @@ class ${actor} {
 
       $saveLock->release();
 
-      ${if:onCreate}
+      #{ if onCreate
         $model->onCreate();
-      ${fi}
+      #} 
 
       return $id;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
-      $model->set${id_property}(null);
+      $model->set/*# id_property */(null);
 
       if (isset($saveLock)) {
         $saveLock->forceRelease();
       }
 
-      $e = new PdoExceptionWrapper($e, '${class}');
+      $e = new PdoExceptionWrapper($e, '/*# class */');
       $e->setSql($sql, $params);
       throw $e;
     }
@@ -306,18 +307,18 @@ class ${actor} {
    *
    * @param ${class} $model
    */
-  public function delete(\${class} $model) {
-    $id = $model->get${id_property}();
+  public function delete(\/*# class */ $model) {
+    $id = $model->get/*# id_property */();
     if ($id === null) {
-      throw new Exception("Can't delete ${class_str} because it does not have an id");
+      throw new Exception("Can't delete /*# class_str */ because it does not have an id");
     }
 
     $params = array();
     $params[':id'] = $id;
 
-    ${if:beforeDelete}
+    #{ if beforeDelete
       $model->beforeDelete();
-    ${fi}
+    #}
 
     try {
       $startTransaction = $this->_pdo->beginTransaction();
@@ -326,38 +327,37 @@ class ${actor} {
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
 
-      #{ each: collections as col
-      ${each:collections as col}
-        $this->removeCollection_${col[property]}($id);
-      ${done}
-      #} each
+      #{ each collections as col
+        $this->removeCollection_/*# col[property] */($id);
+      #}
 
-      ${each:relationships AS rel}
+      #{ each relationships AS rel
         // ---------------------------------------------------------------------
-        // Delete related ${rhs} entities
-        ${if:rel[type] = one-to-many}
-          $persister = Persister::get('${rel[rhs]}');
-          $related = $model->get${rel[lhsProperty]}();
+        // Delete related /*# rel[rhs] */ entities
+        #{ if rel[type] = one-to-many
+          $persister = Persister::get('/*# rel[rhs] */');
+          $related = $model->get/*# rel[lhsProperty] */();
           foreach ($related AS $rel) {
             $persister->delete($rel);
           }
 
-        ${elseif:rel[type] = many-to-many}
-          $sql = 'DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id';
+        #{ elseif rel[type] = many-to-many
+          $sql = 'DELETE FROM /*# rel[linkTable] */
+                  WHERE /*# rel[lhsLinkColumn] */ = :id';
           $params = array('id' => $id);
           $deleteStmt = $this->_pdo->prepare($sql);
           $deleteStmt->execute($params);
 
-        ${fi}
+        #}
         // ---------------------------------------------------------------------
-      ${done}
+      #}
 
-      ${if:onDelete}
+      #{ if onDelete
         $model->onDelete();
-      ${fi}
+      #}
 
       $this->_cache[$id] = null;
-      $model->set${id_property}(null);
+      $model->set/*# id_property */(null);
 
       if ($startTransaction) {
         $this->_pdo->commit();
@@ -367,7 +367,7 @@ class ${actor} {
     } catch (PDOException $e) {
       $this->_pdo->rollback();
 
-      $e = new PdoExceptionWrapper($e, '${class}');
+      $e = new PdoExceptionWrapper($e, '/*# class */');
       $e->setSql($sql, $params);
       throw $e;
     }
@@ -378,12 +378,12 @@ class ${actor} {
    * then null is returned.
    *
    * @param integer $id
-   * @return ${class}
+   * @return /*# class */
    */
   public function getById($id) {
     if (!isset($this->_cache[$id])) {
       $c = new Criteria();
-      $c->addEquals('${id_column}', $id);
+      $c->addEquals('/*# id_column */', $id);
 
       // We don't care about the result since the retrieve method will
       // populate the cache
@@ -402,7 +402,7 @@ class ${actor} {
    * @return QueryBuilder
    */
   public function getQueryBuilder() {
-    return QueryBuilder::get('${class}');
+    return QueryBuilder::get('/*# class */');
   }
 
   /**
@@ -412,7 +412,7 @@ class ${actor} {
    * is returned
    *
    * @param Criteria $c Criteria that will result in a single entity
-   * @return ${class}
+   * @return /*# class */
    * @throws Exception if the criteria results in more than one entity.
    */
   public function retrieveOne(Criteria $c) {
@@ -441,7 +441,7 @@ class ${actor} {
     }
 
     if ($c->getTable() === null) {
-      $c->setTable('${table}');
+      $c->setTable('/*# table */');
     }
 
 
@@ -457,10 +457,10 @@ class ${actor} {
       $stmt->setFetchMode(PDO::FETCH_ASSOC);
       $stmt->execute($params);
 
-      $transformer = ActorFactory::getActor('transformer', '${class}');
+      $transformer = ActorFactory::getActor('transformer', '/*# class */');
       $result = Array();
       foreach ($stmt AS $row) {
-        $id = $transformer->idFromDb($row['${id_column}']);
+        $id = $transformer->idFromDb($row['/*# id_column */']);
 
         // Don't allow two instances for the same id to be created
         if (isset($this->_cache[$id])) {
@@ -468,8 +468,8 @@ class ${actor} {
           continue;
         }
 
-        $model = new \${class}();
-        $model->set${id_property}($id);
+        $model = new \/*# class */();
+        $model->set/*# id_property */($id);
 
         // Cache the instance before populating any relationships in order to
         // prevent inifinite loops when loading models that have a
@@ -477,82 +477,80 @@ class ${actor} {
         $this->_cache[$id] = $model;
 
         // Populate the model's properties
-        ${each:properties AS prop}
-          ${if:prop[type] = boolean}
-            $model->set${prop[name]}($row['${prop[col]}'] == 1 ? true : false);
+        #{ each properties as prop
+          #{ if prop[type] = boolean
+          $model->set/*# prop[name] */($row['/*# prop[col] */'] == 1 ? true : false);
 
-          ${elseif:prop[type] = integer}
-            $model->set${prop[name]}((int) $row['${prop[col]}']);
+          #{ elseif prop[type] = integer
+          $model->set/*# prop[name] */((int) $row['/*# prop[col] */']);
 
-          ${else}
-            $model->set${prop[name]}($row['${prop[col]}']);
+          #{ else
+            $model->set/*# prop[name] */($row['/*# prop[col] */']);
 
-          ${fi}
-        ${done}
+          #}
+        #}
 
         // Populate collections
-        #{ each: collections as col
-        // TODO Figure out a way of getting SQL into any exceptions
         $sql = null;
         $params = null;
-        ${each:collections as col}
-          $this->retrieveCollection_${col[property]}($id, $model);
-        ${done}
-        #} each
+        #{ each collections as col
+          // TODO Figure out a way of getting SQL into any exceptions
+          $this->retrieveCollection_/*# col[property] */($id, $model);
+        #}
 
         // Populate any relationships
-        ${each:relationships AS rel}
+        #{ each relationships as rel
           // -------------------------------------------------------------------
-          // Populate the ${rel[rhs]}
-          ${if:rel[type] = one-to-many}
+          // Populate the /*# rel[rhs] */
+          #{ if rel[type] = one-to-many
             $c = new Criteria();
-            $c->addEquals('${rel[rhsColumn]}', $id);
-            ${if:rel[orderByCol] ISSET}
-              $c->addSort('${rel[orderByCol]}', '${rel[orderByDir]}');
-            ${else}
-              $c->addSort('${rel[rhsIdProperty]}', 'asc');
-            ${fi}
+            $c->addEquals('/*# rel[rhsColumn] */', $id);
+            #{ if rel[orderByCol] ISSET
+              $c->addSort('/*# rel[orderByCol] */', '/*# rel[orderByDir] */');
+            #{ else
+              $c->addSort('/*# rel[rhsIdProperty] */', 'asc');
+            #}
 
-            $persister = Persister::get('${rel[rhs]}');
+            $persister = Persister::get('/*# rel[rhs] */');
             $related = $persister->retrieve($c);
-            $model->set${rel[lhsProperty]}($related);
+            $model->set/*# rel[lhsProperty] */($related);
 
-          ${elseif:rel[type] = many-to-many}
+          #{ elseif rel[type] = many-to-many
             $c = new Criteria();
-            $c->addSelect('${rel[rhsTable]}.*');
-            $c->addInnerJoin('${rel[linkTable]}', '${rel[rhsIdColumn]}', '${rel[rhsLinkColumn]}');
-            $c->addEquals('${rel[lhsLinkColumn]}', $id);
-            ${if:rel[orderByCol] ISSET}
-              $c->addSort('${rel[orderByCol]}', '${rel[orderByDir]}');
-            ${fi}
+            $c->addSelect('/*# rel[rhsTable] */.*');
+            $c->addInnerJoin('/*# rel[linkTable] */', '/*# rel[rhsIdColumn] */', '/*# rel[rhsLinkColumn] */');
+            $c->addEquals('/*# rel[lhsLinkColumn] */', $id);
+            #{ if rel[orderByCol] ISSET
+              $c->addSort('/*# rel[orderByCol] */', '/*# rel[orderByDir] */');
+            #}
 
-            $persister = Persister::get('${rel[rhs]}');
+            $persister = Persister::get('/*# rel[rhs] */');
             $related = $persister->retrieve($c);
-            $model->set${rel[lhsProperty]}($related);
+            $model->set/*# rel[lhsProperty] */($related);
 
-          ${elseif:rel[type] = many-to-one}
-            $relId = $row['${rel[lhsColumn]}'];
+          #{ elseif rel[type] = many-to-one
+            $relId = $row['/*# rel[lhsColumn] */'];
             if ($relId !== null) {
-              $persister = Persister::get('${rel[rhs]}');
+              $persister = Persister::get('/*# rel[rhs] */');
               $related = $persister->getById($relId);
 
               if ($related === null) {
-                throw new Exception("No ${rel[rhsStr]} with id $relId.");
+                throw new Exception("No /*# rel[rhsStr] */ with id $relId.");
               }
 
-              $model->set${rel[lhsProperty]}($related);
+              $model->set/*# rel[lhsProperty] */($related);
             }
 
-          ${fi}
+          #}
           // -------------------------------------------------------------------
-        ${done}
+        #}
 
         $result[] = $model;
       }
 
       return $result;
     } catch (PDOException $e) {
-      $e = new PdoExceptionWrapper($e, '${class}');
+      $e = new PdoExceptionWrapper($e, '/*# class */');
       $e->setSql($sql, $params);
       throw $e;
     }
@@ -564,8 +562,8 @@ class ${actor} {
    *
    * @param ${class} $model
    */
-  public function save(\${class} $model) {
-    $id = $model->get${id_property}();
+  public function save(\/*# class */ $model) {
+    $id = $model->get/*# id_property */();
     if ($id === null) {
       $this->create($model);
     } else {
@@ -578,24 +576,24 @@ class ${actor} {
    *
    * @param ${class} $model
    */
-  public function update(\${class} $model) {
-    $id = $model->get${id_property}();
+  public function update(\/*# class */ $model) {
+    $id = $model->get/*# id_property */();
     if ($id === null) {
-      throw new Exception("Can't update ${class_str} because it does not have an id");
+      throw new Exception("Can't update /*# class_str */ because it does not have an id");
     }
 
     if (SaveLock::isLocked($model)) {
       return;
     }
 
-    $validator = ActorFactory::getActor('validator', '${class}');
+    $validator = ActorFactory::getActor('validator', '/*# class */');
     if (!$validator->validate($model, $e)) {
       throw $e;
     }
 
-    ${if:beforeUpdate}
+    #{ if beforeUpdate
       $model->beforeUpdate();
-    ${fi}
+    #}
 
     try {
       $startTransaction = $this->_pdo->beginTransaction();
@@ -605,156 +603,154 @@ class ${actor} {
 
       $params = Array();
       $params[':id'] = $id;
-      ${each:properties as prop}
-        ${if:prop[type] = boolean}
-          $params[':${prop[col]}'] = $model->get${prop[name]}() ? 1 : 0;
-        ${else}
-          $params[':${prop[col]}'] = $model->get${prop[name]}();
-        ${fi}
-      ${done}
+      #{ each properties as prop
+        #{ if prop[type] = boolean
+          $params[':/*# prop[col] */'] = $model->get/*# prop[name] */() ? 1 : 0;
+        #{ else
+          $params[':/*# prop[col] */'] = $model->get/*# prop[name] */();
+        #}
+      #}
 
-      ${each:relationships as rel}
+      #{ each relationships as rel
 
-        ${if:rel[type] = many-to-one}
-          // Populate ${rel[rhs]} parameter
-          $rhs = $model->get${rel[lhsProperty]}();
+        #{ if rel[type] = many-to-one
+          // Populate /*# rel[rhs] */ parameter
+          $rhs = $model->get/*# rel[lhsProperty] */();
           $rhsId = null;
           if ($rhs !== null) {
-            $rhsId = $rhs->get${rel[rhsIdProperty]}();
+            $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
             if ($rhsId === null) {
-              $persister = ActorFactory::getActor('persister', '${rel[rhs]}');
+              $persister = ActorFactory::getActor('persister', '/*# rel[rhs] */');
               $rhsId = $persister->create($rhs);
             }
           }
-          $params[':${rel[lhsColumn]}'] = $rhsId;
-        ${fi}
+          $params[':/*# rel[lhsColumn] */'] = $rhsId;
+        #}
 
-      ${done}
+      #}
 
-      ${if:has_update}
+      #{ if has_update
         $sql = $this->updateSql;
         $this->_update->execute($params);
         $rowCount = $this->_update->rowCount();
-      ${fi}
+      #}
 
       #-- Update each of the model's collections by first removing the existing
       #-- persisted collection and replacing it with what is in the model
-      #{ each: collections as col
       // TODO Figure out a way of getting the SQL and params into any exception
       $sql = null;
       $params = null;
-      ${each:collections as col}
-          $this->removeCollection_${col[property]}($id);
-          $this->insertCollection_${col[property]}($id, $model->get${col[property]}());
-      ${done}
-      #} each
+      #{ each collections as col
+          $this->removeCollection_/*# col[property] */($id);
+          $this->insertCollection_/*# col[property] */($id, $model->get/*# col[property] */());
+      #}
 
 
-      ${each:relationships as rel}
+      #{ each relationships as rel
         // ---------------------------------------------------------------------
-        // Save related ${rel[rhs]} entities
-        $persister = Persister::get('${rel[rhs]}');
-        ${if:rel[type] = many-to-many}
+        // Save related /*# rel[rhs] */ entities
+        $persister = Persister::get('/*# rel[rhs] */');
+        #{ if rel[type] = many-to-many
           // If any of the related entities are new, save them to ensure that
           // they have an id, then update them.
-          $related = $model->get${rel[lhsProperty]}();
+          $related = $model->get/*# rel[lhsProperty] */();
           if ($related !== null) {
             foreach($related AS $rel) {
-              if ($rel->get${rel[rhsIdProperty]}() === null) {
+              if ($rel->get/*# rel[rhsIdProperty] */() === null) {
                 $persister->save($rel);
               }
             }
           }
 
           // Delete all link entries for this entity
-          $sql = "DELETE FROM ${rel[linkTable]} WHERE ${rel[lhsLinkColumn]} = :id";
+          $sql = "DELETE FROM /*# rel[linkTable] */ WHERE /*# rel[lhsLinkColumn] */ = :id";
           $params = array('id' => $id);
           $deleteStmt = $this->_pdo->prepare($sql);
           $deleteStmt->execute($params);
 
           // Create new link entries for all related entities
           if ($related !== null) {
-            $sql = "INSERT INTO ${rel[linkTable]} (${rel[lhsLinkColumn]}, ${rel[rhsLinkColumn]}) VALUES (:lhsId, :rhsId)";
+            $sql = "INSERT INTO /*# rel[linkTable] */ (/*# rel[lhsLinkColumn] */, /*# rel[rhsLinkColumn] */) VALUES (:lhsId, :rhsId)";
             $createStmt = $this->_pdo->prepare($sql);
             foreach ($related AS $rel) {
               $params = array(
                 'lhsId' => $id,
-                'rhsId' => $rel->get${rel[rhsIdProperty]}()
+                'rhsId' => $rel->get/*# rel[rhsIdProperty] */()
               );
               $createStmt->execute($params);
             }
           }
 
-        ${elseif:rel[type] = one-to-many}
-          $related = $model->get${rel[lhsProperty]}();
+        #{ elseif rel[type] = one-to-many
+          $related = $model->get/*# rel[lhsProperty] */();
           if ($related === null) {
             $related = array();
           }
 
           $relIds = array();
           foreach ($related AS $rel) {
-            $relIds[] = $rel->get${rel[rhsIdProperty]}();
+            $relIds[] = $rel->get/*# rel[rhsIdProperty] */();
           }
 
           $c = new Criteria();
-          $c->addEquals('${rel[rhsColumn]}', $id);
+          $c->addEquals('/*# rel[rhsColumn] */', $id);
           $current = $persister->retrieve($c);
 
           // Update or save the collection
-          ${if:rel[mirrored]}
+          #{ if rel[mirrored]
             foreach ($related AS $rel) {
               $rel->set${rel[rhsProperty]($model);
               $persister->save($model);
             }
             foreach ($current AS $cur) {
-              if (!in_array($cur->get${rel[rhsIdProperty]}(), $relIds)) {
-                ${if:rel[deleteOrphan]}
+              if (!in_array($cur->get/*# rel[rhsIdProperty] */(), $relIds)) {
+                #{ if rel[deleteOrphan]
                   $persister->delete($cur);
-                ${else}
-                  $cur->set${rel[rhsProperty]}(null);
+                #{ else
+                  $cur->set/*# rel[rhsProperty] */(null);
                   $persister->save($cur);
-                ${fi}
+                #}
               }
             }
-          ${else}
+          #{ else
             foreach ($related AS $rel) {
-              if ($rel->get${rel[rhsIdProperty]}() === null) {
+              if ($rel->get/*# rel[rhsIdProperty] */() === null) {
                 $persister->create($rel);
               }
             }
 
-            $sql = "UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = :id WHERE ${rel[rhsIdColumn]} = :relId";
+            $sql = "UPDATE /*# rel[rhsTable] */ SET /*# rel[rhsColumn] */ = :id WHERE /*# rel[rhsIdColumn] */ = :relId";
             $updateStmt = $this->_pdo->prepare($sql);
             foreach ($related AS $rel) {
               $params = array(
                 'id' => $id,
-                'relId' => $rel->get${rel[rhsIdProperty]}()
+                'relId' => $rel->get/*# rel[rhsIdProperty] */()
               );
               $updateStmt->execute($params);
 
               // Clear the cache of the RHS entity as it may contain a stale id
-              $persister->clearCache($rel->get${rel[rhsIdProperty]}());
+              $persister->clearCache($rel->get/*# rel[rhsIdProperty] */());
             }
 
-            ${if:rel[deleteOrphan]}
-              $sql = "DELETE FROM ${rel[rhsTable]} WHERE ${rel[rhsIdColumn]} = :relId";
+            #{ if rel[deleteOrphan]
+              $sql = "DELETE FROM /*# rel[rhsTable] */ WHERE /*# rel[rhsIdColumn] */ = :relId";
               $orphanStmt = $this->_pdo->prepare($sql);
-            ${else}
-              $sql = "UPDATE ${rel[rhsTable]} SET ${rel[rhsColumn]} = null WHERE ${rel[rhsIdColumn]} = :relId";
+            #{ else
+              $sql = "UPDATE /*# rel[rhsTable] */ SET /*# rel[rhsColumn] */ = null WHERE /*# rel[rhsIdColumn] */ = :relId";
               $orphanStmt = $this->_pdo->prepare($sql);
-            ${fi}
+            #}
             foreach ($current AS $cur) {
-              if (!in_array($cur->get${rel[rhsIdProperty]}(), $relIds)) {
-                $params = array('relId' => $cur->get${rel[rhsIdProperty]}());
+              if (!in_array($cur->get/*# rel[rhsIdProperty] */(), $relIds)) {
+                $params = array('relId' => $cur->get/*# rel[rhsIdProperty] */());
                 $orphanStmt->execute($params);
               }
 
-              $persister->clearCache($rel->get${rel[rhsIdProperty]}());
+              $persister->clearCache($rel->get/*# rel[rhsIdProperty] */());
             }
-          ${fi}
-        ${fi}
+          #}
+        #}
         // ---------------------------------------------------------------------
-      ${done}
+      #}
 
       $saveLock->release();
 
@@ -762,48 +758,44 @@ class ${actor} {
         $this->_pdo->commit();
       }
 
-      ${if:onUpdate}
+      #{ if onUpdate
         $model->onUpdate();
-      ${fi}
+      #}
 
-      ${if:has_update}
+      #{ if has_update
         return $rowCount;
-      ${else}
+      #{ else
         return 1;
-      ${fi}
+      #}
       return $rowCount;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
       $saveLock->forceRelease();
 
-      $e = new PdoExceptionWrapper($e, '${class}');
+      $e = new PdoExceptionWrapper($e, '/*# class */');
       $e->setSql($sql, $params);
       throw $e;
     }
   }
 
   #-- Create methods for removing each of the model's collections
-  #{ each: collection as col
-  ${each:collections as col}
-    private function removeCollection_${col[property]}($id) {
+  #{ each collections as col
+    private function removeCollection_/*# col[property] */($id) {
       $stmt = $this->_pdo->prepare(
-        'DELETE FROM ${col[link]}
-         WHERE ${col[idCol]} = :id');
+        'DELETE FROM /*# col[link] */
+         WHERE /*# col[idCol] */ = :id');
       $stmt->execute(array('id' => $id));
         
     }
-  ${done}
-  #} done
+  #}
 
   #-- Create methods for persisting each of the model's collections
-  #{ each: collections as col
-  ${each:collections as col}
-    private function insertCollection_${col[property]}($id, $collection) {
-      ${if:col[type] = set}
-      #{ if: col[type] = set
+  #{ each collections as col
+    private function insertCollection_/*# col[property] */($id, $collection) {
+      #{ if col[type] = set
         $stmt = $this->_pdo->prepare(
-          "INSERT INTO ${col[link]}
-           (${collection[idCol]}, ${col[valCol]})
+          "INSERT INTO /*# col[link] */
+           (/*# collection[idCol] */, /*# col[valCol] */)
            VALUES (:id, :val)");
 
         // TODO Update this to use bulk insert
@@ -814,11 +806,10 @@ class ${actor} {
           ));
         }
 
-      ${elseif:col[type] = list}
-      #} { elseif: col[type] = list
+      #{ elseif col[type] = list
         $stmt = $this->_pdo->prepare(
-          "INSERT INTO ${col[link]}
-           (${col[idCol]}, ${col[valCol]}, ${col[seqCol]})
+          "INSERT INTO /*# col[link] */
+           (/*# col[idCol] */, /*# col[valCol] */, /*# col[seqCol] */)
            VALUES (:id, :val, :seq)");
 
         // TODO Update this to use bulk insert
@@ -830,11 +821,10 @@ class ${actor} {
           ));
         }
 
-      ${elseif:col[type] = map}
-      #} { elseif: col[type] = map
+      #{ elseif col[type] = map
         $stmt = $this->_pdo->prepare(
-          "INSERT INTO ${col[link]}
-           (${col[idCol]}, ${col[keyCol]}, ${col[valCol]})
+          "INSERT INTO /*# col[link] */
+           (/*# col[idCol] */, /*# col[keyCol] */, /*# col[valCol] */)
            VALUES (:id, :key, :val)");
 
         // TODO Update this to use bulk insert
@@ -846,58 +836,50 @@ class ${actor} {
           ));
         }
 
-      ${fi}
-      #} if
+      #}
     }
-  ${done}
-  #} each
+  #}
 
   #-- Create methods for retrieve each of the model's collections
-  #{ each: collections as col
-  ${each: collections as col}
-    private function retrieveCollection_${col[property]}($id, $model) {
-      #{ if: col[type] = set
-      ${if:col[type] = set}
+  #{ each  collections as col
+    private function retrieveCollection_/*# col[property] */($id, $model) {
+      #{ if col[type] = set
         $stmt = $this->_pdo->prepare(
-          'SELECT ${col[valCol]} FROM ${col[link]} WHERE ${col[idCol]} = :id');
+          'SELECT /*# col[valCol] */ FROM /*# col[link] */ WHERE /*# col[idCol] */ = :id');
         $stmt->execute(array('id' => $id));
 
         $collection = array();
         foreach ($stmt as $row) {
-          $collection[] = $row['${col[valCol]}'];
+          $collection[] = $row['/*# col[valCol] */'];
         }
-        $model->set${col[property]}($collection);
+        $model->set/*# col[property] */($collection);
         
-      #}{ else if: col[type] = list
-      ${elseif:col[type] = list}
+      #{ elseif col[type] = list
         $stmt = $this->_pdo->prepare(
-          'SELECT ${col[valCol]} FROM ${col[link]} WHERE ${col[idCol]} = :id
-           ORDER BY ${col[seqCol]}');
+          'SELECT /*# col[valCol] */ FROM /*# col[link] */ WHERE /*# col[idCol] */ = :id
+           ORDER BY /*# col[seqCol] */');
         $stmt->execute(array('id' => $id));
         
         $collection = array();
         foreach ($stmt as $row) {
-          $collection[] = $row['${col[valCol]}'];
+          $collection[] = $row['/*# col[valCol] */'];
         }
-        $model->set${col[property]}($collection);
+        $model->set/*# col[property] */($collection);
 
-      #}{ else if: col[type] = map
-      ${elseif:col[type] = map}
+      #{ elseif col[type] = map
         $stmt = $this->_pdo->prepare(
-          'SELECT ${col[keyCol]}, ${col[valCol]}
-           FROM ${col[link]}
-           WHERE ${col[idCol]} = :id');
+          'SELECT /*# col[keyCol] */, /*# col[valCol] */
+           FROM /*# col[link] */
+           WHERE /*# col[idCol] */ = :id');
         $stmt->execute(array('id' => $id));
 
         $collection = array();
         foreach ($stmt as $row) {
-          $collection[$row['${col[keyCol]}']] = $row['${col[valCol]}'];
+          $collection[$row['/*# col[keyCol] */']] = $row['/*# col[valCol] */'];
         }
-        $model->set${col[property]}($collection);
+        $model->set/*# col[property] */($collection);
 
-      ${fi}
-      #} if
+      #}
     }
-  ${done}
-  #} each
+  #}
 }

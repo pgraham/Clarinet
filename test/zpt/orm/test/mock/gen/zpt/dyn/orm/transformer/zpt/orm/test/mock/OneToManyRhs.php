@@ -25,7 +25,7 @@ class zpt_orm_test_mock_OneToManyRhs {
   /**
   * Transform the given model object into an array.
   *
-  * @param zpt\orm\test\mock\OneToManyRhs $model The model instance to convert.
+  * @param ${class} $model The model instance to convert.
   */
   public function asArray(\zpt\orm\test\mock\OneToManyRhs $model = null) {
     if ($model === null) {
@@ -39,17 +39,15 @@ class zpt_orm_test_mock_OneToManyRhs {
     $a['name'] = $model->getname();
     $a['oneToManyEntityId'] = $model->getoneToManyEntityId();
 
-    #{ each: collections as col
-    #} each
 
 
     return $a;
   }
 
   /**
-  * Transform an array of zpt\orm\test\mock\OneToManyRhs instances into an array.
+  * Transform an array of ${class} instances into an array.
   *
-  * @param zpt\orm\test\mock\OneToManyRhs[] $models
+  * @param ${class}[] $models
   */
   public function asCollection(array $models) {
     $a = array();
@@ -102,8 +100,6 @@ class zpt_orm_test_mock_OneToManyRhs {
 
 
     #-- Add each collection into the model
-    #{ each: collections as col
-    #} each
 
 
     return $model;

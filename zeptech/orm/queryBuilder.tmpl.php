@@ -8,7 +8,7 @@ use \zpt\orm\Criteria;
  * but instead modify the model class of this query builder and re-generate
  * this file using the appropriate generator.
  */
-class ${actor} {
+class /*# actor */ {
 
   private $_c;
 
@@ -113,11 +113,11 @@ class ${actor} {
 
   private function _getProp($prop) {
     switch ($prop) {
-      ${each:properties as prop}
-        case '${prop[name]}':
-        return ${php:prop};
+      #{ each properties as prop
+        case '/*# prop[name] */':
+        return /*# php:prop */;
         break;
-      ${done}
+      #}
 
       default:
       // Property does not exist so there is nothing to return
@@ -127,11 +127,11 @@ class ${actor} {
 
   private function _getRel($rel) {
     switch ($rel) {
-      ${each:relationships as rel}
-        case '${rel[name]}':
-        return ${php:rel};
+      #{ each relationships as rel
+        case '/*# rel[name] */':
+        return /*# php:rel */;
         break;
-      ${done}
+      #}
 
       default:
       // Relationship does not exist so there is nothing to return

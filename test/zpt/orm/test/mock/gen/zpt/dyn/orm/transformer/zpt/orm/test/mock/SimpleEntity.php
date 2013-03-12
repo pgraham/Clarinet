@@ -25,7 +25,7 @@ class zpt_orm_test_mock_SimpleEntity {
   /**
   * Transform the given model object into an array.
   *
-  * @param zpt\orm\test\mock\SimpleEntity $model The model instance to convert.
+  * @param ${class} $model The model instance to convert.
   */
   public function asArray(\zpt\orm\test\mock\SimpleEntity $model = null) {
     if ($model === null) {
@@ -39,17 +39,15 @@ class zpt_orm_test_mock_SimpleEntity {
     $a['name'] = $model->getname();
     $a['value'] = $model->getvalue();
 
-    #{ each: collections as col
-    #} each
 
 
     return $a;
   }
 
   /**
-  * Transform an array of zpt\orm\test\mock\SimpleEntity instances into an array.
+  * Transform an array of ${class} instances into an array.
   *
-  * @param zpt\orm\test\mock\SimpleEntity[] $models
+  * @param ${class}[] $models
   */
   public function asCollection(array $models) {
     $a = array();
@@ -102,8 +100,6 @@ class zpt_orm_test_mock_SimpleEntity {
 
 
     #-- Add each collection into the model
-    #{ each: collections as col
-    #} each
 
 
     return $model;

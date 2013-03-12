@@ -54,16 +54,14 @@ class zpt_orm_test_mock_ManyToOneEntity {
   private $_delete = null;
 
   /**
-  * Create a new persister for zpt\orm\test\mock\ManyToOneEntity entities.
+  * Create a new persister for ${class} entities.
   */
   public function __construct() {
     $this->_pdo = PdoWrapper::get();
 
     $this->createSql =
       "INSERT INTO many_to_one_entity
-      (`name`,`simple_entity_id`)
-      VALUES
-      (:name,:simple_entity_id)";
+      (`name`,`simple_entity_id`) VALUES (:name,:simple_entity_id)";
     $this->_create = $this->_pdo->prepare($this->createSql);
 
     $this->updateSql =
@@ -133,7 +131,7 @@ class zpt_orm_test_mock_ManyToOneEntity {
   /**
   * Insert the given entity into the database.
   *
-  * @param zpt\orm\test\mock\ManyToOneEntity $model
+  * @param ${class} $model
   */
   public function create(\zpt\orm\test\mock\ManyToOneEntity $model) {
     $validator = ActorFactory::getActor('validator', 'zpt\orm\test\mock\ManyToOneEntity');
@@ -152,11 +150,9 @@ class zpt_orm_test_mock_ManyToOneEntity {
       $model->setid(self::CREATE_MARKER);
 
       $params = Array();
+      $params['name'] = $model->getname();
 
-      $params[':name'] = $model->getname();
-
-
-      // Populate zpt\orm\test\mock\SimpleEntity parameter
+      // Populate zpt\orm\test\mock\SimpleEntity parameter --------------------------------
       $rhs = $model->getone();
       $rhsId = null;
       if ($rhs !== null) {
@@ -167,6 +163,7 @@ class zpt_orm_test_mock_ManyToOneEntity {
         }
       }
       $params[':simple_entity_id'] = $rhsId;
+      // -------------------------------------------------------------------
 
       $sql = $this->createSql; // If there is an exception this is handy to know
       $this->_create->execute($params);
@@ -183,9 +180,9 @@ class zpt_orm_test_mock_ManyToOneEntity {
       $saveLock = SaveLock::acquire();
       $saveLock->lock($model);
 
-      // ---------------------------------------------------------------------
-      // Save related zpt\orm\test\mock\SimpleEntity entities
+      // Save related zpt\orm\test\mock\SimpleEntity entities -------------------------------
       $persister = Persister::get('zpt\orm\test\mock\SimpleEntity');
+      $related = $model->getone();
       // ---------------------------------------------------------------------
 
       if ($startTransaction) {
@@ -213,7 +210,7 @@ class zpt_orm_test_mock_ManyToOneEntity {
   /**
   * Delete the given entity.
   *
-  * @param zpt\orm\test\mock\ManyToOneEntity $model
+  * @param ${class} $model
   */
   public function delete(\zpt\orm\test\mock\ManyToOneEntity $model) {
     $id = $model->getid();
@@ -232,11 +229,9 @@ class zpt_orm_test_mock_ManyToOneEntity {
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
 
-      #{ each: collections as col
-      #} each
 
       // ---------------------------------------------------------------------
-      // Delete related  entities
+      // Delete related zpt\orm\test\mock\SimpleEntity entities
       // ---------------------------------------------------------------------
 
 
@@ -264,7 +259,7 @@ class zpt_orm_test_mock_ManyToOneEntity {
   * @param integer $id
   * @return zpt\orm\test\mock\ManyToOneEntity
   */
-  public function getById($id, $debug = false) {
+  public function getById($id) {
     if (!isset($this->_cache[$id])) {
       $c = new Criteria();
       $c->addEquals('id', $id);
@@ -319,7 +314,7 @@ class zpt_orm_test_mock_ManyToOneEntity {
   *
   * @param Criteria $c
   */
-  public function retrieve(Criteria $c = null, $debug = false) {
+  public function retrieve(Criteria $c = null) {
     if ($c === null) {
       $c = new Criteria();
     }
@@ -335,10 +330,6 @@ class zpt_orm_test_mock_ManyToOneEntity {
       ->setDistinct(true);
     $sql = $c->__toString();
     $params = $c->getParameters();
-    if ($debug) {
-      echo "$sql\n";
-      print_r($params);
-    }
 
     try {
       $stmt = $this->_pdo->prepare($sql);
@@ -369,11 +360,8 @@ class zpt_orm_test_mock_ManyToOneEntity {
 
 
         // Populate collections
-        #{ each: collections as col
-        // TODO Figure out a way of getting SQL into any exceptions
         $sql = null;
         $params = null;
-        #} each
 
         // Populate any relationships
         // -------------------------------------------------------------------
@@ -407,7 +395,7 @@ class zpt_orm_test_mock_ManyToOneEntity {
   * Saves the given instance by either creating it if it does not have an ID or
   * updating if it does.
   *
-  * @param zpt\orm\test\mock\ManyToOneEntity $model
+  * @param ${class} $model
   */
   public function save(\zpt\orm\test\mock\ManyToOneEntity $model) {
     $id = $model->getid();
@@ -421,9 +409,9 @@ class zpt_orm_test_mock_ManyToOneEntity {
   /**
   * Update the given entity.
   *
-  * @param zpt\orm\test\mock\ManyToOneEntity $model
+  * @param ${class} $model
   */
-  public function update(\zpt\orm\test\mock\ManyToOneEntity $model, $debug = false) {
+  public function update(\zpt\orm\test\mock\ManyToOneEntity $model) {
     $id = $model->getid();
     if ($id === null) {
       throw new Exception("Can't update zpt\\orm\\test\\mock\\ManyToOneEntity because it does not have an id");
@@ -469,11 +457,9 @@ class zpt_orm_test_mock_ManyToOneEntity {
 
       #-- Update each of the model's collections by first removing the existing
       #-- persisted collection and replacing it with what is in the model
-      #{ each: collections as col
       // TODO Figure out a way of getting the SQL and params into any exception
       $sql = null;
       $params = null;
-      #} each
 
 
       // ---------------------------------------------------------------------
@@ -501,14 +487,8 @@ class zpt_orm_test_mock_ManyToOneEntity {
   }
 
   #-- Create methods for removing each of the model's collections
-  #{ each: collection as col
-  #} done
 
   #-- Create methods for persisting each of the model's collections
-  #{ each: collections as col
-  #} each
 
   #-- Create methods for retrieve each of the model's collections
-  #{ each: collections as col
-  #} each
 }

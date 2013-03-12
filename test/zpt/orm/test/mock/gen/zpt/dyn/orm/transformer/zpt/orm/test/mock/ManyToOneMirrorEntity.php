@@ -25,7 +25,7 @@ class zpt_orm_test_mock_ManyToOneMirrorEntity {
   /**
   * Transform the given model object into an array.
   *
-  * @param zpt\orm\test\mock\ManyToOneMirrorEntity $model The model instance to convert.
+  * @param ${class} $model The model instance to convert.
   */
   public function asArray(\zpt\orm\test\mock\ManyToOneMirrorEntity $model = null) {
     if ($model === null) {
@@ -38,8 +38,6 @@ class zpt_orm_test_mock_ManyToOneMirrorEntity {
 
     $a['name'] = $model->getname();
 
-    #{ each: collections as col
-    #} each
 
     $relVal = $model->getone();
     if ($relVal === null) {
@@ -55,9 +53,9 @@ class zpt_orm_test_mock_ManyToOneMirrorEntity {
   }
 
   /**
-  * Transform an array of zpt\orm\test\mock\ManyToOneMirrorEntity instances into an array.
+  * Transform an array of ${class} instances into an array.
   *
-  * @param zpt\orm\test\mock\ManyToOneMirrorEntity[] $models
+  * @param ${class}[] $models
   */
   public function asCollection(array $models) {
     $a = array();
@@ -101,8 +99,6 @@ class zpt_orm_test_mock_ManyToOneMirrorEntity {
 
 
     #-- Add each collection into the model
-    #{ each: collections as col
-    #} each
 
 
     if ($whiteList === null || in_array('one', $whiteList)) {
