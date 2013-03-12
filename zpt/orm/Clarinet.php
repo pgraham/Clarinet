@@ -12,7 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace zeptech\orm\runtime;
+namespace zpt\orm;
 
 use \Exception;
 use \PDO;
