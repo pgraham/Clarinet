@@ -14,6 +14,7 @@
  * @package clarinet/test/generated
  */
 
+use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\SimpleEntity;
 use \zpt\orm\test\mock\ManyToOneEntity;
 use \zpt\orm\test\Db;
@@ -39,8 +40,11 @@ class ManyToOnePersisterTest extends TestCase {
     Generator::generate();
   }
 
+  /* Companion Loader */
+  private $loader;
+
   /* The object under test */
-  private $_persister;
+  private $persister;
 
   /**
    * Prepare a clean database and the object under test.
@@ -49,10 +53,11 @@ class ManyToOnePersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $modelName = 'zpt\orm\test\mock\ManyToOneEntity';
-    $actorName = str_replace('\\', '_', $modelName);
-    $className = "zpt\\dyn\\orm\\persister\\" . $actorName;
-    $this->_persister = new $className();
+    $this->loader = new CompanionLoader();
+    $this->persister = $this->loader->get(
+      'zpt\dyn\orm\persister',
+      'zpt\orm\test\mock\ManyToOneEntity'
+    );
   }
 
   /**
@@ -61,7 +66,7 @@ class ManyToOnePersisterTest extends TestCase {
    * and removing the sqlite database file that was used for the test.
    */
   protected function tearDown() {
-    $this->_persister = null;
+    $this->persister = null;
     Db::tearDown();
   }
 
@@ -78,11 +83,11 @@ class ManyToOnePersisterTest extends TestCase {
     $manyToOne->setName('manyToOneEntity1');
     $manyToOne->setOne($one);
 
-    $id = $this->_persister->create($manyToOne);
+    $id = $this->persister->create($manyToOne);
     $this->assertNotNull($id);
     $this->assertEquals($id, $manyToOne->getId());
 
-    $retrieved = $this->_persister->getById($id);
+    $retrieved = $this->persister->getById($id);
     $this->assertNotNull($retrieved);
     $this->assertInstanceOf('zpt\orm\test\mock\ManyToOneEntity', $retrieved);
     $this->assertEquals('manyToOneEntity1', $retrieved->getName());
@@ -105,19 +110,18 @@ class ManyToOnePersisterTest extends TestCase {
     $many->setName('ManyEntity');
     $many->setOne($one);
 
-    $manyId = $this->_persister->create($many);
+    $manyId = $this->persister->create($many);
 
-    // Use a new persister to avoid the cache
-    $className = get_class($this->_persister);
-    $persister = new $className();
+    $this->persister->clearCache($manyId);
 
-    $retrieved = $persister->getById($manyId);
+    $retrieved = $this->persister->getById($manyId);
     $this->assertEquals('ManyEntity', $retrieved->getName());
     
     $retrievedOne = $retrieved->getOne();
     $this->assertNotNull($retrievedOne);
     $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $retrievedOne);
     $this->assertEquals($one->getId(), $retrievedOne->getId());
+    $this->assertTrue($one === $retrievedOne);
   }
 
   public function testUpdate() {
@@ -129,17 +133,17 @@ class ManyToOnePersisterTest extends TestCase {
     $many->setName('Many');
     $many->setOne($one);
 
-    $manyId = $this->_persister->create($many);
+    $manyId = $this->persister->create($many);
 
     $newOne = new SimpleEntity();
     $newOne->setName('NewEntity');
     $newOne->setValue('NewValue');
     $many->setOne($newOne);
-    $this->_persister->update($many);
+    $this->persister->update($many);
 
     $this->assertNotNull($newOne->getId());
 
-    $retrieved = $this->_persister->getById($manyId);
+    $retrieved = $this->persister->getById($manyId);
     $retrievedOne = $retrieved->getOne();
     $this->assertNotNull($retrievedOne);
     $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $retrievedOne);
@@ -147,10 +151,9 @@ class ManyToOnePersisterTest extends TestCase {
     $this->assertEquals($newOne->getId(), $retrievedOne->getId());
 
     // Retrieve with a new persister to avoid any cached models
-    $className = get_class($this->_persister);
-    $persister = new $className();
+    $this->persister->clearCache($manyId);
 
-    $retrieved = $persister->getById($manyId);
+    $retrieved = $this->persister->getById($manyId);
     $retrievedOne = $retrieved->getOne();
     $this->assertNotNull($retrievedOne);
     $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $retrievedOne);
@@ -166,19 +169,16 @@ class ManyToOnePersisterTest extends TestCase {
     $many = new ManyToOneEntity();
     $many->setName('Many');
     $many->setOne($one);
-    $manyId = $this->_persister->create($many);
+    $manyId = $this->persister->create($many);
     $this->assertNotNull($manyId);
 
-    $this->_persister->delete($many);
-    $retrieved = $this->_persister->getById($manyId);
+    $this->persister->delete($many);
+    $retrieved = $this->persister->getById($manyId);
     $this->assertNull($retrieved);
 
-    // Use a new persister to ensure that the delete was actually done in the
-    // database
-    $className = get_class($this->_persister);
-    $persister = new $className();
+    $this->persister->clearCache($manyId);
 
-    $retrieved = $persister->getById($manyId);
+    $retrieved = $this->persister->getById($manyId);
     $this->assertNull($retrieved);
   }
 }

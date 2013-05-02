@@ -15,8 +15,6 @@
  */
 namespace zpt\orm\test;
 
-
-use \zeptech\orm\runtime\ActorFactory;
 use \zeptech\orm\runtime\PdoWrapper;
 use \PDO;
 
@@ -51,11 +49,6 @@ class Db {
    * @param PDO PDO connection to clean up.
    */
   public static function tearDown() {
-    // Since some persisters load other persisters through the
-    // ActorFactory class, we need to ensure that it's cache it cleaned as well
-    // otherwise their PDO connections will be set to null.
-    ActorFactory::clearFactories();
-
     PdoWrapper::get()->close();
     unlink(__DIR__ . '/db.sq3');
   }

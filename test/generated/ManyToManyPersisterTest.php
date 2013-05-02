@@ -15,6 +15,7 @@
  */
 
 use \zeptech\orm\runtime\PdoWrapper;
+use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\ManyToManyEntity;
 use \zpt\orm\test\mock\SimpleEntity;
 use \zpt\orm\test\Db;
@@ -36,24 +37,25 @@ class ManyToManyPersisterTest extends TestCase {
    * Suite wide setUp, ensure all Mock classes have had their actors generated.
    */
   public static function setUpBeforeClass() {
-    Generator::generate();
+      Generator::generate();
   }
 
   /* The object under test */
-  private $_persister;
+  private $persister;
 
   /**
    * Prepares a clean database, connects to it and instantiates the persister
    * that is the object under test.
    */
   protected function setUp() {
-    Db::setUp();
+      Db::setUp();
 
-    // Instantiate a generated persister to test
-    $modelName = 'zpt\orm\test\mock\ManyToManyEntity';
-    $actorName = str_replace('\\', '_', $modelName);
-    $className = "zpt\dyn\orm\\persister\\$actorName";
-    $this->_persister = new $className();
+      // Instantiate a generated persister to test
+      $modelName = 'zpt\orm\test\mock\ManyToManyEntity';
+
+      // Instantiate a generated persister to test
+      $loader = new CompanionLoader();
+      $this->persister = $loader->get('zpt\dyn\orm\persister', $modelName);
   }
 
   /**
@@ -62,7 +64,7 @@ class ManyToManyPersisterTest extends TestCase {
    * notably in the ActorFactory.
    */
   protected function tearDown() {
-    $this->_persister = null;
+    $this->persister = null;
     Db::tearDown();
   }
 
@@ -87,7 +89,7 @@ class ManyToManyPersisterTest extends TestCase {
     $lhs1->setMany($many);
     $lhs2->setMany($many);
 
-    $id1 = $this->_persister->create($lhs1);
+    $id1 = $this->persister->create($lhs1);
     $this->assertNotNull($id1);
     $manyIds = Array();
 
@@ -97,7 +99,7 @@ class ManyToManyPersisterTest extends TestCase {
     }
     $this->assertEquals(10, count($manyIds));
 
-    $id2 = $this->_persister->create($lhs2);
+    $id2 = $this->persister->create($lhs2);
     $this->assertNotNull($id2);
     $this->assertNotEquals($id1, $id2);
 
@@ -111,11 +113,6 @@ class ManyToManyPersisterTest extends TestCase {
    * Tests that retrieving an entity works as expected.
    */
   public function testRetrieve() {
-    // Use a second persister to create the mock entities to avoid hitting the
-    // cache of the OUT
-    $className = get_class($this->_persister);
-    $persister = new $className();
-
     $lhs1 = new ManyToManyEntity();
     $lhs1->setName('Lhs1');
 
@@ -133,16 +130,20 @@ class ManyToManyPersisterTest extends TestCase {
     $lhs1->setMany($many);
     $lhs2->setMany($many);
 
-    $id1 = $persister->create($lhs1);
-    $id2 = $persister->create($lhs2);
+    $id1 = $this->persister->create($lhs1);
+    $id2 = $this->persister->create($lhs2);
 
-    $retrieved1 = $this->_persister->getById($id1);
+    $this->persister->clearCache(array($id1, $id2));
+
+    $retrieved1 = $this->persister->getById($id1);
     $this->assertNotNull($retrieved1);
     $this->assertInstanceOf('zpt\orm\test\mock\ManyToManyEntity', $retrieved1);
 
-    $retrieved2 = $this->_persister->getById($id2);
+    $retrieved2 = $this->persister->getById($id2);
     $this->assertNotNull($retrieved2);
     $this->assertInstanceOf('zpt\orm\test\mock\ManyToManyEntity', $retrieved2);
+
+    $this->assertFalse($retrieved1 === $retrieved2);
 
     $many1 = $retrieved1->getMany();
     $this->assertInternalType('array', $many1);
@@ -170,6 +171,17 @@ class ManyToManyPersisterTest extends TestCase {
    * Tests that updating works as expected.
    */
   public function testUpdate() {
+    $companionLoader = new CompanionLoader();
+    $companionLoader->setCacheEnabled(false);
+    $persister1 = $companionLoader->get(
+      'zpt\dyn\orm\persister',
+      'zpt\orm\test\mock\ManyToManyEntity'
+    );
+    $persister2 = $companionLoader->get(
+      'zpt\dyn\orm\persister',
+      'zpt\orm\test\mock\ManyToManyEntity'
+    );
+
     $lhs1 = new ManyToManyEntity();
     $lhs1->setName('Lhs1');
 
@@ -187,9 +199,9 @@ class ManyToManyPersisterTest extends TestCase {
     $lhs1->setMany($many);
     $lhs2->setMany($many);
 
-    $id1 = $this->_persister->create($lhs1);
+    $id1 = $persister1->create($lhs1);
     $this->assertEquals($id1, $lhs1->getId());
-    $id2 = $this->_persister->create($lhs2);
+    $id2 = $persister1->create($lhs2);
 
     $newMany = Array();
     for ($i = 1; $i <= 10; $i++) {
@@ -199,18 +211,13 @@ class ManyToManyPersisterTest extends TestCase {
       $newMany[] = $e;
     }
     $lhs1->setMany($newMany);
-    $this->_persister->update($lhs1);
+    $persister1->update($lhs1);
 
-    // Use a second persister to retrieve the entities to assert against in
-    // order to avoid hitting the cache
-    $className = get_class($this->_persister);
-    $persister = new $className();
-
-    $retrieved1 = $persister->getById($id1);
+    $retrieved1 = $persister2->getById($id1);
     $this->assertNotNull($retrieved1);
     $this->assertInstanceOf('zpt\orm\test\mock\ManyToManyEntity', $retrieved1);
 
-    $retrieved2 = $persister->getById($id2);
+    $retrieved2 = $persister2->getById($id2);
     $this->assertNotNull($retrieved2);
     $this->assertInstanceOf('zpt\orm\test\mock\ManyToManyEntity', $retrieved2);
 
@@ -251,10 +258,10 @@ class ManyToManyPersisterTest extends TestCase {
     }
     $lhs1->setMany($many);
 
-    $id = $this->_persister->create($lhs1);
-    $this->_persister->delete($lhs1);
+    $id = $this->persister->create($lhs1);
+    $this->persister->delete($lhs1);
 
-    $this->assertNull($this->_persister->getById($id));
+    $this->assertNull($this->persister->getById($id));
 
     $pdo = PdoWrapper::get();
     $stmt = $pdo->prepare('SELECT COUNT(*)

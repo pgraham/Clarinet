@@ -14,7 +14,7 @@
  * @package clarinet/test/generated
  */
 
-use \zeptech\orm\runtime\ActorFactory;
+use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\ManyToOneMirrorEntity;
 use \zpt\orm\test\mock\OneToManyMirrorEntity;
 use \zpt\orm\test\Db;
@@ -40,8 +40,11 @@ class OneToManyMirrorPersisterTest extends TestCase {
     Generator::generate();
   }
 
+  /* Companion Loader */
+  private $loader;
+
   /* The object under test */
-  private $_persister;
+  private $persister;
 
   /**
    * Prepares a clean database, connects to it and instantiates the persister
@@ -51,19 +54,19 @@ class OneToManyMirrorPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $modelName = 'zpt\orm\test\mock\OneToManyMirrorEntity';
-    $actorName = str_replace('\\', '_', $modelName);
-    $className = "zpt\\dyn\\orm\\persister\\" . $actorName;
-    $this->_persister = new $className();
+    $this->loader = new CompanionLoader();
+    $this->persister = $this->loader->get(
+      'zpt\dyn\orm\persister',
+      'zpt\orm\test\mock\OneToManyMirrorEntity'
+    );
   }
 
   /**
    * Delete the sqlite database file that was used durring the tests and closes
-   * any connections to it.  This involved cleaning up a bunch of caches,
-   * notable in the ActorFactory.
+   * any connections to it.
    */
   protected function tearDown() {
-    $this->_persister = null;
+    $this->persister = null;
     Db::tearDown();
   }
 
@@ -82,7 +85,7 @@ class OneToManyMirrorPersisterTest extends TestCase {
     }
     $one->setMany($many);
 
-    $id = $this->_persister->create($one);
+    $id = $this->persister->create($one);
     $this->assertNotNull($id);
     
     foreach ($many AS $e) {
@@ -90,8 +93,10 @@ class OneToManyMirrorPersisterTest extends TestCase {
     }
 
     // Ensure that only 10 rhs entities have been created
-    $persister = ActorFactory::getActor('persister',
-      'zpt\orm\test\mock\ManyToOneMirrorEntity');
+    $persister = $this->loader->get(
+      'zpt\dyn\orm\persister',
+      'zpt\orm\test\mock\ManyToOneMirrorEntity'
+    );
     $rhs = $persister->retrieve();
     $this->assertEquals(10, count($rhs));
 
@@ -115,7 +120,7 @@ class OneToManyMirrorPersisterTest extends TestCase {
     }
     $one->setMany($many);
 
-    $id = $this->_persister->create($one);
+    $id = $this->persister->create($one);
     $this->assertNotNull($e->getId());
 
     $oldIds = Array();
@@ -130,7 +135,7 @@ class OneToManyMirrorPersisterTest extends TestCase {
       $newMany[] = $e;
     }
     $one->setMany($newMany);
-    $this->_persister->update($one);
+    $this->persister->update($one);
 
     foreach ($newMany AS $e) {
       $this->assertNotNull($e->getId());
@@ -152,7 +157,7 @@ class OneToManyMirrorPersisterTest extends TestCase {
     }
     $one->setMany($many);
 
-    $id = $this->_persister->create($one);
+    $id = $this->persister->create($one);
     $this->assertNotNull($id);
 
     $ids = Array();
@@ -161,9 +166,9 @@ class OneToManyMirrorPersisterTest extends TestCase {
       $ids[] = $e->getId();
     }
 
-    $className = get_class($this->_persister);
-    $persister = new $className();
-    $retrieved = $persister->getById($id);
+    $this->persister->clearCache($id);
+
+    $retrieved = $this->persister->getById($id);
     $this->assertNotNull($retrieved);
     
     $retrievedMany = $retrieved->getMany();
@@ -193,26 +198,27 @@ class OneToManyMirrorPersisterTest extends TestCase {
     }
     $one->setMany($many);
 
-    $id = $this->_persister->create($one);
+    $id = $this->persister->create($one);
     $this->assertNotNull($id);
 
-    $this->_persister->delete($one);
+    $this->persister->delete($one);
     $this->assertNull($one->getId());
-    $this->assertNull($this->_persister->getById($id));
+    $this->assertNull($this->persister->getById($id));
     foreach ($many AS $e) {
       $this->assertNull($e->getId());
     }
 
-    $className = get_class($this->_persister);
-    $persister = new $className();
-    $this->assertNull($persister->getById($id));
+    $this->persister->clearCache($id);
+    $this->assertNull($this->persister->getById($id));
 
-    $className = get_class($many[0]);
-    $persister = ActorFactory::getActor('persister', $className);
+    $rhsPersister = $this->loader->get(
+      'zpt\dyn\orm\persister',
+      'zpt\orm\test\mock\ManyToOneMirrorEntity'
+    );
 
     $c = new Criteria();
     $c->addEquals('one_to_many_mirror_id', $id);
-    $retrieved = $persister->retrieve($c);
+    $retrieved = $rhsPersister->retrieve($c);
     $this->assertInternalType('array', $retrieved);
     $this->assertEmpty($retrieved);
   }

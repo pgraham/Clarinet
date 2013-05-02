@@ -13,6 +13,7 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test/generated
  */
+use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\SimpleEntity;
 use \zpt\orm\test\Db;
 use \zpt\orm\test\Generator;
@@ -37,20 +38,21 @@ class SimpleEntityPersisterTest extends TestCase {
     Generator::generate();
   }
 
-  private $_persister;
+  private $persister;
 
   protected function setUp() {
     Db::setUp();
 
     // Instantiate a persister
-    $modelName = 'zpt\orm\test\mock\SimpleEntity';
-    $actorName = str_replace('\\' ,'_', $modelName);
-    $className = "zpt\\dyn\\orm\\persister\\$actorName";
-    $this->_persister = new $className();
+    $loader = new CompanionLoader();
+    $this->persister = $loader->get(
+      'zpt\dyn\orm\persister',
+      'zpt\orm\test\mock\SimpleEntity'
+    );
   }
 
   protected function tearDown() {
-    $this->_persister = null;
+    $this->persister = null;
     Db::tearDown();
   }
 
@@ -59,11 +61,11 @@ class SimpleEntityPersisterTest extends TestCase {
     $entity->setName('Entity');
     $entity->setValue('EntityValue');
 
-    $id = $this->_persister->create($entity);
+    $id = $this->persister->create($entity);
     $this->assertNotNull($id);
     $this->assertEquals($id, $entity->getId());
 
-    $retrieved = $this->_persister->getById($id);
+    $retrieved = $this->persister->getById($id);
     $this->assertNotNull($retrieved);
     $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $retrieved);
     $this->assertEquals('Entity', $retrieved->getName());
@@ -79,14 +81,14 @@ class SimpleEntityPersisterTest extends TestCase {
     $entity1 = new SimpleEntity();
     $entity1->setName('Entity1');
     $entity1->setValue('Entity1Value');
-    $this->_persister->create($entity1);
+    $this->persister->create($entity1);
 
     $entity2 = new SimpleEntity();
     $entity2->setName('Entity2');
     $entity2->setValue('Entity2Value');
-    $this->_persister->create($entity2);
+    $this->persister->create($entity2);
 
-    $entities = $this->_persister->retrieve();
+    $entities = $this->persister->retrieve();
     $retrieved1 = null;
     $retrieved2 = null;
     foreach ($entities AS $entity) {
@@ -108,13 +110,13 @@ class SimpleEntityPersisterTest extends TestCase {
     $entity = new SimpleEntity();
     $entity->setName('Entity');
     $entity->setValue('EntityValue');
-    $id = $this->_persister->create($entity);
+    $id = $this->persister->create($entity);
     $this->assertNotNull($id);
 
-    $retrieved = $this->_persister->getById($id);
+    $retrieved = $this->persister->getById($id);
     $retrieved->setValue('NewEntityValue');
 
-    $retrievedAgain = $this->_persister->getById($id);
+    $retrievedAgain = $this->persister->getById($id);
     $this->assertEquals('NewEntityValue', $retrievedAgain->getValue());
   }
 
@@ -125,14 +127,12 @@ class SimpleEntityPersisterTest extends TestCase {
     $entity = new SimpleEntity();
     $entity->setName('Entity');
     $entity->setValue('EntityValue');
-    $id = $this->_persister->create($entity);
+    $id = $this->persister->create($entity);
     $this->assertNotNull($id);
 
-    // Use a new persister to ensure that there are no cached models
-    $className = get_class($this->_persister);
-    $persister = new $className();
+    $this->persister->clearCache($id);
 
-    $retrieved = $persister->getById($id);
+    $retrieved = $this->persister->getById($id);
     $this->assertEquals('Entity', $retrieved->getName());
     $this->assertEquals('EntityValue', $retrieved->getValue());
   }
@@ -144,17 +144,15 @@ class SimpleEntityPersisterTest extends TestCase {
     $entity = new SimpleEntity();
     $entity->setName('Entity');
     $entity->setValue('EntityValue');
-    $id = $this->_persister->create($entity);
+    $id = $this->persister->create($entity);
     $this->assertNotNull($id);
 
     $entity->setValue('NewEntityValue');
-    $this->_persister->update($entity);
+    $this->persister->update($entity);
 
-    // Use a new persister to ensure that there are no cached models
-    $className = get_class($this->_persister);
-    $persister = new $className();
+    $this->persister->clearCache($id);
 
-    $retrieved = $persister->getById($id);
+    $retrieved = $this->persister->getById($id);
     $this->assertEquals('Entity', $retrieved->getName());
     $this->assertEquals('NewEntityValue', $retrieved->getValue());
   }
@@ -167,19 +165,18 @@ class SimpleEntityPersisterTest extends TestCase {
     $entity = new SimpleEntity();
     $entity->setName('Entity');
     $entity->setValue('EntityValue');
-    $id = $this->_persister->create($entity);
+    $id = $this->persister->create($entity);
     $this->assertNotNull($id);
 
-    $this->_persister->delete($entity);
-    $retrieved = $this->_persister->getById($id);
+    $this->persister->delete($entity);
+    $retrieved = $this->persister->getById($id);
     $this->assertNull($retrieved);
 
     // Use a new persister to ensure that the delete was actually done in the
     // database
-    $className = get_class($this->_persister);
-    $persister = new $className();
+    $this->persister->clearCache();
 
-    $retrieved = $persister->getById($id);
+    $retrieved = $this->persister->getById($id);
     $this->assertNull($retrieved);
   }
 }

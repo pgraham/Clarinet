@@ -14,7 +14,7 @@
  * @package clarinet/test/generated
  */
 
-use \zeptech\orm\runtime\ActorFactory;
+use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\ManyToManyMirrorLhsEntity;
 use \zpt\orm\test\mock\ManyToManyMirrorRhsEntity;
 use \zpt\orm\test\Db;
@@ -40,7 +40,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
   }
 
   /* The object under test */
-  private $_persister;
+  private $persister;
 
   /**
    * Prepares a clean database, connects to it an instantiates the persister
@@ -49,9 +49,11 @@ class ManyToManyMirrorPersisterTest extends TestCase {
   protected function setUp() {
     Db::setUp();
 
-    // Instantiate a generated persister to test
     $modelName = 'zpt\orm\test\mock\ManyToManyMirrorLhsEntity';
-    $this->_persister = ActorFactory::getActor('persister', $modelName);
+
+    // Instantiate a generated persister to test
+    $loader = new CompanionLoader();
+    $this->persister = $loader->get('zpt\dyn\orm\persister', $modelName);
   }
 
   /**
@@ -60,7 +62,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
    * notably in the ActorFactory.
    */
   protected function tearDown() {
-    $this->_persister = null;
+    $this->persister = null;
     Db::tearDown();
   }
 
@@ -91,7 +93,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
 
     $lhsIds = Array();
     foreach ($lhs AS $e) {
-      $id = $this->_persister->create($e);
+      $id = $this->persister->create($e);
       $this->assertNotNull($id);
       $this->assertEquals($id, $e->getId());
       $lhsIds[] = $id;
@@ -103,7 +105,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
       $rhsIds[] = $e->getId();
     }
 
-    $createdLhs = $this->_persister->retrieve();
+    $createdLhs = $this->persister->retrieve();
     $this->assertEquals(5, count($createdLhs));
   }
 
@@ -134,7 +136,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
 
     $lhsIds = Array();
     foreach ($lhs AS $e) {
-      $id = $this->_persister->create($e);
+      $id = $this->persister->create($e);
       $this->assertNotNull($id);
       $this->assertEquals($id, $e->getId());
       $lhsIds[] = $id;
@@ -146,10 +148,10 @@ class ManyToManyMirrorPersisterTest extends TestCase {
       $rhsIds[] = $e->getId();
     }
 
-    $this->_persister->clearCache();
+    $this->persister->clearCache();
 
     foreach ($lhs AS $lhsE) {
-      $retrieved = $this->_persister->getById($lhsE->getId());
+      $retrieved = $this->persister->getById($lhsE->getId());
       $this->assertNotNull($retrieved);
       $this->assertNotNull($retrieved->getId());
       $this->assertEquals($lhsE->getId(), $retrieved->getId());
@@ -192,7 +194,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
 
     $lhsIds = Array();
     foreach ($lhs AS $e) {
-      $id = $this->_persister->create($e);
+      $id = $this->persister->create($e);
       $this->assertNotNull($id);
       $this->assertEquals($id, $e->getId());
       $lhsIds[] = $id;
@@ -208,7 +210,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
 
     foreach ($lhs AS $e) {
       $e->setMany($newRhs);
-      $updated = $this->_persister->update($e);
+      $updated = $this->persister->update($e);
       $this->assertEquals(1, $updated);
     }
 
@@ -217,9 +219,9 @@ class ManyToManyMirrorPersisterTest extends TestCase {
       $newRhsIds[] = $e->getId();
     }
 
-    $this->_persister->clearCache();
+    $this->persister->clearCache();
     foreach ($lhs AS $lhsE) {
-      $retrieved = $this->_persister->getById($lhsE->getId());
+      $retrieved = $this->persister->getById($lhsE->getId());
       $this->assertNotNull($retrieved);
       $this->assertNotNull($retrieved->getId());
       $this->assertEquals($lhsE->getId(), $retrieved->getId());
@@ -262,7 +264,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
 
     $lhsIds = Array();
     foreach ($lhs AS $e) {
-      $id = $this->_persister->create($e);
+      $id = $this->persister->create($e);
       $this->assertNotNull($id);
       $this->assertEquals($id, $e->getId());
       $lhsIds[] = $id;
@@ -275,13 +277,13 @@ class ManyToManyMirrorPersisterTest extends TestCase {
     }
 
     $deletedId = $lhs[0]->getId();
-    $this->_persister->delete($lhs[0]);
+    $this->persister->delete($lhs[0]);
 
-    $this->_persister->clearCache();
+    $this->persister->clearCache();
     $lhs = Array();
     $rhs = Array();
 
-    $lhs = $this->_persister->retrieve();
+    $lhs = $this->persister->retrieve();
     $this->assertInternalType('array', $lhs);
     $this->assertEquals(4, count($lhs));
 

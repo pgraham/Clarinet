@@ -14,6 +14,7 @@
  * @package clarinet/test/generated
  */
 
+use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\OneToManyEntity;
 use \zpt\orm\test\mock\OneToManyRhs;
 use \zpt\orm\test\Generator;
@@ -39,8 +40,11 @@ class OneToManyPersisterTest extends TestCase {
     Generator::generate();
   }
 
+  /* Companion loader */
+  private $loader;
+
   /* The object under test */
-  private $_persister;
+  private $persister;
 
   /**
    * Prepares a clean database, connects to it and instantiates the persister
@@ -50,10 +54,11 @@ class OneToManyPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $modelName = 'zpt\orm\test\mock\OneToManyEntity';
-    $actorName = str_replace('\\', '_', $modelName);
-    $className = "zpt\\dyn\\orm\\persister\\" . $actorName;
-    $this->_persister = new $className();
+    $this->loader = new CompanionLoader();
+    $this->persister = $this->loader->get(
+      'zpt\dyn\orm\persister',
+      'zpt\orm\test\mock\OneToManyEntity'
+    );
   }
 
   /**
@@ -62,7 +67,7 @@ class OneToManyPersisterTest extends TestCase {
    * notably in the ActorFactory.
    */
   protected function tearDown() {
-    $this->_persister = null;
+    $this->persister = null;
     Db::tearDown();
   }
 
@@ -80,7 +85,7 @@ class OneToManyPersisterTest extends TestCase {
       $many[] = $o;
     }
     $one->setMany($many);
-    $id = $this->_persister->create($one);
+    $id = $this->persister->create($one);
     $this->assertNotNull($id);
     $this->assertEquals($id, $one->getId());
 
@@ -106,14 +111,13 @@ class OneToManyPersisterTest extends TestCase {
       $many[] = $e;
     }
     $one->setMany($many);
-    $id = $this->_persister->create($one);
+    $id = $this->persister->create($one);
 
     // Use a clean persister to retrieve so that the entity isn't retrieved from
     // cache
-    $className = get_class($this->_persister);
-    $persister = new $className();
+    $this->persister->clearCache($id);
 
-    $retrieved = $persister->getById($id);
+    $retrieved = $this->persister->getById($id);
     $this->assertNotNull($retrieved);
     $this->assertInstanceOf('zpt\orm\test\mock\OneToManyEntity', $retrieved);
 
@@ -142,20 +146,19 @@ class OneToManyPersisterTest extends TestCase {
       $many[] = $e;
     }
     $one->setMany($many);
-    $id = $this->_persister->create($one);
+    $id = $this->persister->create($one);
 
     unset($many[9]);
     unset($many[8]);
 
     $one->setMany($many);
-    $this->_persister->update($one);
+    $this->persister->update($one);
 
     // Retrieve with a new persister to ensure that the orphaned entities were
     // deleted
-    $className = get_class($this->_persister);
-    $persister = new $className();
+    $this->persister->clearCache($id);
 
-    $retrieved = $persister->getById($id);
+    $retrieved = $this->persister->getById($id);
     $retrievedMany = $retrieved->getMany();
     $this->assertEquals(8, count($retrievedMany));
 
@@ -165,10 +168,10 @@ class OneToManyPersisterTest extends TestCase {
       $many[] = $e;
     }
     $one->setMany($many);
-    $this->_persister->update($one);
+    $this->persister->update($one);
 
-    $persister = new $className();
-    $retrieved = $persister->getById($id);
+    $this->persister->clearCache($id);
+    $retrieved = $this->persister->getById($id);
     $retrievedMany = $retrieved->getMany();
     $this->assertEquals(10, count($retrievedMany));
   }
@@ -188,17 +191,21 @@ class OneToManyPersisterTest extends TestCase {
       $many[] = $e;
     }
     $one->setMany($many);
-    $id = $this->_persister->create($one);
+    $id = $this->persister->create($one);
     $this->assertNotNull($id);
 
-    $this->_persister->delete($one);
-    $retrieved = $this->_persister->getById($id);
+    $this->persister->delete($one);
+    $retrieved = $this->persister->getById($id);
     $this->assertNull($retrieved);
 
     $modelName = 'zpt\orm\test\mock\OneToManyRhs';
     $actorName = str_replace('\\', '_', $modelName);
     $className = "zpt\\dyn\orm\\persister\\" . $actorName;
     $rhsPersister = new $className();
+    $rhsPersister = $this->loader->get(
+      'zpt\dyn\orm\persister',
+      'zpt\orm\test\mock\OneToManyRhs'
+    );
 
     $c = new Criteria();
     $c->addEquals('one_to_many_entity_id', $id);

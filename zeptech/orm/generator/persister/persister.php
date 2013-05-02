@@ -1,12 +1,9 @@
 <?php
 namespace zpt\dyn\orm\persister;
 
-use \zeptech\orm\runtime\ActorFactory;
-use \zeptech\orm\runtime\Persister;
 use \zeptech\orm\runtime\PdoExceptionWrapper;
 use \zeptech\orm\runtime\PdoWrapper;
 use \zeptech\orm\runtime\SaveLock;
-use \zpt\orm\actor\QueryBuilder;
 use \zpt\orm\Criteria;
 use \Exception;
 use \PDO;
@@ -90,6 +87,10 @@ class /*# actor */ {
   public function clearCache($id = null) {
     if ($id === null) {
       $this->_cache = array();
+    } else if (is_array($id)) {
+      foreach ($id as $idx) {
+        unset($this->_cache[$idx]);
+      }
     } else {
       unset($this->_cache[$id]);
     }
@@ -138,7 +139,8 @@ class /*# actor */ {
    * @param ${class} $model
    */
   public function create(\/*# class */ $model) {
-    $validator = ActorFactory::getActor('validator', '/*# class */');
+    $validator = $this->opalLoader->get('zpt\dyn\orm\validator', '/*# class */');
+
     if (!$validator->validate($model, $e)) {
       throw $e;
     }
@@ -173,7 +175,10 @@ class /*# actor */ {
           if ($rhs !== null) {
             $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
             if ($rhsId === null) {
-              $persister = Persister::get('/*# rel[rhs] */');
+              $persister = $this->opalLoader->get(
+                'zpt\dyn\orm\persister',
+                '/*# rel[rhs] */'
+              );
               $rhsId = $persister->create($rhs);
             }
           }
@@ -185,7 +190,10 @@ class /*# actor */ {
       $sql = $this->createSql; // If there is an exception this is handy to know
       $this->_create->execute($params);
 
-      $transformer = ActorFactory::getActor('transformer', '/*# class */');
+      $transformer = $this->opalLoader->get(
+        'zpt\dyn\orm\transformer',
+        '/*# class */'
+      );
       $id = $transformer->idFromDb($this->_pdo->lastInsertId());
       $model->set/*# id_property */($id);
       $this->_cache[$id] = $model;
@@ -205,7 +213,11 @@ class /*# actor */ {
 
       #{ each relationships as rel
         // Save related /*# rel[rhs] */ entities -------------------------------
-        $persister = Persister::get('/*# rel[rhs] */');
+        $persister = $this->opalLoader->get(
+          'zpt\dyn\orm\persister',
+          '/*# rel[rhs] */'
+        );
+
         $related = $model->get/*# rel[lhsProperty] */();
         #{ if rel[type] = many-to-many
           // If any of the related entities are new, save them to ensure that
@@ -335,7 +347,10 @@ class /*# actor */ {
         // ---------------------------------------------------------------------
         // Delete related /*# rel[rhs] */ entities
         #{ if rel[type] = one-to-many
-          $persister = Persister::get('/*# rel[rhs] */');
+          $persister = $this->opalLoader->get(
+            'zpt\dyn\orm\persister',
+            '/*# rel[rhs] */'
+          );
           $related = $model->get/*# rel[lhsProperty] */();
           foreach ($related AS $rel) {
             $persister->delete($rel);
@@ -402,7 +417,10 @@ class /*# actor */ {
    * @return QueryBuilder
    */
   public function getQueryBuilder() {
-    return QueryBuilder::get('/*# class */');
+    return $this->opalLoader->get(
+      'zpt\dyn\orm\qb',
+      '/*# class */'
+    );
   }
 
   /**
@@ -457,7 +475,10 @@ class /*# actor */ {
       $stmt->setFetchMode(PDO::FETCH_ASSOC);
       $stmt->execute($params);
 
-      $transformer = ActorFactory::getActor('transformer', '/*# class */');
+      $transformer = $this->opalLoader->get(
+        'zpt\dyn\orm\transformer',
+        '/*# class */'
+      );
       $result = Array();
       foreach ($stmt AS $row) {
         $id = $transformer->idFromDb($row['/*# id_column */']);
@@ -511,7 +532,10 @@ class /*# actor */ {
               $c->addSort('/*# rel[rhsIdProperty] */', 'asc');
             #}
 
-            $persister = Persister::get('/*# rel[rhs] */');
+            $persister = $this->opalLoader->get(
+              'zpt\dyn\orm\persister',
+              '/*# rel[rhs] */'
+            );
             $related = $persister->retrieve($c);
             $model->set/*# rel[lhsProperty] */($related);
 
@@ -524,14 +548,20 @@ class /*# actor */ {
               $c->addSort('/*# rel[orderByCol] */', '/*# rel[orderByDir] */');
             #}
 
-            $persister = Persister::get('/*# rel[rhs] */');
+            $persister = $this->opalLoader->get(
+              'zpt\dyn\orm\persister',
+              '/*# rel[rhs] */'
+            );
             $related = $persister->retrieve($c);
             $model->set/*# rel[lhsProperty] */($related);
 
           #{ elseif rel[type] = many-to-one
             $relId = $row['/*# rel[lhsColumn] */'];
             if ($relId !== null) {
-              $persister = Persister::get('/*# rel[rhs] */');
+              $persister = $this->opalLoader->get(
+                'zpt\dyn\orm\persister',
+                '/*# rel[rhs] */'
+              );
               $related = $persister->getById($relId);
 
               if ($related === null) {
@@ -586,7 +616,10 @@ class /*# actor */ {
       return;
     }
 
-    $validator = ActorFactory::getActor('validator', '/*# class */');
+    $validator = $this->opalLoader->get(
+      'zpt\dyn\orm\validator',
+      '/*# class */'
+    );
     if (!$validator->validate($model, $e)) {
       throw $e;
     }
@@ -620,7 +653,10 @@ class /*# actor */ {
           if ($rhs !== null) {
             $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
             if ($rhsId === null) {
-              $persister = ActorFactory::getActor('persister', '/*# rel[rhs] */');
+              $persister = $this->opalLoader->get(
+                'zpt\dyn\orm\persister',
+                '/*# rel[rhs] */'
+              );
               $rhsId = $persister->create($rhs);
             }
           }
@@ -649,7 +685,11 @@ class /*# actor */ {
       #{ each relationships as rel
         // ---------------------------------------------------------------------
         // Save related /*# rel[rhs] */ entities
-        $persister = Persister::get('/*# rel[rhs] */');
+        $persister = $this->opalLoader->get(
+          'zpt\dyn\orm\persister',
+          '/*# rel[rhs] */'
+        );
+
         #{ if rel[type] = many-to-many
           // If any of the related entities are new, save them to ensure that
           // they have an id, then update them.
@@ -777,6 +817,12 @@ class /*# actor */ {
       throw $e;
     }
   }
+
+  /*
+   * ================================================================================
+   * Private Helpers
+   * ================================================================================
+   */
 
   #-- Create methods for removing each of the model's collections
   #{ each collections as col
