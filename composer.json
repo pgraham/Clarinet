@@ -19,7 +19,7 @@
     },
     "require": {
 	"php": ">=5.3.0",
-	"zeptech/opal": "dev-master",
+	"zeptech/opal": "1.0.*",
 	"zeptech/annotations": "1.0.*",
 	"zeptech/utility": "1.0.*"
     }
