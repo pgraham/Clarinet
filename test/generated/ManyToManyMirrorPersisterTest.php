@@ -1,7 +1,7 @@
 <?php
 /**
  * =============================================================================
- * Copyright (c) 2011, Philip Graham
+ * Copyright (c) 2013, Philip Graham
  * All rights reserved.
  *
  * This file is part of Clarinet and is licensed by the Copyright holder under
@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test/generated
  */
 
 use \zpt\opal\CompanionLoader;
