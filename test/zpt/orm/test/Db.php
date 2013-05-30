@@ -15,7 +15,7 @@
  */
 namespace zpt\orm\test;
 
-use \zeptech\orm\runtime\PdoWrapper;
+use \zpt\orm\PdoWrapper;
 use \PDO;
 
 /**

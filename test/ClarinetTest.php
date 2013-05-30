@@ -1,7 +1,7 @@
 <?php
 /**
  * =============================================================================
- * Copyright (c) 2011, Philip Graham
+ * Copyright (c) 2013, Philip Graham
  * All rights reserved.
  *
  * This file is part of Clarinet and is licensed by the Copyright holder under
@@ -20,19 +20,16 @@ use \PDO;
 require_once __DIR__ . '/test-common.php';
 
 /**
- * This class test the PdoWrapper class.
+ * This class tests the Clarinet static class.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test
  */
-class PdoWrapperTest extends TestCase {
+class ClarinetTest extends TestCase {
 
-  public function testLifeCycle() {
-    $pdo = new PDO('sqlite::memory:');
+	public function testInit() {
+		$pdo = new PDO('sqlite::memory:');
 
-    PdoWrapper::set($pdo);
+		Clarinet::init($pdo);
+	}
 
-    $wrapper = PdoWrapper::get();
-    $wrapper->close();
-  }
 }

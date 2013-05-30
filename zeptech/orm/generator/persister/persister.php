@@ -1,8 +1,8 @@
 <?php
 namespace zpt\dyn\orm\persister;
 
-use \zeptech\orm\runtime\PdoExceptionWrapper;
-use \zeptech\orm\runtime\PdoWrapper;
+use \zpt\orm\PdoExceptionWrapper;
+use \zpt\orm\PdoWrapper;
 use \zeptech\orm\runtime\SaveLock;
 use \zpt\orm\Criteria;
 use \Exception;

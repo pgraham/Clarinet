@@ -13,8 +13,8 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/test/generated
  */
+namespace zpt\orm;
 
-use \zeptech\orm\runtime\PdoWrapper;
 use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\ManyToManyEntity;
 use \zpt\orm\test\mock\SimpleEntity;
