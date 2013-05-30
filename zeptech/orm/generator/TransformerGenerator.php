@@ -17,6 +17,7 @@ namespace zeptech\orm\generator;
 use \zeptech\orm\generator\model\Model;
 use \zeptech\orm\generator\model\Property;
 use \zeptech\orm\generator\model\Relationship;
+use \zpt\orm\ModelCompanionGenerator;
 use \zpt\util\StringUtils;
 
 /**
@@ -24,7 +25,7 @@ use \zpt\util\StringUtils;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class TransformerGenerator extends AbstractModelGenerator {
+class TransformerGenerator extends ModelCompanionGenerator {
 
   public static $actorNamespace = 'zpt\dyn\orm\transformer';
 

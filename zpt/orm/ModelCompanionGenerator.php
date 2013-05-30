@@ -12,11 +12,11 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace zeptech\orm\generator;
+namespace zpt\orm;
 
 use \zeptech\orm\generator\model\Model;
+use \zpt\opal\CompanionGenerator;
 use \zpt\orm\model\ModelCache;
-use \zpt\pct\AbstractGenerator;
 
 /**
  * This class provides functionality common to all persisters.  This includes
@@ -25,7 +25,7 @@ use \zpt\pct\AbstractGenerator;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-abstract class AbstractModelGenerator extends AbstractGenerator {
+abstract class ModelCompanionGenerator extends CompanionGenerator {
 
   private $modelCache;
 

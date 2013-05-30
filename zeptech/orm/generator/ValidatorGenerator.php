@@ -15,13 +15,14 @@
 namespace zeptech\orm\generator;
 
 use \zeptech\orm\generator\model\Model;
+use \zpt\orm\ModelCompanionGenerator;
 
 /**
  * Generator for model validator classes.
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class ValidatorGenerator extends AbstractModelGenerator {
+class ValidatorGenerator extends ModelCompanionGenerator {
 
   public static $actorNamespace = 'zpt\dyn\orm\validator';
 

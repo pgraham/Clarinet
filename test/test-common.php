@@ -15,32 +15,16 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
 
-require 'SplClassLoader.php';
-
-// Initialize Mockery
-// -----------------------------------------------------------------------------
-require 'Mockery/Loader.php';
-require 'Hamcrest/Hamcrest.php';
-$loader = new \Mockery\Loader();
-$loader->register();
-
-// Register loader for clarinet classes
-$ormPath = realpath(__DIR__ . '/..');
+$loader = require __DIR__ . '/../vendor/autoload.php';
 
 // Register an autoloader for test classes. This will be used to load the
 // mocks
-$ldr = new SplClassLoader('zpt\orm\test', __DIR__);
-$ldr->register();
+$loader->add('zpt\orm\test', __DIR__);
 
 // Register autoloaders for source classes
-$ldr = new SplClassLoader('zeptech\orm', $ormPath);
-$ldr->register();
+$ormPath = realpath(__DIR__ . '/..');
+$loader->add('zeptech\orm', $ormPath);
+$loader->add('zpt\orm', $ormPath);
 
-$ldr = new SplClassLoader('zpt\orm', $ormPath);
-$ldr->register();
-
-$ldr = new SplClassLoader('zpt\dyn\orm', __DIR__ . '/zpt/orm/test/mock/gen');
-$ldr->register();
-
-// Register autoloader for composer dependencies
-require_once "$ormPath/vendor/autoload.php";
+// Register autoloader for dynamic classes
+$loader->add('zpt\dyn\orm', __DIR__ . '/zpt/orm/test/mock/gen');

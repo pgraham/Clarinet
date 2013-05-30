@@ -22,5 +22,8 @@
 	"zeptech/opal": "1.0.*",
 	"zeptech/annotations": "1.0.*",
 	"zeptech/utility": "1.1.*"
+    },
+    "require-dev": {
+	"mockery/mockery": "dev-master"
     }
 }

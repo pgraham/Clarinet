@@ -15,6 +15,7 @@
 namespace zeptech\orm\generator;
 
 use \zeptech\orm\generator\model\Model;
+use \zpt\orm\ModelCompanionGenerator;
 use \ReflectionClass;
 
 /**
@@ -23,7 +24,7 @@ use \ReflectionClass;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class PersisterGenerator extends AbstractModelGenerator {
+class PersisterGenerator extends ModelCompanionGenerator {
 
   public static $actorNamespace = 'zpt\dyn\orm\persister';
 
