@@ -18,7 +18,7 @@ use \zeptech\orm\generator\model\ManyToMany;
 use \zeptech\orm\generator\model\ManyToOne;
 use \zeptech\orm\generator\model\Model;
 use \zeptech\orm\generator\model\OnceToMany;
-use \zeptech\orm\generator\AbstractModelGenerator;
+use \zpt\orm\ModelCompanionGenerator;
 use \zpt\pct\CodeTemplateParser;
 
 /**
@@ -32,7 +32,7 @@ use \zpt\pct\CodeTemplateParser;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class QueryBuilder extends AbstractModelGenerator {
+class QueryBuilder extends ModelCompanionGenerator {
 
   public static $actorNamespace = 'zpt\dyn\orm\qb';
 
