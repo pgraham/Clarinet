@@ -12,7 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace zpt\orm\actor;
+namespace zpt\orm\companion;
 
 use \zeptech\orm\generator\model\ManyToMany;
 use \zeptech\orm\generator\model\ManyToOne;
