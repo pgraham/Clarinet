@@ -17,9 +17,10 @@
 	    "zpt\\orm": ""
 	}
     },
+    "minimum-stability": "dev",
     "require": {
 	"php": ">=5.3.0",
-	"zeptech/opal": "1.0.*",
+	"zeptech/opal": "dev-master",
 	"zeptech/annotations": "1.0.*",
 	"zeptech/utility": "1.1.*"
     },
