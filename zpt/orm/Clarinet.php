@@ -14,6 +14,7 @@
  */
 namespace zpt\orm;
 
+use \zpt\opal\CompanionLoader;
 use \Exception;
 use \PDO;
 
@@ -27,6 +28,9 @@ class Clarinet {
 
 	/* Whether or not clarinet has been initialized. */
 	private static $initialized = false;
+
+	/* CompanionLoader - Injectable as argument to init method */
+	private static $companionLoader;
 
 	/**
 	 * Uses the transformation API to create an array representation of the given
@@ -49,7 +53,7 @@ class Clarinet {
 		self::ensureInitialized();
 
 		$modelClass = get_class($obj);
-		$persister = Persister::get($modelClass);
+		$persister = self::getPersister($modelClass);
 
 		$rows = $persister->delete($obj);
 		if ($rows != 1) {
@@ -71,7 +75,7 @@ class Clarinet {
 	public static function get($modelClass, Criteria $c = null) {
 		self::ensureInitialized();
 
-		$persister = Persister::get($modelClass);
+		$persister = self::getPersister($modelClass);
 
 		$rows = $persister->retrieve($c);
 		return $rows;
@@ -129,8 +133,14 @@ class Clarinet {
 	 * TODO Document what the configuration options are.
 	 *
 	 * @param array $config Array of configuration object
+	 * @param CompanionLoader $companionLoader [Optional] If none is provided 
+	 *   a new instance will be created.
 	 */
-	public static function init(PDO $pdo) {
+	public static function init(
+		PDO $pdo,
+		CompanionLoader $companionLoader = null
+	) {
+
 		if (self::$initialized) {
 			return;
 		}
@@ -139,6 +149,11 @@ class Clarinet {
 		// Turn on exceptions for the PDO connection
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		PdoWrapper::set($pdo);
+
+		if ($companionLoader === null) {
+			$companionLoader = new CompanionLoader();
+		}
+		self::$companionLoader = $companionLoader;
 	}
 
 	/**
@@ -150,7 +165,7 @@ class Clarinet {
 		self::ensureInitialized();
 
 		$modelClass = get_class($obj);
-		$persister = Persister::get($modelClass);
+		$persister = self::getPersister($modelClass);
 		$persister->save($obj);
 	}
 
@@ -178,5 +193,12 @@ class Clarinet {
 				. ' and a path for generated persister classes before it can perform'
 				. ' any operations.');
 		}
+	}
+
+	private static function getPersister($model) {
+		return self::$companionLoader->get(
+			'zpt\dyn\orm\persister',
+			$model
+		);
 	}
 }

@@ -1,7 +1,6 @@
 <?php
 namespace /*# companionNs #*/;
 
-use \zeptech\orm\runtime\Persister;
 use \zeptech\orm\runtime\Transformer;
 use \zpt\orm\Criteria;
 use \DateTime;
@@ -102,7 +101,7 @@ class /*# companionClass */ {
   public function fromArray(array $a, $model = null, array $whiteList = null) {
     if ($model === null) {
       if (isset($a['/*# idIdx */'])) {
-        $persister = Persister::get('/*# class */');
+        $persister = $this->__opal__loader->get('zpt\dyn\orm\persister', $this);
         $model = $persister->getById($a['/*# idIdx */']);
       } else {
         $model = new \/*# class */();
@@ -174,7 +173,10 @@ class /*# companionClass */ {
             $relId = $a['/*# relationship[idx] */'];
 
             if ($relId !== null) {
-              $persister = Persister::get('/*# relationship[rhs] */');
+              $persister = $this->__opal__loader->get(
+                'zpt\dyn\orm\persister',
+                $this
+              );
               $relVal = $persister->getById($relId);
               $model->set/*# relationship[name] */($relVal);
             }
