@@ -208,4 +208,11 @@ class Clarinet {
 			$model
 		);
 	}
+
+	private static function getValidator($model) {
+		return self::$companionLoader->get(
+			'zpt\dyn\orm\validator',
+			$model
+		);
+	}
 }
