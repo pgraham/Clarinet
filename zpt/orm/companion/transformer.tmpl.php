@@ -1,7 +1,6 @@
 <?php
 namespace /*# companionNs #*/;
 
-use \zeptech\orm\runtime\Transformer;
 use \zpt\orm\Criteria;
 use \DateTime;
 use \DateTimeZone;
@@ -48,7 +47,10 @@ class /*# companionClass */ {
       if ($relVal === null) {
         $a['/*# relationship[idx] */'] = null;
       } else {
-        $transformer = Transformer::get('/*# relationship[rhs] */');
+        $transformer = $this->__opal__loader->get(
+          'zpt\dyn\orm\transformer',
+          '/*# relationship[rhs] */'
+        );
         #{ if relationship[type] = many-to-many
           $rels = array();
           foreach ($relVal as $rel) {
@@ -159,7 +161,10 @@ class /*# companionClass */ {
           if (isset($a['/*# relationship[idx] */'])) {
             $rels = $a['/*# relationship[idx] */'];
 
-            $transformer = Transformer::get('/*# relationship[rhs] */');
+            $transformer = $this->__opal__loader->get(
+              'zpt\dyn\orm\transformer',
+              '/*# relationship[rhs] */'
+            );
             $relVal = $transformer->fromCollection($rels);
 
             $model->set/*# relationship[name] */($relVal);

@@ -42,7 +42,7 @@ class Clarinet {
 		self::ensureInitialized();
 
 		$modelClass = get_class($obj);
-		$transformer = Transformer::get($modelClass);
+		$transformer = self::getTransformer($modelClass);
 		return $transformer->asArray($obj);
 	}
 
@@ -198,6 +198,13 @@ class Clarinet {
 	private static function getPersister($model) {
 		return self::$companionLoader->get(
 			'zpt\dyn\orm\persister',
+			$model
+		);
+	}
+
+	private static function getTransformer($model) {
+		return self::$companionLoader->get(
+			'zpt\dyn\orm\transformer',
 			$model
 		);
 	}
