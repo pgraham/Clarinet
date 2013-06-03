@@ -26,7 +26,7 @@ use \PDO;
 class Clarinet {
 
 	/* Whether or not clarinet has been initialized. */
-	private static $_initialized = false;
+	private static $initialized = false;
 
 	/**
 	 * Uses the transformation API to create an array representation of the given
@@ -131,10 +131,10 @@ class Clarinet {
 	 * @param array $config Array of configuration object
 	 */
 	public static function init(PDO $pdo) {
-		if (self::$_initialized) {
+		if (self::$initialized) {
 			return;
 		}
-		self::$_initialized = true;
+		self::$initialized = true;
 
 		// Turn on exceptions for the PDO connection
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -173,7 +173,7 @@ class Clarinet {
 
 	/* Throws an exception if the class has not been initialized */
 	private static function ensureInitialized() {
-		if (!self::$_initialized) {
+		if (!self::$initialized) {
 			throw new Exception('Clarinet must be initialized with a PDO connection'
 				. ' and a path for generated persister classes before it can perform'
 				. ' any operations.');
