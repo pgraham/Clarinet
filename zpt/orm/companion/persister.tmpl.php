@@ -139,7 +139,7 @@ class /*# companionClass */ {
    * @param ${class} $model
    */
   public function create(\/*# class */ $model) {
-    $validator = $this->opalLoader->get('zpt\dyn\orm\validator', '/*# class */');
+    $validator = $this->__opal__loader->get('zpt\dyn\orm\validator', '/*# class */');
 
     if (!$validator->validate($model, $e)) {
       throw $e;
@@ -175,7 +175,7 @@ class /*# companionClass */ {
           if ($rhs !== null) {
             $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
             if ($rhsId === null) {
-              $persister = $this->opalLoader->get(
+              $persister = $this->__opal__loader->get(
                 'zpt\dyn\orm\persister',
                 '/*# rel[rhs] */'
               );
@@ -190,7 +190,7 @@ class /*# companionClass */ {
       $sql = $this->createSql; // If there is an exception this is handy to know
       $this->_create->execute($params);
 
-      $transformer = $this->opalLoader->get(
+      $transformer = $this->__opal__loader->get(
         'zpt\dyn\orm\transformer',
         '/*# class */'
       );
@@ -213,7 +213,7 @@ class /*# companionClass */ {
 
       #{ each relationships as rel
         // Save related /*# rel[rhs] */ entities -------------------------------
-        $persister = $this->opalLoader->get(
+        $persister = $this->__opal__loader->get(
           'zpt\dyn\orm\persister',
           '/*# rel[rhs] */'
         );
@@ -347,7 +347,7 @@ class /*# companionClass */ {
         // ---------------------------------------------------------------------
         // Delete related /*# rel[rhs] */ entities
         #{ if rel[type] = one-to-many
-          $persister = $this->opalLoader->get(
+          $persister = $this->__opal__loader->get(
             'zpt\dyn\orm\persister',
             '/*# rel[rhs] */'
           );
@@ -417,7 +417,7 @@ class /*# companionClass */ {
    * @return QueryBuilder
    */
   public function getQueryBuilder() {
-    return $this->opalLoader->get(
+    return $this->__opal__loader->get(
       'zpt\dyn\orm\qb',
       '/*# class */'
     );
@@ -475,7 +475,7 @@ class /*# companionClass */ {
       $stmt->setFetchMode(PDO::FETCH_ASSOC);
       $stmt->execute($params);
 
-      $transformer = $this->opalLoader->get(
+      $transformer = $this->__opal__loader->get(
         'zpt\dyn\orm\transformer',
         '/*# class */'
       );
@@ -532,7 +532,7 @@ class /*# companionClass */ {
               $c->addSort('/*# rel[rhsIdProperty] */', 'asc');
             #}
 
-            $persister = $this->opalLoader->get(
+            $persister = $this->__opal__loader->get(
               'zpt\dyn\orm\persister',
               '/*# rel[rhs] */'
             );
@@ -548,7 +548,7 @@ class /*# companionClass */ {
               $c->addSort('/*# rel[orderByCol] */', '/*# rel[orderByDir] */');
             #}
 
-            $persister = $this->opalLoader->get(
+            $persister = $this->__opal__loader->get(
               'zpt\dyn\orm\persister',
               '/*# rel[rhs] */'
             );
@@ -558,7 +558,7 @@ class /*# companionClass */ {
           #{ elseif rel[type] = many-to-one
             $relId = $row['/*# rel[lhsColumn] */'];
             if ($relId !== null) {
-              $persister = $this->opalLoader->get(
+              $persister = $this->__opal__loader->get(
                 'zpt\dyn\orm\persister',
                 '/*# rel[rhs] */'
               );
@@ -616,7 +616,7 @@ class /*# companionClass */ {
       return;
     }
 
-    $validator = $this->opalLoader->get(
+    $validator = $this->__opal__loader->get(
       'zpt\dyn\orm\validator',
       '/*# class */'
     );
@@ -653,7 +653,7 @@ class /*# companionClass */ {
           if ($rhs !== null) {
             $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
             if ($rhsId === null) {
-              $persister = $this->opalLoader->get(
+              $persister = $this->__opal__loader->get(
                 'zpt\dyn\orm\persister',
                 '/*# rel[rhs] */'
               );
@@ -685,7 +685,7 @@ class /*# companionClass */ {
       #{ each relationships as rel
         // ---------------------------------------------------------------------
         // Save related /*# rel[rhs] */ entities
-        $persister = $this->opalLoader->get(
+        $persister = $this->__opal__loader->get(
           'zpt\dyn\orm\persister',
           '/*# rel[rhs] */'
         );
