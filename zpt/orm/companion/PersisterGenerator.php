@@ -12,7 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace zeptech\orm\generator;
+namespace zpt\orm\companion;
 
 use \zeptech\orm\generator\model\Model;
 use \zpt\orm\ModelCompanionGenerator;
@@ -26,10 +26,18 @@ use \ReflectionClass;
  */
 class PersisterGenerator extends ModelCompanionGenerator {
 
-  public static $actorNamespace = 'zpt\dyn\orm\persister';
+  /**
+   * @override
+   */
+  protected function getCompanionNamespace($defClass) {
+    return 'zpt\dyn\orm\persister';
+  }
 
-  protected function getTemplatePath() {
-    return __DIR__ . '/persister/persister.php';
+  /**
+   * @override
+   */
+  protected function getTemplatePath($defClass) {
+    return __DIR__ . '/persister.tmpl.php';
   }
 
   /**

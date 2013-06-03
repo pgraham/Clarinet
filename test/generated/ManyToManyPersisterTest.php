@@ -172,14 +172,15 @@ class ManyToManyPersisterTest extends TestCase {
    */
   public function testUpdate() {
     $companionLoader = new CompanionLoader();
-    $companionLoader->setCacheEnabled(false);
     $persister1 = $companionLoader->get(
       'zpt\dyn\orm\persister',
-      'zpt\orm\test\mock\ManyToManyEntity'
+      'zpt\orm\test\mock\ManyToManyEntity',
+      false /* No cache */
     );
     $persister2 = $companionLoader->get(
       'zpt\dyn\orm\persister',
-      'zpt\orm\test\mock\ManyToManyEntity'
+      'zpt\orm\test\mock\ManyToManyEntity',
+      false /* No cache */
     );
 
     $lhs1 = new ManyToManyEntity();

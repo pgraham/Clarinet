@@ -12,7 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace zeptech\orm\generator;
+namespace zpt\orm\companion;
 
 use \zeptech\orm\generator\model\Model;
 use \zeptech\orm\generator\model\Property;
@@ -27,10 +27,12 @@ use \zpt\util\StringUtils;
  */
 class TransformerGenerator extends ModelCompanionGenerator {
 
-  public static $actorNamespace = 'zpt\dyn\orm\transformer';
+  protected function getCompanionNamespace($defClass) {
+    return 'zpt\dyn\orm\transformer';
+  }
 
-  protected function getTemplatePath() {
-    return __DIR__ . '/transformer/transformer.php';
+  protected function getTemplatePath($defClass) {
+    return __DIR__ . '/transformer.tmpl.php';
   }
 
   /**

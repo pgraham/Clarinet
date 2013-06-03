@@ -1,5 +1,5 @@
 <?php
-namespace zpt\dyn\orm\transformer;
+namespace /*# companionNs #*/;
 
 use \zeptech\orm\runtime\Persister;
 use \zeptech\orm\runtime\Transformer;
@@ -20,7 +20,7 @@ use \StdClass;
  * - Entities involved in a relationship with the entity being transformed are
  *   always represented by IDs, not models, in the array representation.
  */
-class /*# actor */ {
+class /*# companionClass */ {
 
   /**
    * Transform the given model object into an array.

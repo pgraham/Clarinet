@@ -1,5 +1,5 @@
 <?php
-namespace zpt\dyn\orm\persister;
+namespace /*# companionNs #*/;
 
 use \zpt\orm\PdoExceptionWrapper;
 use \zpt\orm\PdoWrapper;
@@ -14,7 +14,7 @@ use \PDOException;
  * Instead, modify the model class of this persister, then run the clarinet
  * generator to re-generate this file.
  */
-class /*# actor */ {
+class /*# companionClass */ {
 
   /**
    * Entities that in the process of being created are marked with this id so

@@ -14,10 +14,10 @@
  */
 namespace zpt\orm\test;
 
-use \zeptech\orm\generator\PersisterGenerator;
-use \zeptech\orm\generator\TransformerGenerator;
-use \zeptech\orm\generator\ValidatorGenerator;
 use \zpt\anno\AnnotationFactory;
+use \zpt\orm\companion\PersisterGenerator;
+use \zpt\orm\companion\TransformerGenerator;
+use \zpt\orm\companion\ValidatorGenerator;
 use \zpt\orm\model\parser\DefaultNamingStrategy;
 use \zpt\orm\model\parser\ModelParser;
 use \zpt\orm\model\ModelCache;
@@ -44,7 +44,6 @@ class Generator {
     }
 
     $mockDir = __DIR__ . '/mock';
-
 
     $persisterGen = new PersisterGenerator($mockDir . '/gen');
     $persisterGen->setModelCache(self::$modelCache);

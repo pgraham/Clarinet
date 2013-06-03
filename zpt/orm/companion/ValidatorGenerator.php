@@ -12,7 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace zeptech\orm\generator;
+namespace zpt\orm\companion;
 
 use \zeptech\orm\generator\model\Model;
 use \zpt\orm\ModelCompanionGenerator;
@@ -24,10 +24,12 @@ use \zpt\orm\ModelCompanionGenerator;
  */
 class ValidatorGenerator extends ModelCompanionGenerator {
 
-  public static $actorNamespace = 'zpt\dyn\orm\validator';
+  protected function getCompanionNamespace($defClass) {
+    return 'zpt\dyn\orm\validator';
+  }
 
-  protected function getTemplatePath() {
-    return __DIR__ . '/validator/validator.tmpl.php';
+  protected function getTemplatePath($defClass) {
+    return __DIR__ . '/validator.tmpl.php';
   }
 
   /**
