@@ -35,7 +35,7 @@ class Clarinet {
    * @param object $obj The model object to transform
    */
   public static function asArray($obj) {
-    self::_ensureInitialized();
+    self::ensureInitialized();
 
     $modelClass = get_class($obj);
     $transformer = Transformer::get($modelClass);
@@ -46,7 +46,7 @@ class Clarinet {
    * Delete the given object.
    */
   public static function delete($obj) {
-    self::_ensureInitialized();
+    self::ensureInitialized();
 
     $modelClass = get_class($obj);
     $persister = Persister::get($modelClass);
@@ -69,7 +69,7 @@ class Clarinet {
    *     criteria.
    */
   public static function get($modelClass, Criteria $c = null) {
-    self::_ensureInitialized();
+    self::ensureInitialized();
 
     $persister = Persister::get($modelClass);
 
@@ -85,7 +85,7 @@ class Clarinet {
    * @param string $property The property to index by.
    */
   public static function getAll($model, $property) {
-    self::_ensureInitialized();
+    self::ensureInitialized();
 
     $rows = self::get($model);
 
@@ -147,7 +147,7 @@ class Clarinet {
    * @param object $obj The object to save.
    */
   public static function save($obj) {
-    self::_ensureInitialized();
+    self::ensureInitialized();
 
     $modelClass = get_class($obj);
     $persister = Persister::get($modelClass);
@@ -162,7 +162,7 @@ class Clarinet {
    *   a list of messages for why the object did not validate.
    */
   public static function validate($obj) {
-    self::_ensureInitialized();
+    self::ensureInitialized();
 
     $modelClass = get_class($obj);
     $persister = Validator::get($modelClass);
@@ -172,7 +172,7 @@ class Clarinet {
   }
 
   /* Throws an exception if the class has not been initialized */
-  private static function _ensureInitialized() {
+  private static function ensureInitialized() {
     if (!self::$_initialized) {
       throw new Exception('Clarinet must be initialized with a PDO connection'
         . ' and a path for generated persister classes before it can perform'
