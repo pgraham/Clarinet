@@ -15,6 +15,7 @@
  */
 namespace zpt\orm\test;
 
+use \zpt\orm\Clarinet;
 use \zpt\orm\PdoWrapper;
 use \PDO;
 
@@ -38,9 +39,8 @@ class Db {
     copy(__DIR__ . '/mock/db/mock_db.template.sq3', __DIR__ . '/db.sq3');
 
     $pdo = new PDO('sqlite:' . __DIR__ . '/db.sq3');
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    PdoWrapper::set($pdo);
+    Clarinet::init($pdo);
+    //PdoWrapper::set($pdo);
   }
 
   /**
@@ -49,7 +49,7 @@ class Db {
    * @param PDO PDO connection to clean up.
    */
   public static function tearDown() {
-    PdoWrapper::get()->close();
+    Clarinet::reset();
     unlink(__DIR__ . '/db.sq3');
   }
 }

@@ -163,6 +163,16 @@ class Clarinet {
 	}
 
 	/**
+	 * De-initialize clarinet.  This is useful for testing or for reconnected to 
+	 * a different database.
+	 */
+	public static function reset() {
+		PdoWrapper::get()->close();
+		self::$companionLoader = null;
+		self::$initialized = false;
+	}
+
+	/**
 	 * Saves the state of the given object.
 	 *
 	 * @param object $obj The object to save.

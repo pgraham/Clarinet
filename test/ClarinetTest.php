@@ -39,6 +39,10 @@ class ClarinetTest extends TestCase {
 		Db::setUp();
 	}
 
+	protected function tearDown() {
+		Db::tearDown();
+	}
+
 	public function testInit() {
 		$pdo = new PDO('sqlite::memory:');
 
