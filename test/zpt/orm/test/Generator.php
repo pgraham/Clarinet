@@ -38,21 +38,32 @@ class Generator {
    * Iterator over all files in the mock directory and create actors for any
    * entity classes.
    */
-  public static function generate() {
+  public static function generate($modelDir = null, $outDir = null, $ns = null)
+  {
     if (self::$annoFactory === null || self::$modelCache === null) {
       self::initDeps();
     }
 
-    $mockDir = __DIR__ . '/mock';
+    if ($modelDir === null) {
+      $modelDir = __DIR__ . '/mock';
+    }
 
-    $persisterGen = new PersisterGenerator($mockDir . '/gen');
+    if ($outDir === null) {
+      $outDir  = $modelDir . '/gen';
+    }
+
+    if ($ns === null) {
+      $ns = 'zpt\orm\test\mock';
+    }
+
+    $persisterGen = new PersisterGenerator($outDir);
     $persisterGen->setModelCache(self::$modelCache);
-    $transformerGen = new TransformerGenerator($mockDir . '/gen');
+    $transformerGen = new TransformerGenerator($outDir);
     $transformerGen->setModelCache(self::$modelCache);
-    $validatorGen = new ValidatorGenerator($mockDir . '/gen');
+    $validatorGen = new ValidatorGenerator($outDir);
     $validatorGen->setModelCache(self::$modelCache);
 
-    $dir = new DirectoryIterator($mockDir);
+    $dir = new DirectoryIterator($modelDir);
     foreach ($dir AS $file) {
       if ($file->isDot() || $file->isDir()) {
         continue;
@@ -63,7 +74,7 @@ class Generator {
         continue;
       }
       
-      $className = "zpt\\orm\\test\\mock\\" . substr($filename, 0, -4);
+      $className = $ns . '\\' . substr($filename, 0, -4);
       $refClass = new ReflectionClass($className);
       $annotations = self::$annoFactory->get($refClass);
 
