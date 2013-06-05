@@ -86,20 +86,25 @@ class Clarinet {
 	 * indexed by the given column.
 	 *
 	 * @param string $entity The type of model to load.
-	 * @param string $property The property to index by.
+	 * @param string $property The property to index by. Can be a function.
 	 * @param Criteria $c Optional criteria used to filter the returned set
 	 */
 	public static function getAll($model, $property, Criteria $c = null) {
-		self::ensureInitialized();
+		if (is_string($property)) {
+			$getter = 'get' . ucfirst($property);
+			$fn = function ($entity) use ($getter) {
+				return $entity->$getter();
+			};
+		} else {
+			$fn = $property;
+		}
 
-		$rows = self::get($model, $c);
-
-		$getter = 'get' . ucfirst($property);
+		$entities = self::get($model, $c);
 		
-		$indexed = Array();
-		foreach ($rows AS $row) {
-			$idx = $row->$getter();
-			$indexed[$idx] = $row;
+		$indexed = array();
+		foreach ($entities AS $entity) {
+			$idx = $fn($entity);
+			$indexed[$idx] = $entity;
 		}
 		return $indexed;
 	}
