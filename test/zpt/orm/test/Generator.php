@@ -27,6 +27,9 @@ use \ReflectionClass;
 /**
  * This class generates actors for all mock entities.
  *
+ * TODO Move the functionality of this class out of the test package so that it 
+ * is more widely available.
+ *
  * @author Philip Graham <philip@zeptech.ca>
  */
 class Generator {
@@ -38,7 +41,7 @@ class Generator {
    * Iterator over all files in the mock directory and create actors for any
    * entity classes.
    */
-  public static function generate($modelDir = null, $outDir = null, $ns = null)
+  public static function generate($outDir = null, $modelDir = null, $ns = null)
   {
     if (self::$annoFactory === null || self::$modelCache === null) {
       self::initDeps();
