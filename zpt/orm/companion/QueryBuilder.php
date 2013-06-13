@@ -34,8 +34,6 @@ use \zpt\pct\CodeTemplateParser;
  */
 class QueryBuilder extends ModelCompanionGenerator {
 
-  public static $actorNamespace = 'zpt\dyn\orm\qb';
-
   /**
    * Override the static get method to not use a cache.  A new querybuilder is
    * returned everytime.
@@ -54,7 +52,11 @@ class QueryBuilder extends ModelCompanionGenerator {
    * ===========================================================================
    */
 
-  protected function getTemplatePath() {
+  protected function getCompanionNamespace($defClass) {
+    return 'zpt\dyn\orm\qb';
+  }
+
+  protected function getTemplatePath($defClass) {
     return __DIR__ . '/queryBuilder.tmpl.php';
   }
 
