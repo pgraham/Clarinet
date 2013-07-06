@@ -22,7 +22,7 @@
 	"php": ">=5.3.0",
 	"zeptech/opal": "dev-master",
 	"zeptech/annotations": "1.0.*",
-	"zeptech/utility": "1.1.*"
+	"zeptech/utility": "dev-master"
     },
     "require-dev": {
 	"mockery/mockery": "dev-master"
