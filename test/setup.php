@@ -16,6 +16,10 @@
  */
 
 $loader = require_once __DIR__ . '/../vendor/autoload.php';
+function getComposerLoader() {
+	global $loader;
+	return $loader;
+}
 
 // Register an autoloader for test classes. This will be used to load the
 // mocks

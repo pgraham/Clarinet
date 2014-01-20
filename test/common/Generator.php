@@ -21,6 +21,7 @@ use \zpt\orm\companion\ValidatorGenerator;
 use \zpt\orm\model\parser\DefaultNamingStrategy;
 use \zpt\orm\model\parser\ModelParser;
 use \zpt\orm\model\ModelCache;
+use \zpt\util\NamespaceResolver;
 use \DirectoryIterator;
 use \ReflectionClass;
 
@@ -38,17 +39,23 @@ class Generator {
   private static $modelCache;
 
   /**
-   * Iterator over all files in the mock directory and create actors for any
+   * Iterator over all files in specified namespace and creates actors for any
    * entity classes.
    */
-  public static function generate($outDir = null, $modelDir = null, $ns = null)
+  public static function generate($outDir = null, $ns = null, $loader = null)
   {
     if (self::$annoFactory === null || self::$modelCache === null) {
       self::initDeps();
     }
 
-    if ($modelDir === null) {
-      $modelDir = __DIR__ . '/mock';
+    if ($loader === null) {
+      if (function_exists('getComposerLoader')) {
+        $loader = getComposerLoader();
+      } else {
+        throw new Exception(
+          "Composer loader not provided and default not found."
+        );
+      }
     }
 
     if ($outDir === null) {
@@ -58,6 +65,9 @@ class Generator {
     if ($ns === null) {
       $ns = 'zpt\orm\test\mock';
     }
+
+    $nsResolver = new NamespaceResolver($loader);
+    $modelDir = $nsResolver->resolveNamespace($ns);
 
     $persisterGen = new PersisterGenerator($outDir);
     $persisterGen->setModelCache(self::$modelCache);
