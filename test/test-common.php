@@ -19,7 +19,7 @@ $loader = require_once __DIR__ . '/../vendor/autoload.php';
 
 // Register an autoloader for test classes. This will be used to load the
 // mocks
-$loader->add('zpt\orm\test', __DIR__);
+$loader->addPsr4('zpt\\orm\\test\\', __DIR__ . '/test-helpers');
 
 // Register autoloader for dynamic classes
-$loader->add('zpt\dyn\orm', __DIR__ . '/zpt/orm/test/mock/gen');
+$loader->add('zpt\dyn\orm', __DIR__ . '/test-helpers/mock/gen');

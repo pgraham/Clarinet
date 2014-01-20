@@ -1,7 +1,7 @@
 test/zpt/orm/test/mock/gen
 phpdoc.ini
 commit.txt
-test/zpt/orm/test/db.sq3
+test/test-helpers/db.sq3
 
 # Vim undo files
 *.un~
