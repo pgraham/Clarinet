@@ -12,9 +12,11 @@
 	}
     ],
     "autoload": {
+	"psr-4": {
+	    "zpt\\orm\\": "src/"
+	},
 	"psr-0": {
-	    "zeptech\\orm": "",
-	    "zpt\\orm": ""
+	    "zeptech\\orm": ""
 	}
     },
     "minimum-stability": "dev",

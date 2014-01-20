@@ -15,16 +15,11 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
 
-$loader = require __DIR__ . '/../vendor/autoload.php';
+$loader = require_once __DIR__ . '/../vendor/autoload.php';
 
 // Register an autoloader for test classes. This will be used to load the
 // mocks
 $loader->add('zpt\orm\test', __DIR__);
-
-// Register autoloaders for source classes
-$ormPath = realpath(__DIR__ . '/..');
-$loader->add('zeptech\orm', $ormPath);
-$loader->add('zpt\orm', $ormPath);
 
 // Register autoloader for dynamic classes
 $loader->add('zpt\dyn\orm', __DIR__ . '/zpt/orm/test/mock/gen');
