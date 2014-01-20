@@ -22,7 +22,7 @@ use \zpt\orm\test\Db;
 use \zpt\orm\test\Generator;
 use \PDO;
 
-require_once __DIR__ . '/test-common.php';
+require_once __DIR__ . '/../setup.php';
 
 /**
  * This class tests the Clarinet static class.

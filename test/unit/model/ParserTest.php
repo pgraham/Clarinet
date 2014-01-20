@@ -20,7 +20,7 @@ use \zpt\orm\model\ModelCache;
 use \zpt\orm\model\parser\ModelParser;
 use \PHPUnit_Framework_TestCase as TestCase;
 
-require_once __DIR__ . '/../test-common.php';
+require_once __DIR__ . '/../../setup.php';
 
 /**
  * This class tests the ModelParser class.

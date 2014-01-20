@@ -52,7 +52,7 @@ class Generator {
     }
 
     if ($outDir === null) {
-      $outDir  = $modelDir . '/gen';
+      $outDir  = __DIR__ . '/../gen';
     }
 
     if ($ns === null) {

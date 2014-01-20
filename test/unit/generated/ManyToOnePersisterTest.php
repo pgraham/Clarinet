@@ -21,7 +21,7 @@ use \zpt\orm\test\Db;
 use \zpt\orm\test\Generator;
 use \PHPUnit_Framework_TestCase as TestCase;
 
-require_once __DIR__ . '/../test-common.php';
+require_once __DIR__ . '/../../setup.php';
 
 /**
  * This class tests a generated persister for an entity that contains a

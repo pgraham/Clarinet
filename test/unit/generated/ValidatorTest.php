@@ -15,40 +15,39 @@
 
 use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\SimpleEntity;
+use \zpt\orm\test\Db;
 use \zpt\orm\test\Generator;
 use \PHPUnit_Framework_TestCase as TestCase;
 
-require_once __DIR__ . '/../test-common.php';
+require_once __DIR__ . '/../../setup.php';
 
 /**
- * This class tests transformer companion functionality.
+ * This class tests validator companion functionality.
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class TransformerTest extends TestCase {
+class ValidatorTest extends TestCase {
 
   public static function setUpBeforeClass() {
     Generator::generate();
   }
 
-  private $transformer;
+  /* Object under test */
+  private $validator;
 
   protected function setUp() {
+    DB::setUp();
+
     $loader = new CompanionLoader();
-    $this->transformer = $loader->get(
-      'zpt\dyn\orm\transformer',
+    $this->validator = $loader->get(
+      'zpt\dyn\orm\validator',
       'zpt\orm\test\mock\SimpleEntity'
     );
   }
 
-  public function testAsArray() {
+  public function testValidation() {
     $entity = new SimpleEntity();
-    $entity->setName('MyEntity');
-    $entity->setValue('EntityValue');
 
-    $transformed = $this->transformer->asArray($entity);
-
-    $this->assertArrayHasKey('name', $transformed);
-    $this->assertArrayHasKey('value', $transformed);
+    $this->validator->validate($entity);
   }
 }

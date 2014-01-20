@@ -36,9 +36,9 @@ class Db {
    * @return PDO PDO connection to the mock database.
    */
   public static function setUp() {
-    copy(__DIR__ . '/mock/db/mock_db.template.sq3', __DIR__ . '/db.sq3');
+    copy(__DIR__ . '/mock_db.template.sq3', __DIR__ . '/../gen/db.sq3');
 
-    $pdo = new PDO('sqlite:' . __DIR__ . '/db.sq3');
+    $pdo = new PDO('sqlite:' . __DIR__ . '/../gen/db.sq3');
     Clarinet::init($pdo);
     //PdoWrapper::set($pdo);
   }
@@ -50,6 +50,6 @@ class Db {
    */
   public static function tearDown() {
     Clarinet::reset();
-    unlink(__DIR__ . '/db.sq3');
+    unlink(__DIR__ . '/../gen/db.sq3');
   }
 }

@@ -1,7 +1,7 @@
 <?php
 /**
  * =============================================================================
- * Copyright (c) 2013, Philip Graham
+ * Copyright (c) 2011, Philip Graham
  * All rights reserved.
  *
  * This file is part of Clarinet and is licensed by the Copyright holder under
@@ -10,16 +10,29 @@
  * the link below.
  * =============================================================================
  *
- * This file sets up the environment for running tests.
- *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
+namespace zpt\orm;
 
-$loader = require_once __DIR__ . '/../vendor/autoload.php';
+use \PHPUnit_Framework_TestCase as TestCase;
+use \PDO;
 
-// Register an autoloader for test classes. This will be used to load the
-// mocks
-$loader->addPsr4('zpt\\orm\\test\\', __DIR__ . '/test-helpers');
+require_once __DIR__ . '/../setup.php';
 
-// Register autoloader for dynamic classes
-$loader->add('zpt\dyn\orm', __DIR__ . '/test-helpers/mock/gen');
+/**
+ * This class test the PdoWrapper class.
+ *
+ * @author Philip Graham <philip@zeptech.ca>
+ * @package clarinet/test
+ */
+class PdoWrapperTest extends TestCase {
+
+  public function testLifeCycle() {
+    $pdo = new PDO('sqlite::memory:');
+
+    PdoWrapper::set($pdo);
+
+    $wrapper = PdoWrapper::get();
+    $wrapper->close();
+  }
+}
