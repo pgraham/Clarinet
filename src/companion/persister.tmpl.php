@@ -1,10 +1,13 @@
 <?php
 namespace /*# companionNs #*/;
 
+use \zeptech\orm\runtime\SaveLock;
+use \zpt\orm\companion\PersisterBase;
 use \zpt\orm\PdoExceptionWrapper;
 use \zpt\orm\PdoWrapper;
-use \zeptech\orm\runtime\SaveLock;
 use \zpt\orm\Criteria;
+use \Psr\Log\LoggerAwareInterface;
+use \Psr\Log\LoggerAwareTrait;
 use \Exception;
 use \PDO;
 use \PDOException;
@@ -14,7 +17,7 @@ use \PDOException;
  * Instead, modify the model class of this persister, then run the clarinet
  * generator to re-generate this file.
  */
-class /*# companionClass */ {
+class /*# companionClass */ extends PersisterBase {
 
   /**
    * Entities that in the process of being created are marked with this id so
@@ -62,7 +65,7 @@ class /*# companionClass */ {
     $this->_create = $this->_pdo->prepare($this->createSql);
 
     #{ if has_update
-      $this->updateSql = 
+      $this->updateSql =
         "UPDATE /*# table */
          SET /*# join:sql_setters:, */
          WHERE /*# id_column */ = :id";
@@ -117,6 +120,8 @@ class /*# companionClass */ {
       ->setLimit(null);   // Remove any limit on the criteria
     $sql = $c->__toString();
     $params = $c->getParameters();
+
+    $this->logQuery($sql, $params);
 
     try {
 
@@ -188,6 +193,7 @@ class /*# companionClass */ {
       #}
 
       $sql = $this->createSql; // If there is an exception this is handy to know
+      $this->logQuery($sql, $params);
       $this->_create->execute($params);
 
       $transformer = $this->__opal__loader->get(
@@ -201,6 +207,7 @@ class /*# companionClass */ {
       // TODO Figure out a way of getting sql into any exceptions
       $sql = null;
       $params = null;
+
       #{ each collections as col
         $this->insertCollection_/*# col[property] */(
           $id,
@@ -234,6 +241,7 @@ class /*# companionClass */ {
           $sql = "DELETE FROM /*# rel[linkTable] */
                   WHERE /*# rel[lhsLinkColumn] */ = :id";
           $params = array('id' => $id);
+          $this->logQuery($sql, $params);
           $this->_pdo->prepare($sql)->execute($params);
 
           // Create new link entries for all related entities
@@ -247,6 +255,7 @@ class /*# companionClass */ {
                 'lhsId' => $id,
                 'rhsId' => $rel->get/*# rel[rhsIdProperty] */()
               );
+              $this->logQuery($sql, $params);
               $createStmt->execute($params);
             }
           }
@@ -279,6 +288,7 @@ class /*# companionClass */ {
                 'id' => $id,
                 'relId' => $rel->get/*# rel[rhsIdProperty] */()
               );
+              $this->logQuery($sql, $params);
               $updateStmt->execute($params);
 
               // Clear the cache of the RHS entity as it may contain a stale id
@@ -297,7 +307,7 @@ class /*# companionClass */ {
 
       #{ if onCreate
         $model->onCreate();
-      #} 
+      #}
 
       return $id;
     } catch (PDOException $e) {
@@ -336,6 +346,7 @@ class /*# companionClass */ {
       $startTransaction = $this->_pdo->beginTransaction();
 
       $sql = $this->deleteSql; // Set SQL in case there is an exception
+      $this->logQuery($sql, $params);
       $this->_delete->execute($params);
       $rowCount = $this->_delete->rowCount();
 
@@ -361,6 +372,7 @@ class /*# companionClass */ {
                   WHERE /*# rel[lhsLinkColumn] */ = :id';
           $params = array('id' => $id);
           $deleteStmt = $this->_pdo->prepare($sql);
+          $this->logQuery($sql, $params);
           $deleteStmt->execute($params);
 
         #}
@@ -403,7 +415,7 @@ class /*# companionClass */ {
       // We don't care about the result since the retrieve method will
       // populate the cache
       $this->retrieve($c);
-      
+
       if (!isset($this->_cache[$id])) {
         return null;
       }
@@ -473,6 +485,7 @@ class /*# companionClass */ {
     try {
       $stmt = $this->_pdo->prepare($sql);
       $stmt->setFetchMode(PDO::FETCH_ASSOC);
+      $this->logQuery($sql, $params);
       $stmt->execute($params);
 
       $transformer = $this->__opal__loader->get(
@@ -667,6 +680,7 @@ class /*# companionClass */ {
 
       #{ if has_update
         $sql = $this->updateSql;
+        $this->logQuery($sql, $params);
         $this->_update->execute($params);
         $rowCount = $this->_update->rowCount();
       #}
@@ -706,6 +720,7 @@ class /*# companionClass */ {
           $sql = "DELETE FROM /*# rel[linkTable] */ WHERE /*# rel[lhsLinkColumn] */ = :id";
           $params = array('id' => $id);
           $deleteStmt = $this->_pdo->prepare($sql);
+          $this->logQuery($sql, $params);
           $deleteStmt->execute($params);
 
           // Create new link entries for all related entities
@@ -717,6 +732,7 @@ class /*# companionClass */ {
                 'lhsId' => $id,
                 'rhsId' => $rel->get/*# rel[rhsIdProperty] */()
               );
+              $this->logQuery($sql, $params);
               $createStmt->execute($params);
             }
           }
@@ -766,6 +782,7 @@ class /*# companionClass */ {
                 'id' => $id,
                 'relId' => $rel->get/*# rel[rhsIdProperty] */()
               );
+              $this->logQuery($sql, $params);
               $updateStmt->execute($params);
 
               // Clear the cache of the RHS entity as it may contain a stale id
@@ -782,6 +799,7 @@ class /*# companionClass */ {
             foreach ($current AS $cur) {
               if (!in_array($cur->get/*# rel[rhsIdProperty] */(), $relIds)) {
                 $params = array('relId' => $cur->get/*# rel[rhsIdProperty] */());
+                $this->logQuery($sql, $params);
                 $orphanStmt->execute($params);
               }
 
@@ -827,11 +845,10 @@ class /*# companionClass */ {
   #-- Create methods for removing each of the model's collections
   #{ each collections as col
     private function removeCollection_/*# col[property] */($id) {
-      $stmt = $this->_pdo->prepare(
-        'DELETE FROM /*# col[link] */
-         WHERE /*# col[idCol] */ = :id');
-      $stmt->execute(array('id' => $id));
-        
+      $sql = 'DELETE FROM /*# col[link] */ WHERE /*# col[idCol] */ = :id';
+      $params = array('id' => $id);
+      $this->logQuery($sql, $params);
+      $this->_pdo->prepare($sql)->execute($params);
     }
   #}
 
@@ -839,47 +856,56 @@ class /*# companionClass */ {
   #{ each collections as col
     private function insertCollection_/*# col[property] */($id, $collection) {
       #{ if col[type] = set
-        $stmt = $this->_pdo->prepare(
+        $sql = 
           "INSERT INTO /*# col[link] */
            (/*# collection[idCol] */, /*# col[valCol] */)
-           VALUES (:id, :val)");
+           VALUES (:id, :val)";
+        $stmt = $this->_pdo->prepare($sql);
 
         // TODO Update this to use bulk insert
         foreach ($collection as $val) {
-          $stmt->execute(array(
+          $params = array(
             'id' => $id,
             'val' => $val
-          ));
+          );
+          $this->logQuery($sql, $params);
+          $stmt->execute($params);
         }
 
       #{ elseif col[type] = list
-        $stmt = $this->_pdo->prepare(
+        $sql = 
           "INSERT INTO /*# col[link] */
            (/*# col[idCol] */, /*# col[valCol] */, /*# col[seqCol] */)
-           VALUES (:id, :val, :seq)");
+           VALUES (:id, :val, :seq)";
+        $stmt = $this->_pdo->prepare($sql);
 
         // TODO Update this to use bulk insert
         foreach ($collection as $seq => $val) {
-          $stmt->execute(array(
+          $params = array(
             'id' => $id,
             'val' => $val,
             'seq' => $seq
-          ));
+          );
+          $this->logQuery($sql, $params);
+          $stmt->execute($params);
         }
 
       #{ elseif col[type] = map
-        $stmt = $this->_pdo->prepare(
+        $sql = 
           "INSERT INTO /*# col[link] */
            (/*# col[idCol] */, /*# col[keyCol] */, /*# col[valCol] */)
-           VALUES (:id, :key, :val)");
+           VALUES (:id, :key, :val)";
+        $stmt = $this->_pdo->prepare($sql);
 
         // TODO Update this to use bulk insert
         foreach ($collection as $key => $val) {
-          $stmt->execute(array(
+          $params = array(
             'id' => $id,
             'key' => $key,
             'val' => $val
-          ));
+          );
+          $this->logQuery($sql, $params);
+          $stmt->execute($params);
         }
 
       #}
@@ -890,22 +916,26 @@ class /*# companionClass */ {
   #{ each  collections as col
     private function retrieveCollection_/*# col[property] */($id, $model) {
       #{ if col[type] = set
-        $stmt = $this->_pdo->prepare(
-          'SELECT /*# col[valCol] */ FROM /*# col[link] */ WHERE /*# col[idCol] */ = :id');
-        $stmt->execute(array('id' => $id));
+        $sql = 'SELECT /*# col[valCol] */ FROM /*# col[link] */ WHERE /*# col[idCol] */ = :id';
+        $params = array('id' => $id);
+        $this->logQuery($sql, $params);
+        $this->_pdo->prepare($sql)->execute($params);
 
         $collection = array();
         foreach ($stmt as $row) {
           $collection[] = $row['/*# col[valCol] */'];
         }
         $model->set/*# col[property] */($collection);
-        
+
       #{ elseif col[type] = list
-        $stmt = $this->_pdo->prepare(
-          'SELECT /*# col[valCol] */ FROM /*# col[link] */ WHERE /*# col[idCol] */ = :id
-           ORDER BY /*# col[seqCol] */');
-        $stmt->execute(array('id' => $id));
-        
+        $sql = 
+          'SELECT /*# col[valCol] */ FROM /*# col[link] */
+          WHERE /*# col[idCol] */ = :id
+          ORDER BY /*# col[seqCol] */';
+        $params = array('id' => $id);
+        $this->logQuery($sql, $params);
+        $this->_pdo->prepare($sql)->execute($params);
+
         $collection = array();
         foreach ($stmt as $row) {
           $collection[] = $row['/*# col[valCol] */'];
@@ -913,11 +943,13 @@ class /*# companionClass */ {
         $model->set/*# col[property] */($collection);
 
       #{ elseif col[type] = map
-        $stmt = $this->_pdo->prepare(
+        $sql = 
           'SELECT /*# col[keyCol] */, /*# col[valCol] */
            FROM /*# col[link] */
-           WHERE /*# col[idCol] */ = :id');
-        $stmt->execute(array('id' => $id));
+           WHERE /*# col[idCol] */ = :id';
+        $params = array('id' => $id);
+        $this->logQuery($sql, $params);
+        $this->_pdo->prepare($sql)->execute($params);
 
         $collection = array();
         foreach ($stmt as $row) {
