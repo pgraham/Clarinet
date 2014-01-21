@@ -492,7 +492,7 @@ class /*# companionClass */ extends PersisterBase {
         'zpt\dyn\orm\transformer',
         '/*# class */'
       );
-      $result = Array();
+      $result = array();
       foreach ($stmt AS $row) {
         $id = $transformer->idFromDb($row['/*# id_column */']);
 
@@ -856,7 +856,7 @@ class /*# companionClass */ extends PersisterBase {
   #{ each collections as col
     private function insertCollection_/*# col[property] */($id, $collection) {
       #{ if col[type] = set
-        $sql = 
+        $sql =
           "INSERT INTO /*# col[link] */
            (/*# collection[idCol] */, /*# col[valCol] */)
            VALUES (:id, :val)";
@@ -873,7 +873,7 @@ class /*# companionClass */ extends PersisterBase {
         }
 
       #{ elseif col[type] = list
-        $sql = 
+        $sql =
           "INSERT INTO /*# col[link] */
            (/*# col[idCol] */, /*# col[valCol] */, /*# col[seqCol] */)
            VALUES (:id, :val, :seq)";
@@ -891,7 +891,7 @@ class /*# companionClass */ extends PersisterBase {
         }
 
       #{ elseif col[type] = map
-        $sql = 
+        $sql =
           "INSERT INTO /*# col[link] */
            (/*# col[idCol] */, /*# col[keyCol] */, /*# col[valCol] */)
            VALUES (:id, :key, :val)";
@@ -928,7 +928,7 @@ class /*# companionClass */ extends PersisterBase {
         $model->set/*# col[property] */($collection);
 
       #{ elseif col[type] = list
-        $sql = 
+        $sql =
           'SELECT /*# col[valCol] */ FROM /*# col[link] */
           WHERE /*# col[idCol] */ = :id
           ORDER BY /*# col[seqCol] */';
@@ -943,7 +943,7 @@ class /*# companionClass */ extends PersisterBase {
         $model->set/*# col[property] */($collection);
 
       #{ elseif col[type] = map
-        $sql = 
+        $sql =
           'SELECT /*# col[keyCol] */, /*# col[valCol] */
            FROM /*# col[link] */
            WHERE /*# col[idCol] */ = :id';

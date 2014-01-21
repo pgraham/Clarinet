@@ -46,9 +46,11 @@ abstract class PersisterBase extends ModelCompanionBase
 			return $paramsStr;
 		}
 
-		return implode(', ', array_map(function ($p) {
-			return (string) $p;
-		}, $params));
+		$paramsStr = [];
+		foreach ($params as $k => $v) {
+			$paramsStr[] = "$k: $v";
+		}
+		return implode(', ', $paramsStr);
 	}
 
 }
