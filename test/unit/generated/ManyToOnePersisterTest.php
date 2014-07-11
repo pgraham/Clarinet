@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test/generated
  */
 
 use \zpt\opal\CompanionLoader;
@@ -28,7 +27,6 @@ require_once __DIR__ . '/../../setup.php';
  * ManyToOne relationship.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/generated
  */
 class ManyToOnePersisterTest extends TestCase {
   

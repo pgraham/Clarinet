@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test/generated
  */
 
 use \zpt\opal\CompanionLoader;
@@ -29,7 +28,6 @@ require_once __DIR__ . '/../../setup.php';
  * contain a mirrored one-to-many relationship.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/generated
  */
 class OneToManyMirrorPersisterTest extends TestCase {
 

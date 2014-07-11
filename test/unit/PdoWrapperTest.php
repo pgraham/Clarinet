@@ -23,7 +23,6 @@ require_once __DIR__ . '/../setup.php';
  * This class test the PdoWrapper class.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test
  */
 class PdoWrapperTest extends TestCase {
 

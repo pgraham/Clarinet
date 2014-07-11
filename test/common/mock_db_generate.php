@@ -4,7 +4,6 @@
  * database in __DIR__ . '/mock_db.template.sq3'
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/mock/db
  */
 define('TEMPLATE_FILE', __DIR__ . '/mock_db.template.sq3');
 if (file_exists(TEMPLATE_FILE)) {

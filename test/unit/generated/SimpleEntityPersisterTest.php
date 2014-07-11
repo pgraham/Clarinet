@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test/generated
  */
 use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\SimpleEntity;
@@ -26,7 +25,6 @@ require_once __DIR__ . '/../../setup.php';
  * scalar value columns.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/generated
  */
 class SimpleEntityPersisterTest extends TestCase {
 

@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test/mock
  */
 namespace zpt\orm\test\mock;
 
@@ -20,7 +19,6 @@ namespace zpt\orm\test\mock;
  * mock\SimpleEntity.  The relationship is not declared on the other side.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/mock
  *
  * @Entity(table = many_to_many_entity)
  */

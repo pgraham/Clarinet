@@ -19,7 +19,6 @@ namespace zpt\orm\test\mock;
  * relationship is not declared at the other side.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/mock
  *
  * @Entity(table = many_to_one_entity)
  */

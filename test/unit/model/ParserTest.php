@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test
  */
 
 use \zpt\anno\AnnotationFactory;
@@ -26,7 +25,6 @@ require_once __DIR__ . '/../../setup.php';
  * This class tests the ModelParser class.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test
  */
 class ParserTest extends TestCase {
 

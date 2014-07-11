@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test/generated
  */
 namespace zpt\orm;
 
@@ -29,7 +28,6 @@ require_once __DIR__ . '/../../setup.php';
  * many-to-many relationship.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/generated
  */
 class ManyToManyPersisterTest extends TestCase {
 

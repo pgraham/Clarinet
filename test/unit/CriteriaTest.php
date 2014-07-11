@@ -22,7 +22,6 @@ require_once __DIR__ . '/../setup.php';
  * This class tests the Criteria class.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test
  */
 class CriteriaTest  extends TestCase {
 

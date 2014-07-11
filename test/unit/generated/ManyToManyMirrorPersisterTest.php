@@ -27,7 +27,6 @@ require_once __DIR__ . '/../../setup.php';
  * mirrored many-to-many relationship.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/generated
  */
 class ManyToManyMirrorPersisterTest extends TestCase {
 

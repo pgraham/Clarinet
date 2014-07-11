@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/test/generated
  */
 namespace zpt\orm\test;
 
@@ -25,7 +24,6 @@ use \PDO;
  * structure described by the mock model objects.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/generated
  */
 class Db {
 

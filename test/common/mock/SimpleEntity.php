@@ -18,7 +18,6 @@ namespace zpt\orm\test\mock;
  * Mock class that represents an entityt with no relationships to other entities
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/mock
  *
  * @Entity(table = simple_entity)
  */

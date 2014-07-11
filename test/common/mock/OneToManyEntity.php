@@ -19,7 +19,6 @@ namespace zpt\orm\test\mock;
  * declared on one side.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/test/mock
  *
  * @Entity(table = one_to_many_entity)
  */

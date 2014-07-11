@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/model
  */
 namespace zpt\orm\model;
 
@@ -19,7 +18,6 @@ namespace zpt\orm\model;
  * This class encapsulates a Many-to-many relationship representation.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/model
  */
 class ManyToMany extends AbstractRelationship {
 
