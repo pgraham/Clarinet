@@ -189,8 +189,10 @@ class Clarinet {
 	 * Validates the given object.
 	 *
 	 * @param object $obj The object to validate.
-	 * @return null if the object is valid or a ValidationException that contains
-	 *   a list of messages for why the object did not validate.
+	 * @return ValidationException
+	 *   Null if the object is valid or a
+	 *   {@link zpt\orm\runtime\ValidationException} that contains a list of
+	 *   messages for why the object did not validate.
 	 */
 	public static function validate($obj) {
 		self::ensureInitialized();

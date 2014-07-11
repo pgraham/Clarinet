@@ -1,7 +1,7 @@
 <?php
 namespace /*# companionNs #*/;
 
-use \zeptech\orm\runtime\ValidationException;
+use \zpt\orm\runtime\ValidationException;
 use \DateTime;
 use \DateTimeZone;
 use \Exception;
