@@ -291,15 +291,15 @@ class Model implements Identifiable {
     $className = null;
     switch ($type) {
       case 'many-to-one':
-      $className = 'clarinet\model\ManyToOne';
+      $className = 'zpt\orm\model\ManyToOne';
       break;
 
       case 'one-to-many':
-      $className = 'clarinet\model\OneToMany';
+      $className = 'zpt\orm\model\OneToMany';
       break;
 
       case 'many-to-many':
-      $className = 'clarinet\model\ManyToMany';
+      $className = 'zpt\orm\model\ManyToMany';
       break;
 
       default:

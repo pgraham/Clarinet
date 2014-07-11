@@ -11,7 +11,6 @@
  * =============================================================================
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
- * @package clarinet/model
  */
 namespace zpt\orm\model;
 
@@ -19,7 +18,6 @@ namespace zpt\orm\model;
  * Base class for relationships.
  *
  * @author Philip Graham <philip@zeptech.ca>
- * @package clarinet/model
  */
 abstract class AbstractRelationship implements Relationship {
 
@@ -66,7 +64,7 @@ abstract class AbstractRelationship implements Relationship {
   }
 
   /**
-   * Getter for the clarinet\model\Model object for the left side of the
+   * Getter for the zpt\orm\model\Model object for the left side of the
    * relationship.
    *
    * @return Model
@@ -96,7 +94,7 @@ abstract class AbstractRelationship implements Relationship {
   }
 
   /**
-   * Getter for the clarinet\model\Model object for the right side of the
+   * Getter for the zpt\orm\model\Model object for the right side of the
    * relationship.
    *
    * @return Model
