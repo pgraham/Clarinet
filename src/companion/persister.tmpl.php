@@ -1,7 +1,7 @@
 <?php
 namespace /*# companionNs #*/;
 
-use \zeptech\orm\runtime\SaveLock;
+use \zpt\orm\runtime\SaveLock;
 use \zpt\orm\companion\PersisterBase;
 use \zpt\orm\PdoExceptionWrapper;
 use \zpt\orm\PdoWrapper;
