@@ -14,7 +14,7 @@
  */
 namespace zpt\orm\model\parser;
 
-use \zeptech\orm\generator\model\Property;
+use \zpt\orm\model\Property;
 use \Exception;
 use \ReflectionClass;
 use \ReflectionMethod;

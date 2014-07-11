@@ -14,9 +14,9 @@
  */
 namespace zpt\orm\companion;
 
-use \zeptech\orm\generator\model\Model;
-use \zeptech\orm\generator\model\Property;
-use \zeptech\orm\generator\model\Relationship;
+use \zpt\orm\model\Model;
+use \zpt\orm\model\Property;
+use \zpt\orm\model\Relationship;
 use \zpt\orm\ModelCompanionGenerator;
 use \zpt\util\StringUtils;
 

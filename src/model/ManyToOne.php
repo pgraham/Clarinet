@@ -12,7 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace zeptech\orm\generator\model;
+namespace zpt\orm\model;
 
 /**
  * This class encapsulates a many-to-one relationship representation.

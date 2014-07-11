@@ -12,7 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
-namespace zeptech\orm\generator\model;
+namespace zpt\orm\model;
 
 /**
  * This interface is implemented by multiton objects that provide a unique

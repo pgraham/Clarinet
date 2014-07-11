@@ -14,10 +14,10 @@
  */
 namespace zpt\orm\companion;
 
-use \zeptech\orm\generator\model\ManyToMany;
-use \zeptech\orm\generator\model\ManyToOne;
-use \zeptech\orm\generator\model\Model;
-use \zeptech\orm\generator\model\OnceToMany;
+use \zpt\orm\model\ManyToMany;
+use \zpt\orm\model\ManyToOne;
+use \zpt\orm\model\Model;
+use \zpt\orm\model\OnceToMany;
 use \zpt\orm\ModelCompanionGenerator;
 use \zpt\pct\CodeTemplateParser;
 

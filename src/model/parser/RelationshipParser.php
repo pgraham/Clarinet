@@ -15,9 +15,9 @@
 namespace zpt\orm\model\parser;
 
 use \zpt\anno\Annotations;
-use \zeptech\orm\generator\model\ManyToMany;
-use \zeptech\orm\generator\model\ManyToOne;
-use \zeptech\orm\generator\model\OneToMany;
+use \zpt\orm\model\ManyToMany;
+use \zpt\orm\model\ManyToOne;
+use \zpt\orm\model\OneToMany;
 use \Exception;
 use \ReflectionClass;
 use \ReflectionMethod;

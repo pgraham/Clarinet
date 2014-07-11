@@ -14,7 +14,7 @@
  */
 namespace zpt\orm\companion;
 
-use \zeptech\orm\generator\model\Model;
+use \zpt\orm\model\Model;
 use \zpt\orm\ModelCompanionGenerator;
 
 /**

@@ -13,7 +13,7 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  * @package clarinet/model
  */
-namespace zeptech\orm\generator\model;
+namespace zpt\orm\model;
 
 /**
  * This class encapsulates a Many-to-many relationship representation.

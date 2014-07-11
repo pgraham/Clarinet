@@ -63,7 +63,7 @@ class ParserTest extends TestCase {
     $info = $this->modelParser->parse('zpt\orm\test\mock\SimpleEntity');
     $msg = print_r($info, true);
 
-    $this->assertInstanceOf('zeptech\orm\generator\model\Model', $info, $msg);
+    $this->assertInstanceOf('zpt\orm\model\Model', $info, $msg);
 
     $this->assertEquals('zpt\orm\test\mock\SimpleEntity', $info->getClass(),
       $msg);
@@ -74,7 +74,7 @@ class ParserTest extends TestCase {
     $name = null;
     $value = null;
     foreach ($properties AS $property) {
-      $this->assertInstanceOf('zeptech\orm\generator\model\Property', $property, $msg);
+      $this->assertInstanceOf('zpt\orm\model\Property', $property, $msg);
 
       if ($property->getName() === 'name') {
         $name = $property;
@@ -88,7 +88,7 @@ class ParserTest extends TestCase {
     $this->assertEquals('value', $value->getColumn());
 
     $id = $info->getId();;
-    $this->assertInstanceOf('zeptech\orm\generator\model\Property', $id, $msg);
+    $this->assertInstanceOf('zpt\orm\model\Property', $id, $msg);
     $this->assertEquals('id', $id->getName(), $msg);
     $this->assertEquals('id', $id->getColumn(), $msg);
   }
@@ -105,7 +105,7 @@ class ParserTest extends TestCase {
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('zeptech\orm\generator\model\OneToMany', $relationship);
+    $this->assertInstanceOf('zpt\orm\model\OneToMany', $relationship);
   }
 
   /**
@@ -120,7 +120,7 @@ class ParserTest extends TestCase {
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToOne', $relationship);
+    $this->assertInstanceOf('zpt\orm\model\ManyToOne', $relationship);
   }
 
   /**
@@ -139,7 +139,7 @@ class ParserTest extends TestCase {
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('zeptech\orm\generator\model\OneToMany', $relationship);
+    $this->assertInstanceOf('zpt\orm\model\OneToMany', $relationship);
 
     $info = $this->modelParser->parse('zpt\orm\test\mock\ManyToOneMirrorEntity');
 
@@ -148,7 +148,7 @@ class ParserTest extends TestCase {
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToOne', $relationship);
+    $this->assertInstanceOf('zpt\orm\model\ManyToOne', $relationship);
   }
 
   /**
@@ -166,7 +166,7 @@ class ParserTest extends TestCase {
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToMany', $relationship);
+    $this->assertInstanceOf('zpt\orm\model\ManyToMany', $relationship);
   }
 
   /**
@@ -184,7 +184,7 @@ class ParserTest extends TestCase {
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToMany', $relationship);
+    $this->assertInstanceOf('zpt\orm\model\ManyToMany', $relationship);
 
     $info = $this->modelParser->parse('zpt\orm\test\mock\ManyToManyMirrorRhsEntity');
 
@@ -193,6 +193,6 @@ class ParserTest extends TestCase {
     $this->assertEquals(1, count($relationships));
 
     $relationship = $relationships[0];
-    $this->assertInstanceOf('zeptech\orm\generator\model\ManyToMany', $relationship);
+    $this->assertInstanceOf('zpt\orm\model\ManyToMany', $relationship);
   }
 }

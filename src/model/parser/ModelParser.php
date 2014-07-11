@@ -14,7 +14,7 @@
  */
 namespace zpt\orm\model\parser;
 
-use \zeptech\orm\generator\model\Model;
+use \zpt\orm\model\Model;
 use \zpt\anno\AnnotationFactory;
 use \zpt\orm\model\ModelCache;
 use \Exception;

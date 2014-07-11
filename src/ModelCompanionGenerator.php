@@ -14,7 +14,7 @@
  */
 namespace zpt\orm;
 
-use \zeptech\orm\generator\model\Model;
+use \zpt\orm\model\Model;
 use \zpt\opal\CompanionGenerator;
 use \zpt\orm\model\ModelCache;
 
