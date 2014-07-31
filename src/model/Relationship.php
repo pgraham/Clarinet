@@ -1,16 +1,10 @@
 <?php
-/**
- * =============================================================================
- * Copyright (c) 2011, Philip Graham
+/*
+ * Copyright (c) 2014, Philip Graham
  * All rights reserved.
  *
- * This file is part of Clarinet and is licensed by the Copyright holder under
- * the 3-clause BSD License.  The full text of the license can be found in the
- * LICENSE.txt file included in the root directory of this distribution or at
- * the link below.
- * =============================================================================
- *
- * @license http://www.opensource.org/licenses/bsd-license.php
+ * This file is part of Clarinet. For the full copyright and license information
+ * please view the LICENSE file that was distributed with this source code.
  */
 namespace zpt\orm\model;
 
@@ -21,31 +15,31 @@ namespace zpt\orm\model;
  */
 interface Relationship {
 
-  const TYPE_MANYTOMANY = 'many-to-many';
-  const TYPE_MANYTOONE  = 'many-to-one';
-  const TYPE_ONETOMANY  = 'one-to-many';
+	const TYPE_MANYTOMANY = 'many-to-many';
+	const TYPE_MANYTOONE  = 'many-to-one';
+	const TYPE_ONETOMANY  = 'one-to-many';
 
-  /**
-   * This method is responsible for returning the clarinet\model\Model object
-   * for the entity on the left side of the relationship.
-   *
-   * @return Model
-   */
-  public function getLhs();
+	/**
+	 * This method is responsible for returning the clarinet\model\Model object
+	 * for the entity on the left side of the relationship.
+	 *
+	 * @return Model
+	 */
+	public function getLhs();
 
-  /**
-   * This method is responsible for returning the name of the property on the
-   * left side that contains this relationship.
-   *
-   * @return string Property name.
-   */
-  public function getLhsProperty();
+	/**
+	 * This method is responsible for returning the name of the property on the
+	 * left side that contains this relationship.
+	 *
+	 * @return string
+	 */
+	public function getLhsProperty();
 
-  /**
-   * This method is responsible for returning the clarinet\model\Model object
-   * for the entity on the right side of the relationship.
-   *
-   * @return Model
-   */
-  public function getRhs();
+	/**
+	 * This method is responsible for returning the clarinet\model\Model object
+	 * for the entity on the right side of the relationship.
+	 *
+	 * @return Model
+	 */
+	public function getRhs();
 }
