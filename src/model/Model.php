@@ -175,9 +175,9 @@ class Model
 	 */
 	public function getRelationship() {
 		if (func_num_args() == 1) {
-			return $this->_getRelationshipById(func_get_arg(0));
+			return $this->getRelationshipById(func_get_arg(0));
 		} else if (func_num_args() == 2) {
-			return $this->_getRelationshipByType(func_get_arg(0), func_get_arg(1));
+			return $this->getRelationshipByType(func_get_arg(0), func_get_arg(1));
 		}
 
 		throw new InvalidArgumentException('getRelationship accepts either one'
@@ -256,7 +256,7 @@ class Model
 	}
 
 	/* Get a relationship by id. */
-	private function _getRelationshipById($relId) {
+	private function getRelationshipById($relId) {
 		if (isset($this->rels[$relId])) {
 			return $this->rels[$relId];
 		}
@@ -264,7 +264,7 @@ class Model
 	}
 
 	/* Get a relationship by type. */
-	private function _getRelationshipByType($type, $model) {
+	private function getRelationshipByType($type, $model) {
 		$className = null;
 		switch ($type) {
 			case 'many-to-one':
