@@ -20,12 +20,6 @@ use InvalidArgumentException;
 class Model
 {
 
-	/*
-	 * The name of the classes that will act upon this model. Different actors
-	 * will be placed into different namespaces.
-	 */
-	private $actor;
-
 	/* Class level model annotations. */
 	private $annotations;
 
@@ -57,7 +51,6 @@ class Model
 	 */
 	public function __construct($className, $annotations) {
 		$this->class = $className;
-		$this->actor = str_replace('\\', '_', $className);
 		$this->annotations = $annotations;
 	}
 
@@ -113,19 +106,6 @@ class Model
 	 */
 	public function addRelationship(Relationship $relationship) {
 		$this->rels[$relationship->getName()] = $relationship;
-	}
-
-	/**
-	 * Getter for the base class name for all actors for the model.  Actor's for
-	 * different functions will be placed into different namespaces.	This will
-	 * always be the fully qualified name of the model class with backslashes (\)
-	 * replaced with underscores (_).
-	 *
-	 * @return string
-	 *   Base class name for all of the represented model's actors.
-	 */
-	public function getActor() {
-		return $this->actor;
 	}
 
 	/**
