@@ -17,14 +17,14 @@ use Exception;
  */
 class Property {
 
-	const TYPE_BOOLEAN	 = 'boolean';
-	const TYPE_DATE			 = 'date';
-	const TYPE_DECIMAL	 = 'decimal';
-	const TYPE_EMAIL		 = 'email';
-	const TYPE_FLOAT		 = 'float';
-	const TYPE_INTEGER	 = 'integer';
-	const TYPE_STRING		 = 'string';
-	const TYPE_TEXT			 = 'text';
+	const TYPE_BOOLEAN   = 'boolean';
+	const TYPE_DATE      = 'date';
+	const TYPE_DECIMAL   = 'decimal';
+	const TYPE_EMAIL     = 'email';
+	const TYPE_FLOAT     = 'float';
+	const TYPE_INTEGER   = 'integer';
+	const TYPE_STRING    = 'string';
+	const TYPE_TEXT      = 'text';
 	const TYPE_TIMESTAMP = 'timestamp';
 
 	public static $ALL_TYPES = array(
