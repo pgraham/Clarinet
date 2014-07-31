@@ -41,7 +41,6 @@ class Property {
 
 	private $column;
 	private $default;
-	private $model;
 	private $name;
 	private $notNull;
 	private $type;
@@ -85,15 +84,6 @@ class Property {
 	 */
 	public function getDefault() {
 		return $this->default;
-	}
-
-	/**
-	 * Getter for the model to which the property belongs.
-	 *
-	 * @return Model
-	 */
-	public function getModel() {
-		return $this->model;
 	}
 
 	/**
@@ -154,15 +144,6 @@ class Property {
 	 */
 	public function setDefault($default) {
 		$this->default = $default;
-	}
-
-	/**
-	 * Setter for the model that this property belongs to.
-	 *
-	 * @param Model $model
-	 */
-	public function setModel(Model $model) {
-		$this->model = $model;
 	}
 
 	/**
