@@ -16,6 +16,7 @@ namespace zpt\orm\model;
 
 use zpt\orm\model\Model;
 use zpt\orm\model\parser\ModelParser;
+use ReflectionClass;
 
 /**
  * This class stores reference to parsed models. Note that if it is possible
@@ -34,7 +35,13 @@ class ModelCache {
 		$this->cache = array();
 	}
 
-	public function get($className) {
+	public function get($classDef) {
+		if ($classDef instanceof ReflectionClass) {
+			$className = $classDef->getName();
+		} else {
+			$className = (string) $classDef;
+		}
+
 		if (!$this->isCached($className)) {
 			$this->modelParser->parse($className);
 		}
