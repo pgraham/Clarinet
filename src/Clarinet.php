@@ -100,7 +100,7 @@ class Clarinet {
 		}
 
 		$entities = self::get($model, $c);
-		
+
 		$indexed = array();
 		foreach ($entities AS $entity) {
 			$idx = $fn($entity);
@@ -139,7 +139,7 @@ class Clarinet {
 	 * TODO Document what the configuration options are.
 	 *
 	 * @param array $config Array of configuration object
-	 * @param CompanionLoader $companionLoader [Optional] If none is provided 
+	 * @param CompanionLoader $companionLoader [Optional] If none is provided
 	 *   a new instance will be created.
 	 */
 	public static function init(
@@ -163,7 +163,7 @@ class Clarinet {
 	}
 
 	/**
-	 * De-initialize clarinet.  This is useful for testing or for reconnected to 
+	 * De-initialize clarinet.  This is useful for testing or for reconnected to
 	 * a different database.
 	 */
 	public static function reset() {
