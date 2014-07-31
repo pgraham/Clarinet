@@ -20,8 +20,8 @@ use \PDOException;
 class /*# companionClass */ extends PersisterBase {
 
   /**
-   * Entities that in the process of being created are marked with this id so
-   * that any right side relationships won't call the create method for the
+   * Entities that are in the process of being created are marked with this id
+   * so that any right side relationships won't call the create method for the
    * entity a second time.  In particular this will help prevent double creation
    * when saving a mirrored ManyToOneEntity.  This happens because the left side
    * (many side) of the relationship will attempt to create the right side, if
