@@ -17,7 +17,8 @@ use InvalidArgumentException;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class Model implements Identifiable {
+class Model
+{
 
 	/*
 	 * The name of the classes that will act upon this model. Different actors
@@ -153,15 +154,6 @@ class Model implements Identifiable {
 	 */
 	public function getId() {
 		return $this->id;
-	}
-
-	/**
-	 * Getter for the Identifiable instance's unique string identifier.
-	 *
-	 * @return string
-	 */
-	public function getIdentifier() {
-		return $this->actor;
 	}
 
 	/**

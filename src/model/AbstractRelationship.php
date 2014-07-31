@@ -25,8 +25,8 @@ abstract class AbstractRelationship implements Relationship
 	/** Model for the entity on the right side of the relationship */
 	protected $rhs;
 
-	/* Identifiable instance's unique identifier. */
-	private $identifier;
+	/* Relationship name */
+	private $name;
 
 	/**
 	 * Initiate a new relationship.
@@ -43,7 +43,7 @@ abstract class AbstractRelationship implements Relationship
 		$this->rhs = $rhs;
 		$this->lhsProperty = $lhsProperty;
 
-		$this->identifier = $lhs->getActor() . '-' . $rhs->getActor();
+		$this->name = $lhs->getActor() . '-' . $rhs->getActor();
 	}
 
 	/**
@@ -52,7 +52,7 @@ abstract class AbstractRelationship implements Relationship
 	 * @return string
 	 */
 	public function getName() {
-		return $this->identifier;
+		return $this->name;
 	}
 
 	/**
