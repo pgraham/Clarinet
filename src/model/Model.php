@@ -13,7 +13,7 @@ use Exception;
 use InvalidArgumentException;
 
 /**
- * This class encapsulates entity information for a model class.
+ * This class encapsulates model information for a data model class.
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
@@ -23,8 +23,8 @@ class Model
 	/* Class level model annotations. */
 	private $annotations;
 
-	/* The fully qualified name of the class that defines the model. */
-	private $class;
+	/* The name of the model. */
+	private $name;
 
 	/* The ID property of the model. */
 	private $id;
@@ -44,13 +44,13 @@ class Model
 	/**
 	 * Create a new model representation for the model with the given class name.
 	 *
-	 * @param string $className
-	 *   The name of the class where the model is defined.
+	 * @param string $name
+	 *   The name of the model.
 	 * @param Annotations $annotations
 	 *   Class level annotations declared on the model's class.
 	 */
-	public function __construct($className, $annotations) {
-		$this->class = $className;
+	public function __construct($name, $annotations) {
+		$this->name = $name;
 		$this->annotations = $annotations;
 	}
 
@@ -109,13 +109,12 @@ class Model
 	}
 
 	/**
-	 * Getter for the name of the model class represented by the instance.
+	 * Getter for the name of the model.
 	 *
 	 * @return string
-	 *   The name of the model class represented by the instance.
 	 */
-	public function getClass() {
-		return $this->class;
+	public function getName() {
+		return $this->name;
 	}
 
 	/**
