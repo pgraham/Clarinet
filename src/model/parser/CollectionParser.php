@@ -121,9 +121,7 @@ class CollectionParser extends BaseMethodParser
     {
         $idColumn = $anno['idColumn'];
         if ($idColumn === null) {
-            $lhs = $this->modelCache->get(
-                $method->getDeclaringClass()->getName()
-            );
+            $lhs = $this->getModel($method->getDeclaringClass()->getName());
             $idColumn = $this->namingStrategy->getLinkColumn($lhs);
         }
         return $idColumn;
@@ -133,10 +131,8 @@ class CollectionParser extends BaseMethodParser
     {
         $linkTable = $anno['table'];
         if ($linkTable === null) {
-            $lhs = $this->modelCache->get(
-                $method->getDeclaringClass()->getName()
-            );
-            
+            $lhs = $this->getModel($method->getDeclaringClass()->getName());
+
             $linkTable = $this->namingStrategy->getCollectionLink(
                 $lhs,
                 $property

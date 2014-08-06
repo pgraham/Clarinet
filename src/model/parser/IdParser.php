@@ -58,7 +58,7 @@ class IdParser extends BaseMethodParser
   public function parseId(ReflectionMethod $method, $annos)
   {
     $propertyName = $this->getPropertyName($method);
-    
+
     if (isset($annos['column'])) {
       $column = $annos['column']['name'];
     } else {

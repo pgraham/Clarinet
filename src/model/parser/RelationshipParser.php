@@ -44,7 +44,7 @@ class RelationshipParser extends BaseMethodParser
 
       } else if ($annos->isAnnotatedWith('manytoone')) {
         $rel = $this->parseManyToOne($method, $annos);
-  
+
       } else if ($annos->isAnnotatedWith('manytomany')) {
         $rel = $this->parseManyToMany($method, $annos);
       }
@@ -66,8 +66,8 @@ class RelationshipParser extends BaseMethodParser
       throw $this->buildNoEntityException($method);
     }
 
-    $lhs = $this->modelCache->get($method->getDeclaringClass()->getName());
-    $rhs = $this->modelCache->get($anno['entity']);
+    $lhs = $this->getModel($method->getDeclaringClass()->getName());
+    $rhs = $this->getModel($anno['entity']);
 
     if (isset($anno['table'])) {
       $linkTable = $anno['table'];
@@ -120,8 +120,8 @@ class RelationshipParser extends BaseMethodParser
       throw $this->buildNoEntityException($method);
     }
 
-    $lhs = $this->modelCache->get($method->getDeclaringClass()->getName());
-    $rhs = $this->modelCache->get($anno['entity']);
+    $lhs = $this->getModel($method->getDeclaringClass()->getName());
+    $rhs = $this->getModel($anno['entity']);
 
     if (isset($anno['column'])) {
       $lhsColumn = $anno['column'];
@@ -142,8 +142,8 @@ class RelationshipParser extends BaseMethodParser
       throw $this->buildNoEntityException($method);
     }
 
-    $lhs = $this->modelCache->get($method->getDeclaringClass()->getName());
-    $rhs = $this->modelCache->get($anno['entity']);
+    $lhs = $this->getModel($method->getDeclaringClass()->getName());
+    $rhs = $this->getModel($anno['entity']);
 
     if (isset($anno['column'])) {
       $rhsColumn = $anno['column'];

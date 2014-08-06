@@ -41,30 +41,36 @@ class ModelParser
 	private $collectionParser;
 	private $relationshipParser;
 
-	/**
-	 * Initialize the parser once its dependencies has been set.
-	 */
-	public function init() {
-		$this->idParser = new IdParser(
-			$this->annotationFactory,
-			$this->namingStrategy,
-			$this->modelCache
-		);
-		$this->columnParser = new ColumnParser(
-			$this->annotationFactory,
-			$this->namingStrategy,
-			$this->modelCache
-		);
-		$this->collectionParser = new CollectionParser(
-			$this->annotationFactory,
-			$this->namingStrategy,
-			$this->modelCache
-		);
-		$this->relationshipParser = new RelationshipParser(
-			$this->annotationFactory,
-			$this->namingStrategy,
-			$this->modelCache
-		);
+	public function __construct(
+		ModelCache $modelCache = null,
+		AnnotationFactory $annotationFactory = null,
+		NamingStrategy $namingStrategy = null
+	) {
+
+		if ($modelCache === null) {
+			$modelCache = new ModelCache();
+		}
+		$this->modelCache = $modelCache;
+
+		if ($annotationFactory === null) {
+			$annotationFactory = new AnnotationFactory();
+		}
+		$this->annotationFactory = new AnnotationFactory();
+
+		if ($namingStrategy === null) {
+			$namingStrategy = new DefaultNamingStrategy($annotationFactory);
+		}
+		$this->namingStrategy = $namingStrategy;
+
+		$this->init();
+	}
+
+	public function getAnnotationFactory() {
+		return $this->annotationFactory;
+	}
+
+	public function getNamingStrategy() {
+		return $this->namingStrategy;
 	}
 
 	public function parse($className) {
@@ -74,9 +80,6 @@ class ModelParser
 		}
 
 		$class = $this->reflect($className);
-
-		// TODO Create an AnnotationFactory class and use an injected instance to
-		//      create the annotations instance.
 		$classAnnos = $this->annotationFactory->get($class);
 
 		if (!$classAnnos->isAnnotatedWith('Entity')) {
@@ -126,25 +129,19 @@ class ModelParser
 		return $model;
 	}
 
-	/* ===========================================================================
-	 * Dependency setters.
-	 * ------------------------------------------------------------------------ */
-
-	public function setAnnotationFactory(AnnotationFactory $annotationFactory) {
-		$this->annotationFactory = $annotationFactory;
-	}
-
-	public function setModelCache(ModelCache $modelCache) {
-		$this->modelCache = $modelCache;
-	}
-
-	public function setNamingStrategy(NamingStrategy $namingStrategy) {
-		$this->namingStrategy = $namingStrategy;
-	}
-
-	/* ===========================================================================
+	/*
+	 * ===========================================================================
 	 * Private helpers.
-	 * ------------------------------------------------------------------------ */
+	 * ===========================================================================
+	 */
+
+	/* Initialize the parser once its dependencies has been set. */
+	private function init() {
+		$this->idParser = new IdParser($this);
+		$this->columnParser = new ColumnParser($this);
+		$this->collectionParser = new CollectionParser($this);
+		$this->relationshipParser = new RelationshipParser($this);
+	}
 
 
 	/* Attempt to reflect the specified class */

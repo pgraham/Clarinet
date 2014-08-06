@@ -29,8 +29,6 @@ class ModelCache {
 
 	private $cache = array();
 
-	private $modelParser;
-
 	public function clear() {
 		$this->cache = array();
 	}
@@ -43,7 +41,7 @@ class ModelCache {
 		}
 
 		if (!$this->isCached($className)) {
-			$this->modelParser->parse($className);
+			return null;
 		}
 
 		return $this->cache[$className];
@@ -55,9 +53,5 @@ class ModelCache {
 
 	public function set($className, Model $model) {
 		$this->cache[$className] = $model;
-	}
-
-	public function setModelParser(ModelParser $modelParser) {
-		$this->modelParser = $modelParser;
 	}
 }

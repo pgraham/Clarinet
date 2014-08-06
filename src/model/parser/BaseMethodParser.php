@@ -26,18 +26,18 @@ use \ReflectionMethod;
 abstract class BaseMethodParser
 {
 
+  protected $parser;
   protected $annotationFactory;
   protected $namingStrategy;
-  protected $modelCache;
 
-  public function __construct(
-    AnnotationFactory $annotationFactory,
-    NamingStrategy $namingStrategy,
-    ModelCache $modelCache
-  ) {
-    $this->annotationFactory = $annotationFactory;
-    $this->namingStrategy = $namingStrategy;
-    $this->modelCache = $modelCache;
+  public function __construct(ModelParser $parser) {
+    $this->parser = $parser;
+    $this->annotationFactory = $parser->getAnnotationFactory();
+    $this->namingStrategy = $parser->getNamingStrategy();
+  }
+
+  protected function getModel($className) {
+    return $this->parser->parse($className);
   }
 
   protected function getPropertyName(ReflectionMethod $method)

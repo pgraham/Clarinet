@@ -29,6 +29,13 @@ class DefaultNamingStrategy implements NamingStrategy
 
   private $annotationFactory;
 
+  public function __construct(AnnotationFactory $annotationFactory = null) {
+    if ($annotationFactory === null) {
+      $annotationFactory = new AnnotationFactory();
+    }
+    $this->annotationFactory = $annotationFactory;
+  }
+
   /**
    * Get the name of the link table for a collection property.  This composed
    * of the default table name for a class followed by an '_' then the default
@@ -98,15 +105,6 @@ class DefaultNamingStrategy implements NamingStrategy
     }
 
     return $this->pluralize(strtolower($this->getClassBaseName($className)));
-  }
-
-  /* ===========================================================================
-   * Dependency setters.
-   * ------------------------------------------------------------------------ */
-
-  public function setAnnotationFactory(AnnotationFactory $annotationFactory)
-  {
-    $this->annotationFactory = $annotationFactory;
   }
 
   /* ===========================================================================
