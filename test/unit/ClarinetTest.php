@@ -17,6 +17,7 @@ namespace zpt\orm;
 use \PHPUnit_Framework_TestCase as TestCase;
 
 use \zpt\opal\CompanionLoader;
+use \zpt\orm\companion\PersisterCompanionDirector;
 use \zpt\orm\test\mock\SimpleEntity;
 use \zpt\orm\test\Db;
 use \zpt\orm\test\Generator;
@@ -44,19 +45,19 @@ class ClarinetTest extends TestCase {
 	}
 
 	public function testInit() {
+		global $dynTarget;
 		$pdo = new PDO('sqlite::memory:');
 
-		Clarinet::init($pdo);
+		Clarinet::init($pdo, $dynTarget);
 	}
 
 	public function testGetAllProperty() {
 
 		// Instantiate a persister
-		$loader = new CompanionLoader();
-		$persister = $loader->get(
-			'zpt\dyn\orm\persister',
-			'zpt\orm\test\mock\SimpleEntity'
-		);
+		global $dynTarget;
+		$director = new PersisterCompanionDirector();
+		$loader = new CompanionLoader($director, $dynTarget);
+		$persister = $loader->get('zpt\orm\test\mock\SimpleEntity');
 
 		$entity = new SimpleEntity();
 		$entity->setName('entity1');
@@ -71,11 +72,10 @@ class ClarinetTest extends TestCase {
 
 	public function testGetAllFunction() {
 		// Instantiate a persister
-		$loader = new CompanionLoader();
-		$persister = $loader->get(
-			'zpt\dyn\orm\persister',
-			'zpt\orm\test\mock\SimpleEntity'
-		);
+		global $dynTarget;
+		$director = new PersisterCompanionDirector();
+		$loader = new CompanionLoader($director, $dynTarget);
+		$persister = $loader->get('zpt\orm\test\mock\SimpleEntity');
 
 		$entity = new SimpleEntity();
 		$entity->setName('entity1');

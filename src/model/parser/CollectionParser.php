@@ -52,7 +52,7 @@ class CollectionParser extends BaseMethodParser
     {
         $property = $this->getPropertyName($method);
         $anno = $annos['set'];
-          
+
         $linkTable = $this->getLinkTable($method, $anno, $property);
         $idColumn = $this->getIdColumn($method, $anno, $property);
         $valueColumn = $this->getValueColumn($method, $anno, $property);
@@ -71,7 +71,7 @@ class CollectionParser extends BaseMethodParser
     {
         $property = $this->getPropertyName($method);
         $anno = $annos['list'];
-          
+
         $linkTable = $this->getLinkTable($method, $anno, $property);
         $idColumn = $this->getIdColumn($method, $anno, $property);
         $valueColumn = $this->getValueColumn($method, $anno, $property);
@@ -96,7 +96,7 @@ class CollectionParser extends BaseMethodParser
     {
         $property = $this->getPropertyName($method);
         $anno = $annos['map'];
-          
+
         $linkTable = $this->getLinkTable($method, $anno, $property);
         $idColumn = $this->getIdColumn($method, $anno, $property);
         $valueColumn = $this->getValueColumn($method, $anno, $property);

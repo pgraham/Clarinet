@@ -15,6 +15,8 @@
 namespace zpt\orm;
 
 use \zpt\opal\CompanionLoader;
+use \zpt\opal\Psr4Dir;
+use \zpt\orm\companion\PersisterCompanionDirector;
 use \Exception;
 use \PDO;
 
@@ -29,8 +31,7 @@ class Clarinet {
 	/* Whether or not clarinet has been initialized. */
 	private static $initialized = false;
 
-	/* CompanionLoader - Injectable as argument to init method */
-	private static $companionLoader;
+	private static $persisterLoader;
 
 	/**
 	 * Uses the transformation API to create an array representation of the given
@@ -142,11 +143,7 @@ class Clarinet {
 	 * @param CompanionLoader $companionLoader [Optional] If none is provided
 	 *   a new instance will be created.
 	 */
-	public static function init(
-		PDO $pdo,
-		CompanionLoader $companionLoader = null
-	) {
-
+	public static function init(PDO $pdo, Psr4Dir $companionGen) {
 		if (self::$initialized) {
 			return;
 		}
@@ -156,10 +153,10 @@ class Clarinet {
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		PdoWrapper::set($pdo);
 
-		if ($companionLoader === null) {
-			$companionLoader = new CompanionLoader();
-		}
-		self::$companionLoader = $companionLoader;
+		self::$persisterLoader = new CompanionLoader(
+			new PersisterCompanionDirector(),
+			$companionGen
+		);
 	}
 
 	/**
@@ -168,7 +165,6 @@ class Clarinet {
 	 */
 	public static function reset() {
 		PdoWrapper::get()->close();
-		self::$companionLoader = null;
 		self::$initialized = false;
 	}
 
@@ -214,10 +210,7 @@ class Clarinet {
 	}
 
 	private static function getPersister($model) {
-		return self::$companionLoader->get(
-			'zpt\dyn\orm\persister',
-			$model
-		);
+		return self::$persisterLoader->get($model);
 	}
 
 	private static function getTransformer($model) {

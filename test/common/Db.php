@@ -34,10 +34,12 @@ class Db {
    * @return PDO PDO connection to the mock database.
    */
   public static function setUp() {
+    global $dynTarget;
+
     copy(__DIR__ . '/mock_db.template.sq3', __DIR__ . '/../gen/db.sq3');
 
     $pdo = new PDO('sqlite:' . __DIR__ . '/../gen/db.sq3');
-    Clarinet::init($pdo);
+    Clarinet::init($pdo, $dynTarget);
     //PdoWrapper::set($pdo);
   }
 
