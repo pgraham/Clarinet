@@ -32,14 +32,14 @@ use \zpt\orm\BaseModelCompanionDirector;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class QueryBuilder extends BaseModelCompanionDirector
+class QueryBuilderCompanionDirector extends BaseModelCompanionDirector
 {
 
   public function __construct(ModelFactory $modelFactory = null) {
     parent::__construct('querybuilder', $modelFactory);
   }
 
-  protected function getTemplatePath() {
+  public function getTemplatePath() {
     return __DIR__ . '/queryBuilder.tmpl.php';
   }
 
