@@ -53,9 +53,7 @@ class ValidatorCompanionDirector extends BaseModelCompanionDirector
     }
 
     return array(
-      'class'     => $model->getClass(),
-      'actor'     => $model->getActor(),
-
+      'class'     => $model->getName(),
       'properties' => $properties
     );
   }

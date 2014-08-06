@@ -285,7 +285,7 @@ class Model
 
 		foreach ($this->rels AS $relationship) {
 			$isType = get_class($relationship) == $className;
-			$isModel = $relationship->getRhs()->getClass() == $model;
+			$isModel = $relationship->getRhs()->getName() == $model;
 
 			if ($isType && $isModel) {
 				return $relationship;

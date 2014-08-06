@@ -42,8 +42,8 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
    *   to be generated.
    * @return string The PHP code for a persister.
    */
-    $className = $model->getClass();
   public function getValuesForModel(Model $model) {
+    $className = $model->getName();
     $persisterName = str_replace('\\', '_', $className);
 
     $columnNames = Array();
@@ -77,11 +77,11 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
       $rhs = $rel->getRhs();
       $vals = array(
         'type'          => $rel->getType(),
-        'lhs'           => $lhs->getClass(),
+        'lhs'           => $lhs->getName(),
         'lhsProperty'   => $rel->getLhsProperty(),
         'lhsIdProperty' => $lhs->getId()->getName(),
-        'rhs'           => $rhs->getClass(),
-        'rhsStr'        => str_replace('\\', '\\\\', $rhs->getClass()),
+        'rhs'           => $rhs->getName(),
+        'rhsStr'        => str_replace('\\', '\\\\', $rhs->getName()),
         'rhsIdProperty' => $rhs->getId()->getName(),
       );
 
@@ -99,10 +99,10 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
         }
 
         // Save params
-        $mirrored = $rhs->hasRelationship('many-to-one', $lhs->getClass());
+        $mirrored = $rhs->hasRelationship('many-to-one', $lhs->getName());
         $vals['mirrored'] = $mirrored;
         if ($mirrored) {
-          $mirrorRel = $rhs->getRelationship('many-to-one', $lhs->getClass());
+          $mirrorRel = $rhs->getRelationship('many-to-one', $lhs->getName());
           $vals['rhsProperty'] = $mirrorRel->getLhsProperty();
         } else {
           $vals['rhsTable'] = $rhs->getTable();
@@ -156,7 +156,7 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
     );
 
     // Add booleans for callbacks
-    $modelClass = new ReflectionClass($model->getClass());
+    $modelClass = new ReflectionClass($model->getName());
 
     if ($modelClass->hasMethod('beforeCreate')) {
       $templateValues['beforeCreate'] = true;

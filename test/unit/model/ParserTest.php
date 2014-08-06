@@ -35,44 +35,28 @@ class ParserTest extends TestCase {
    * Clear the cache of parsed model's before each test.
    */
   protected function setUp() {
-    $annotationFactory = new AnnotationFactory();
-
-    $namingStrategy = new DefaultNamingStrategy();
-    $namingStrategy->setAnnotationFactory($annotationFactory);
-
-    $this->modelParser = new ModelParser();
     $this->modelCache = new ModelCache();
-
-    $this->modelCache->setModelParser($this->modelParser);
-
-    $this->modelParser->setModelCache($this->modelCache);
-    $this->modelParser->setAnnotationFactory($annotationFactory);
-    $this->modelParser->setNamingStrategy($namingStrategy);
-
-    $this->modelParser->init();
-
+    $this->modelParser = new ModelParser($this->modelCache);
   }
-  
+
   /**
    * Tests that the parse(...) method generates the expected array structure for
    * a mock\SimpleEntity model.
    */
   public function testParseSimpleEntity() {
     $info = $this->modelParser->parse('zpt\orm\test\mock\SimpleEntity');
-    $msg = print_r($info, true);
 
-    $this->assertInstanceOf('zpt\orm\model\Model', $info, $msg);
+    $this->assertInstanceOf('zpt\orm\model\Model', $info);
 
-    $this->assertEquals('zpt\orm\test\mock\SimpleEntity', $info->getClass(),
-      $msg);
-    $this->assertEquals('simple_entity', $info->getTable(), $msg);
+    $this->assertEquals('zpt\orm\test\mock\SimpleEntity', $info->getName());
+    $this->assertEquals('simple_entity', $info->getTable());
 
     $properties = $info->getProperties();
-    $this->assertInternalType('array', $properties, $msg);
+    $this->assertInternalType('array', $properties);
     $name = null;
     $value = null;
     foreach ($properties AS $property) {
-      $this->assertInstanceOf('zpt\orm\model\Property', $property, $msg);
+      $this->assertInstanceOf('zpt\orm\model\Property', $property);
 
       if ($property->getName() === 'name') {
         $name = $property;
@@ -86,9 +70,9 @@ class ParserTest extends TestCase {
     $this->assertEquals('value', $value->getColumn());
 
     $id = $info->getId();;
-    $this->assertInstanceOf('zpt\orm\model\Property', $id, $msg);
-    $this->assertEquals('id', $id->getName(), $msg);
-    $this->assertEquals('id', $id->getColumn(), $msg);
+    $this->assertInstanceOf('zpt\orm\model\Property', $id);
+    $this->assertEquals('id', $id->getName());
+    $this->assertEquals('id', $id->getColumn());
   }
 
   /**

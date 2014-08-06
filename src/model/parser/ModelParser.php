@@ -104,15 +104,11 @@ class ModelParser
 		if ($id === null) {
 			throw new Exception("{$class->getName()} does not define an ID column.");
 		}
-
-		// TODO Is this parent relationship necessary?
-		$id->setModel($model);
 		$model->setId($id);
 
 		// Parse Column mappings
 		$columns = $this->columnParser->parse($class);
 		foreach ($columns as $column) {
-			$column->setModel($model);
 			$model->addProperty($column);
 		}
 

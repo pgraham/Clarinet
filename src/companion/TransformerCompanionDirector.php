@@ -71,7 +71,7 @@ class TransformerCompanionDirector extends BaseModelCompanionDirector
         'type'          => $type,
         'name'          => $lhsProp,
         'idx'           => $lhsProp,
-        'rhs'           => $rhs->getClass(),
+        'rhs'           => $rhs->getName(),
         'rhsIdProperty' => $rhs->getId()->getName(),
       );
 
@@ -85,8 +85,7 @@ class TransformerCompanionDirector extends BaseModelCompanionDirector
 
     $templateValues = Array
     (
-      'class'           => $model->getClass(),
-      'actor'           => $model->getActor(),
+      'class'           => $model->getName(),
       'id'              => $id,
       'idIdx'           => StringUtils::fromCamelCase($id),
       'properties'      => $properties,
