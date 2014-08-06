@@ -17,9 +17,9 @@ namespace zpt\orm\companion;
 use \zpt\orm\model\ManyToMany;
 use \zpt\orm\model\ManyToOne;
 use \zpt\orm\model\Model;
+use \zpt\orm\model\ModelFactory;
 use \zpt\orm\model\OnceToMany;
-use \zpt\orm\ModelCompanionGenerator;
-use \zpt\pct\CodeTemplateParser;
+use \zpt\orm\BaseModelCompanionDirector;
 
 /**
  * This class generates a query builder class which can be used to create
@@ -32,31 +32,14 @@ use \zpt\pct\CodeTemplateParser;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class QueryBuilder extends ModelCompanionGenerator {
+class QueryBuilder extends BaseModelCompanionDirector
+{
 
-  /**
-   * Override the static get method to not use a cache.  A new querybuilder is
-   * returned everytime.
-   *
-   * @override
-   */
-  public static function get($modelName) {
-    $actor = str_replace('\\', '_', $modelName);
-    $fq = static::$actorNamespace . "\\$actor";
-    return new $fq();
+  public function __construct(ModelFactory $modelFactory = null) {
+    parent::__construct('querybuilder', $modelFactory);
   }
 
-  /*
-   * ===========================================================================
-   * Instance
-   * ===========================================================================
-   */
-
-  protected function getCompanionNamespace($defClass) {
-    return 'zpt\dyn\orm\qb';
-  }
-
-  protected function getTemplatePath($defClass) {
+  protected function getTemplatePath() {
     return __DIR__ . '/queryBuilder.tmpl.php';
   }
 

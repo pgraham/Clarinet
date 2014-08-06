@@ -12,8 +12,10 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
+namespace zpt\orm\unit\generated;
 
 use \zpt\opal\CompanionLoader;
+use \zpt\orm\companion\ValidatorCompanionDirector;
 use \zpt\orm\test\mock\SimpleEntity;
 use \zpt\orm\test\Db;
 use \zpt\orm\test\Generator;
@@ -36,13 +38,13 @@ class ValidatorTest extends TestCase {
   private $validator;
 
   protected function setUp() {
+    global $dynTarget;
+
     DB::setUp();
 
-    $loader = new CompanionLoader();
-    $this->validator = $loader->get(
-      'zpt\dyn\orm\validator',
-      'zpt\orm\test\mock\SimpleEntity'
-    );
+    $director = new ValidatorCompanionDirector();
+    $loader = new CompanionLoader($director, $dynTarget);
+    $this->validator = $loader->get('zpt\orm\test\mock\SimpleEntity');
   }
 
   public function testValidation() {

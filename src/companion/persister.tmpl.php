@@ -1,8 +1,8 @@
 <?php
 namespace /*# companionNs #*/;
 
-use \zpt\orm\runtime\SaveLock;
 use \zpt\orm\companion\PersisterBase;
+use \zpt\orm\runtime\SaveLock;
 use \zpt\orm\PdoExceptionWrapper;
 use \zpt\orm\PdoWrapper;
 use \zpt\orm\Criteria;
@@ -17,7 +17,8 @@ use \PDOException;
  * Instead, modify the model class of this persister, then run the clarinet
  * generator to re-generate this file.
  */
-class /*# companionClass */ extends PersisterBase {
+class /*# companionClass */ extends PersisterBase
+{
 
   /**
    * Entities that are in the process of being created are marked with this id
@@ -144,7 +145,7 @@ class /*# companionClass */ extends PersisterBase {
    * @param ${class} $model
    */
   public function create(\/*# class */ $model) {
-    $validator = $this->__opal__loader->get('zpt\dyn\orm\validator', '/*# class */');
+    $validator = $this->getValidator('/*# class #*/');
 
     if (!$validator->validate($model, $e)) {
       throw $e;
@@ -180,10 +181,7 @@ class /*# companionClass */ extends PersisterBase {
           if ($rhs !== null) {
             $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
             if ($rhsId === null) {
-              $persister = $this->__opal__loader->get(
-                'zpt\dyn\orm\persister',
-                '/*# rel[rhs] */'
-              );
+              $persister = $this->getPersister('/*# rel[rhs] */');
               $rhsId = $persister->create($rhs);
             }
           }
@@ -196,10 +194,7 @@ class /*# companionClass */ extends PersisterBase {
       $this->logQuery($sql, $params);
       $this->_create->execute($params);
 
-      $transformer = $this->__opal__loader->get(
-        'zpt\dyn\orm\transformer',
-        '/*# class */'
-      );
+      $transformer = $this->getTransformer('/*# class */');
       $id = $transformer->idFromDb($this->_pdo->lastInsertId());
       $model->set/*# id_property */($id);
       $this->_cache[$id] = $model;
@@ -220,10 +215,7 @@ class /*# companionClass */ extends PersisterBase {
 
       #{ each relationships as rel
         // Save related /*# rel[rhs] */ entities -------------------------------
-        $persister = $this->__opal__loader->get(
-          'zpt\dyn\orm\persister',
-          '/*# rel[rhs] */'
-        );
+        $persister = $this->getPersister('/*# rel[rhs] */');
 
         $related = $model->get/*# rel[lhsProperty] */();
         #{ if rel[type] = many-to-many
@@ -269,7 +261,7 @@ class /*# companionClass */ extends PersisterBase {
           #{ if rel[mirrored]
            foreach ($related AS $rel) {
              $rel->set/*# rel[rhsProperty] */($model);
-             $persister->save($model);
+             $persister->save($rel);
            }
           #{ else
             foreach ($related AS $rel) {
@@ -358,10 +350,7 @@ class /*# companionClass */ extends PersisterBase {
         // ---------------------------------------------------------------------
         // Delete related /*# rel[rhs] */ entities
         #{ if rel[type] = one-to-many
-          $persister = $this->__opal__loader->get(
-            'zpt\dyn\orm\persister',
-            '/*# rel[rhs] */'
-          );
+          $persister = $this->getPersister('/*# rel[rhs] */');
           $related = $model->get/*# rel[lhsProperty] */();
           foreach ($related AS $rel) {
             $persister->delete($rel);
@@ -424,18 +413,6 @@ class /*# companionClass */ extends PersisterBase {
   }
 
   /**
-   * Get a new query builder instance for the model handled by this persister.
-   *
-   * @return QueryBuilder
-   */
-  public function getQueryBuilder() {
-    return $this->__opal__loader->get(
-      'zpt\dyn\orm\qb',
-      '/*# class */'
-    );
-  }
-
-  /**
    * Retrieve a single entity that matches the given criteria.  If the criteria
    * results in more than one entity being retrieved then an exception is
    * thrown.  If the criteria results in no entities being retrieved then NULL
@@ -488,10 +465,7 @@ class /*# companionClass */ extends PersisterBase {
       $this->logQuery($sql, $params);
       $stmt->execute($params);
 
-      $transformer = $this->__opal__loader->get(
-        'zpt\dyn\orm\transformer',
-        '/*# class */'
-      );
+      $transformer = $this->getTransformer('/*# class */');
       $result = array();
       foreach ($stmt AS $row) {
         $id = $transformer->idFromDb($row['/*# id_column */']);
@@ -545,10 +519,7 @@ class /*# companionClass */ extends PersisterBase {
               $c->addSort('/*# rel[rhsIdProperty] */', 'asc');
             #}
 
-            $persister = $this->__opal__loader->get(
-              'zpt\dyn\orm\persister',
-              '/*# rel[rhs] */'
-            );
+            $persister = $this->getPersister('/*# rel[rhs] */');
             $related = $persister->retrieve($c);
             $model->set/*# rel[lhsProperty] */($related);
 
@@ -561,20 +532,14 @@ class /*# companionClass */ extends PersisterBase {
               $c->addSort('/*# rel[orderByCol] */', '/*# rel[orderByDir] */');
             #}
 
-            $persister = $this->__opal__loader->get(
-              'zpt\dyn\orm\persister',
-              '/*# rel[rhs] */'
-            );
+            $persister = $this->getPersister('/*# rel[rhs] */');
             $related = $persister->retrieve($c);
             $model->set/*# rel[lhsProperty] */($related);
 
           #{ elseif rel[type] = many-to-one
             $relId = $row['/*# rel[lhsColumn] */'];
             if ($relId !== null) {
-              $persister = $this->__opal__loader->get(
-                'zpt\dyn\orm\persister',
-                '/*# rel[rhs] */'
-              );
+              $persister = $this->getPersister('/*# rel[rhs] */');
               $related = $persister->getById($relId);
 
               if ($related === null) {
@@ -629,10 +594,7 @@ class /*# companionClass */ extends PersisterBase {
       return;
     }
 
-    $validator = $this->__opal__loader->get(
-      'zpt\dyn\orm\validator',
-      '/*# class */'
-    );
+    $validator = $this->getValidator('/*# class */');
     if (!$validator->validate($model, $e)) {
       throw $e;
     }
@@ -666,10 +628,7 @@ class /*# companionClass */ extends PersisterBase {
           if ($rhs !== null) {
             $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
             if ($rhsId === null) {
-              $persister = $this->__opal__loader->get(
-                'zpt\dyn\orm\persister',
-                '/*# rel[rhs] */'
-              );
+              $persister = $this->getPersister('/*# rel[rhs] */');
               $rhsId = $persister->create($rhs);
             }
           }
@@ -699,10 +658,7 @@ class /*# companionClass */ extends PersisterBase {
       #{ each relationships as rel
         // ---------------------------------------------------------------------
         // Save related /*# rel[rhs] */ entities
-        $persister = $this->__opal__loader->get(
-          'zpt\dyn\orm\persister',
-          '/*# rel[rhs] */'
-        );
+        $persister = $this->getPersister('/*# rel[rhs] */');
 
         #{ if rel[type] = many-to-many
           // If any of the related entities are new, save them to ensure that
@@ -730,7 +686,7 @@ class /*# companionClass */ extends PersisterBase {
             foreach ($related AS $rel) {
               $params = array(
                 'lhsId' => $id,
-                'rhsId' => $rel->get/*# rel[rhsIdProperty] */()
+                'rhsId' => $rel->get/*# rel[rhsIdProperty] #*/()
               );
               $this->logQuery($sql, $params);
               $createStmt->execute($params);
@@ -738,14 +694,14 @@ class /*# companionClass */ extends PersisterBase {
           }
 
         #{ elseif rel[type] = one-to-many
-          $related = $model->get/*# rel[lhsProperty] */();
+          $related = $model->get/*# rel[lhsProperty] #*/();
           if ($related === null) {
             $related = array();
           }
 
           $relIds = array();
           foreach ($related AS $rel) {
-            $relIds[] = $rel->get/*# rel[rhsIdProperty] */();
+            $relIds[] = $rel->get/*# rel[rhsIdProperty] #*/();
           }
 
           $c = new Criteria();
@@ -755,27 +711,24 @@ class /*# companionClass */ extends PersisterBase {
           // Update or save the collection
           #{ if rel[mirrored]
             foreach ($related AS $rel) {
-              $rel->set${rel[rhsProperty]($model);
-              $persister->save($model);
+              $rel->set/*# rel[rhsProperty] #*/($model);
+              $persister->save($rel);
             }
             foreach ($current AS $cur) {
-              if (!in_array($cur->get/*# rel[rhsIdProperty] */(), $relIds)) {
+              if (!in_array($cur->get/*# rel[rhsIdProperty] #*/(), $relIds)) {
                 #{ if rel[deleteOrphan]
                   $persister->delete($cur);
-                #{ else
-                  $cur->set/*# rel[rhsProperty] */(null);
-                  $persister->save($cur);
                 #}
               }
             }
           #{ else
             foreach ($related AS $rel) {
-              if ($rel->get/*# rel[rhsIdProperty] */() === null) {
+              if ($rel->get/*# rel[rhsIdProperty] #*/() === null) {
                 $persister->create($rel);
               }
             }
 
-            $sql = "UPDATE /*# rel[rhsTable] */ SET /*# rel[rhsColumn] */ = :id WHERE /*# rel[rhsIdColumn] */ = :relId";
+            $sql = "UPDATE /*# rel[rhsTable] #*/ SET /*# rel[rhsColumn] #*/ = :id WHERE /*# rel[rhsIdColumn] #*/ = :relId";
             $updateStmt = $this->_pdo->prepare($sql);
             foreach ($related AS $rel) {
               $params = array(

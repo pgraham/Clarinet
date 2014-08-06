@@ -14,9 +14,10 @@
  */
 namespace zpt\orm;
 
+use zpt\opal\BaseCompanionDirector;
 use zpt\orm\model\Model;
-use zpt\opal\CompanionGenerator;
-use zpt\orm\model\ModelCache;
+use zpt\orm\model\ModelFactory;
+use ReflectionClass;
 
 /**
  * This class provides functionality common to all persisters.	This includes
@@ -25,12 +26,14 @@ use zpt\orm\model\ModelCache;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-abstract class ModelCompanionGenerator extends CompanionGenerator {
+abstract class BaseModelCompanionDirector extends BaseCompanionDirector
+{
 
-	private $modelCache;
+	private $modelFactory;
 
-	public function setModelCache(ModelCache $modelCache) {
-		$this->modelCache = $modelCache;
+	protected function __construct($type, ModelFactory $modelFactory = null) {
+		parent::__construct($type);
+		$this->modelFactory = $modelFactory;
 	}
 
 	/**
@@ -39,8 +42,12 @@ abstract class ModelCompanionGenerator extends CompanionGenerator {
 	 *
 	 * @param string $className The entity for which to generate code.
 	 */
-	protected function getValues($className) {
-		$model = $this->modelCache->get($className);
+	public function getValuesFor(ReflectionClass $class) {
+		if ($this->modelFactory === null) {
+			$this->modelFactory = new ModelFactory();
+		}
+
+		$model = $this->modelFactory->get($class->getName());
 		return $this->getValuesForModel($model);
 	}
 

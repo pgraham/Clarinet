@@ -1,34 +1,30 @@
 <?php
-/**
- * =============================================================================
- * Copyright (c) 2011, Philip Graham
+/*
+ * Copyright (c) 2014, Philip Graham
  * All rights reserved.
  *
- * This file is part of Clarinet and is licensed by the Copyright holder under
- * the 3-clause BSD License.  The full text of the license can be found in the
- * LICENSE.txt file included in the root directory of this distribution or at
- * the link below.
- * =============================================================================
- *
- * @license http://www.opensource.org/licenses/bsd-license.php
+ * This file is part of Clarinet. For the full copyright and license information
+ * please view the LICENSE file that was distributed with this source code.
  */
 namespace zpt\orm\companion;
 
 use \zpt\orm\model\Model;
-use \zpt\orm\ModelCompanionGenerator;
+use \zpt\orm\model\ModelFactory;
+use \zpt\orm\BaseModelCompanionDirector;
 
 /**
  * Generator for model validator classes.
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-class ValidatorGenerator extends ModelCompanionGenerator {
+class ValidatorCompanionDirector extends BaseModelCompanionDirector
+{
 
-  protected function getCompanionNamespace($defClass) {
-    return 'zpt\dyn\orm\validator';
+  public function __construct(ModelFactory $modelFactory = null) {
+    parent::__construct('validator', $modelFactory);
   }
 
-  protected function getTemplatePath($defClass) {
+  public function getTemplatePath() {
     return __DIR__ . '/validator.tmpl.php';
   }
 
@@ -40,7 +36,7 @@ class ValidatorGenerator extends ModelCompanionGenerator {
    *   is to be generated.
    * @return string The PHP code for a validator.
    */
-  protected function getValuesForModel(Model $model) {
+  public function getValuesForModel(Model $model) {
     $properties = array();
 
     foreach ($model->getProperties() AS $property) {

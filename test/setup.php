@@ -26,4 +26,5 @@ function getComposerLoader() {
 $loader->addPsr4('zpt\\orm\\test\\', __DIR__ . '/common');
 
 // Register autoloader for dynamic classes
-$loader->add('zpt\dyn\orm', __DIR__ . '/gen');
+$dynTarget = new zpt\opal\Psr4Dir(__DIR__ . '/gen', 'dyn\\');
+$dynTarget->registerWith($loader);

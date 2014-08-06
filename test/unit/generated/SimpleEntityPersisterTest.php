@@ -13,6 +13,7 @@
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
 use \zpt\opal\CompanionLoader;
+use \zpt\orm\companion\PersisterCompanionDirector;
 use \zpt\orm\test\mock\SimpleEntity;
 use \zpt\orm\test\Db;
 use \zpt\orm\test\Generator;
@@ -42,11 +43,10 @@ class SimpleEntityPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a persister
-    $loader = new CompanionLoader();
-    $this->persister = $loader->get(
-      'zpt\dyn\orm\persister',
-      'zpt\orm\test\mock\SimpleEntity'
-    );
+    global $dynTarget;
+    $director = new PersisterCompanionDirector();
+    $loader = new CompanionLoader($director, $dynTarget);
+    $this->persister = $loader->get('zpt\orm\test\mock\SimpleEntity');
   }
 
   protected function tearDown() {

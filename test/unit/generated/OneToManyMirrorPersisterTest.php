@@ -14,6 +14,7 @@
  */
 
 use \zpt\opal\CompanionLoader;
+use \zpt\orm\companion\PersisterCompanionDirector;
 use \zpt\orm\test\mock\ManyToOneMirrorEntity;
 use \zpt\orm\test\mock\OneToManyMirrorEntity;
 use \zpt\orm\test\Db;
@@ -52,9 +53,10 @@ class OneToManyMirrorPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $this->loader = new CompanionLoader();
+    global $dynTarget;
+    $director = new PersisterCompanionDirector();
+    $this->loader = new CompanionLoader($director, $dynTarget);
     $this->persister = $this->loader->get(
-      'zpt\dyn\orm\persister',
       'zpt\orm\test\mock\OneToManyMirrorEntity'
     );
   }
@@ -91,10 +93,7 @@ class OneToManyMirrorPersisterTest extends TestCase {
     }
 
     // Ensure that only 10 rhs entities have been created
-    $persister = $this->loader->get(
-      'zpt\dyn\orm\persister',
-      'zpt\orm\test\mock\ManyToOneMirrorEntity'
-    );
+    $persister = $this->loader->get('zpt\orm\test\mock\ManyToOneMirrorEntity');
     $rhs = $persister->retrieve();
     $this->assertEquals(10, count($rhs));
 
@@ -210,7 +209,6 @@ class OneToManyMirrorPersisterTest extends TestCase {
     $this->assertNull($this->persister->getById($id));
 
     $rhsPersister = $this->loader->get(
-      'zpt\dyn\orm\persister',
       'zpt\orm\test\mock\ManyToOneMirrorEntity'
     );
 

@@ -12,6 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
+namespace zpt\orm\companion;
 
 use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\ManyToManyMirrorLhsEntity;
@@ -50,8 +51,10 @@ class ManyToManyMirrorPersisterTest extends TestCase {
     $modelName = 'zpt\orm\test\mock\ManyToManyMirrorLhsEntity';
 
     // Instantiate a generated persister to test
-    $loader = new CompanionLoader();
-    $this->persister = $loader->get('zpt\dyn\orm\persister', $modelName);
+    global $dynTarget;
+    $director = new PersisterCompanionDirector();
+    $loader = new CompanionLoader($director, $dynTarget);
+    $this->persister = $loader->get($modelName);
   }
 
   /**

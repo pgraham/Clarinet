@@ -14,6 +14,7 @@
  */
 
 use \zpt\opal\CompanionLoader;
+use \zpt\orm\companion\TransformerCompanionDirector;
 use \zpt\orm\test\mock\SimpleEntity;
 use \zpt\orm\test\Generator;
 use \PHPUnit_Framework_TestCase as TestCase;
@@ -34,11 +35,10 @@ class TransformerTest extends TestCase {
   private $transformer;
 
   protected function setUp() {
-    $loader = new CompanionLoader();
-    $this->transformer = $loader->get(
-      'zpt\dyn\orm\transformer',
-      'zpt\orm\test\mock\SimpleEntity'
-    );
+    global $dynTarget;
+    $director = new TransformerCompanionDirector();
+    $loader = new CompanionLoader($director, $dynTarget);
+    $this->transformer = $loader->get('zpt\orm\test\mock\SimpleEntity');
   }
 
   public function testAsArray() {

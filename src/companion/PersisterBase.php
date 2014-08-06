@@ -14,7 +14,12 @@
  */
 namespace zpt\orm\companion;
 
-use \Psr\Log\NullLogger;
+use zpt\opal\CompanionAwareInterface;
+use zpt\opal\CompanionLoaderFactory;
+use zpt\orm\companion\PersisterCompanionDirector;
+use zpt\orm\companion\TransformerCompanionDirector;
+use zpt\orm\companion\ValidatorCompanionDirector;
+use Psr\Log\NullLogger;
 
 /**
  * Base class for persister companions.
@@ -22,7 +27,41 @@ use \Psr\Log\NullLogger;
  * @author Philip Graham <philip@zeptech.ca>
  */
 abstract class PersisterBase extends ModelCompanionBase
+	implements CompanionAwareInterface
 {
+
+	protected $persisterLoader;
+	protected $transformerLoader;
+	protected $validatorLoader;
+	protected $queryBuilderLoader;
+
+	/**
+	 * {@link CompanionAwareInterface#setCompanionLoaderFactory(CompanionLoaderFactory)}
+	 * implementation. Creates required {@link CompanionLoader}s.
+	 *
+	 * @param CompanionLoaderFactory $factory
+	 */
+	public function setCompanionLoaderFactory(CompanionLoaderFactory $factory) {
+		$persisterLoader = $factory->get(new PersisterCompanionDirector());
+		$transformerLoader = $factory->get(new TransformerCompanionDirector());
+		$validatorLoader = $factory->get(new ValidatorCompanionDirector());
+
+		$this->persisterLoader = $persisterLoader;
+		$this->transformerLoader = $transformerLoader;
+		$this->validatorLoader = $validatorLoader;
+	}
+
+	protected function getPersister($className) {
+		return $this->persisterLoader->get($className);
+	}
+
+	protected function getTransformer($className) {
+		return $this->transformerLoader->get($className);
+	}
+
+	protected function getValidator($className) {
+		return $this->validatorLoader->get($className);
+	}
 
 	protected function logQuery ($sql, $params) {
 		if ($this->logger === null) {

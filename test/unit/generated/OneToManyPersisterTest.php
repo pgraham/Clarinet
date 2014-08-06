@@ -12,6 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
+namespace zpt\orm\companion;
 
 use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\OneToManyEntity;
@@ -52,11 +53,10 @@ class OneToManyPersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $this->loader = new CompanionLoader();
-    $this->persister = $this->loader->get(
-      'zpt\dyn\orm\persister',
-      'zpt\orm\test\mock\OneToManyEntity'
-    );
+    global $dynTarget;
+    $director = new PersisterCompanionDirector();
+    $this->loader = new CompanionLoader($director, $dynTarget);
+    $this->persister = $this->loader->get('zpt\orm\test\mock\OneToManyEntity');
   }
 
   /**
@@ -196,14 +196,7 @@ class OneToManyPersisterTest extends TestCase {
     $retrieved = $this->persister->getById($id);
     $this->assertNull($retrieved);
 
-    $modelName = 'zpt\orm\test\mock\OneToManyRhs';
-    $actorName = str_replace('\\', '_', $modelName);
-    $className = "zpt\\dyn\orm\\persister\\" . $actorName;
-    $rhsPersister = new $className();
-    $rhsPersister = $this->loader->get(
-      'zpt\dyn\orm\persister',
-      'zpt\orm\test\mock\OneToManyRhs'
-    );
+    $rhsPersister = $this->loader->get('zpt\orm\test\mock\OneToManyRhs');
 
     $c = new Criteria();
     $c->addEquals('one_to_many_entity_id', $id);

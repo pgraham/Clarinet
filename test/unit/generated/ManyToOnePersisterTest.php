@@ -12,6 +12,7 @@
  *
  * @license http://www.opensource.org/licenses/bsd-license.php
  */
+namespace zpt\orm\companion;
 
 use \zpt\opal\CompanionLoader;
 use \zpt\orm\test\mock\SimpleEntity;
@@ -51,11 +52,10 @@ class ManyToOnePersisterTest extends TestCase {
     Db::setUp();
 
     // Instantiate a generated persister to test
-    $this->loader = new CompanionLoader();
-    $this->persister = $this->loader->get(
-      'zpt\dyn\orm\persister',
-      'zpt\orm\test\mock\ManyToOneEntity'
-    );
+    global $dynTarget;
+    $director = new PersisterCompanionDirector();
+    $this->loader = new CompanionLoader($director, $dynTarget);
+    $this->persister = $this->loader->get('zpt\orm\test\mock\ManyToOneEntity');
   }
 
   /**
