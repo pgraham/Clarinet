@@ -23,10 +23,6 @@ class ModelFactory
 	private $modelParser;
 
 	public function __construct(AnnotationFactory $annotationFactory = null) {
-		if ($annotationFactory === null) {
-			$annotationFactory = new AnnotationFactory();
-		}
-
 		$this->modelCache = new ModelCache();
 		$this->modelParser = new ModelParser($this->modelCache, $annotationFactory);
 	}
