@@ -15,6 +15,7 @@
 namespace zpt\orm;
 
 use \PDO;
+use \Exception;
 
 /**
  * This class decorates a PDO connection.
