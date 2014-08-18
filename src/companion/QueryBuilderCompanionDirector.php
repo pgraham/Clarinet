@@ -51,10 +51,6 @@ class QueryBuilderCompanionDirector extends BaseModelCompanionDirector
    * @return string The PHP code for a query builder.
    */
   protected function getValuesForModel(Model $model) {
-    $tmplValues = array(
-      'actor' => $model->getActor()
-    );
-
     $props = array();
     foreach ($model->getProperties() as $prop) {
       $props[] = array(
@@ -108,9 +104,9 @@ class QueryBuilderCompanionDirector extends BaseModelCompanionDirector
       $rels[] = $relVals;
     }
 
-    $tmplValues['properties'] = $props;
-    $tmplValues['relationships'] = $rels;
-
-    return $tmplValues;
+    return [
+      'properties' => $props,
+      'relationships' => $rels
+    ];
   }
 }
