@@ -35,6 +35,29 @@ abstract class PersisterBase extends ModelCompanionBase
 	protected $validatorLoader;
 	protected $queryBuilderLoader;
 
+	protected $cache = [];
+
+	/**
+	 * Clear the cache. If an id is provided, only the entity with the given id
+	 * is cleared.	This will happen when an entity at the many side of an
+	 * un-mirrored one-to-many relationship is updated to ensure that it does not
+	 * have a stale id for the one side of the relationship. The entire cache is
+	 * generally only cleared during testing.
+	 *
+	 * @param mixed $id
+	 */
+	public function clearCache($id = null) {
+		if ($id === null) {
+			$this->cache = array();
+		} else if (is_array($id)) {
+			foreach ($id as $idx) {
+				unset($this->cache[$idx]);
+			}
+		} else {
+			unset($this->cache[$id]);
+		}
+	}
+
 	/**
 	 * {@link CompanionAwareInterface#setCompanionLoaderFactory(CompanionLoaderFactory)}
 	 * implementation. Creates required {@link CompanionLoader}s.

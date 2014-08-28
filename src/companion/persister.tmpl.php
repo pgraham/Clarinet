@@ -33,12 +33,6 @@ class /*# companionClass */ extends PersisterBase
    */
   const CREATE_MARKER = 0;
 
-  /*
-   * Delete entities will have an index in the cache but the value will be
-   * null.
-   */
-  private $_cache = array();
-
   /* PDO Connection to the database in which entities are to be persisted. */
   private $_pdo = null;
 
@@ -77,27 +71,6 @@ class /*# companionClass */ extends PersisterBase
 
     $this->deleteSql = "DELETE FROM /*# table */ WHERE /*# id_column */ = :id";
     $this->_delete = $this->_pdo->prepare($this->deleteSql);
-  }
-
-  /**
-   * Clear the cache. If an id is provided, only the entity with the given id
-   * is cleared.  This will happen when an entity at the many side of an
-   * un-mirrored one-to-many relationship is updated to ensure that it does not
-   * have a stale id for the one side of the relationship.  The entire cache is
-   * generally only cleared during testing.
-   *
-   * @param mixed $id
-   */
-  public function clearCache($id = null) {
-    if ($id === null) {
-      $this->_cache = array();
-    } else if (is_array($id)) {
-      foreach ($id as $idx) {
-        unset($this->_cache[$idx]);
-      }
-    } else {
-      unset($this->_cache[$id]);
-    }
   }
 
   /**
@@ -196,8 +169,8 @@ class /*# companionClass */ extends PersisterBase
 
       $transformer = $this->getTransformer('/*# class */');
       $id = $transformer->idFromDb($this->_pdo->lastInsertId());
-      $model->set/*# id_property */($id);
-      $this->_cache[$id] = $model;
+      $model->set/*# id_property #*/($id);
+      $this->cache[$id] = $model;
 
       // TODO Figure out a way of getting sql into any exceptions
       $sql = null;
@@ -372,8 +345,8 @@ class /*# companionClass */ extends PersisterBase
         $model->onDelete();
       #}
 
-      $this->_cache[$id] = null;
-      $model->set/*# id_property */(null);
+      $this->cache[$id] = null;
+      $model->set/*# id_property #*/(null);
 
       if ($startTransaction) {
         $this->_pdo->commit();
@@ -397,7 +370,7 @@ class /*# companionClass */ extends PersisterBase
    * @return /*# class */
    */
   public function getById($id) {
-    if (!isset($this->_cache[$id])) {
+    if (!isset($this->cache[$id])) {
       $c = new Criteria();
       $c->addEquals('/*# id_column */', $id);
 
@@ -405,11 +378,11 @@ class /*# companionClass */ extends PersisterBase
       // populate the cache
       $this->retrieve($c);
 
-      if (!isset($this->_cache[$id])) {
+      if (!isset($this->cache[$id])) {
         return null;
       }
     }
-    return $this->_cache[$id];
+    return $this->cache[$id];
   }
 
   /**
@@ -471,8 +444,8 @@ class /*# companionClass */ extends PersisterBase
         $id = $transformer->idFromDb($row['/*# id_column */']);
 
         // Don't allow two instances for the same id to be created
-        if (isset($this->_cache[$id])) {
-          $result[] = $this->_cache[$id];
+        if (isset($this->cache[$id])) {
+          $result[] = $this->cache[$id];
           continue;
         }
 
@@ -482,7 +455,7 @@ class /*# companionClass */ extends PersisterBase
         // Cache the instance before populating any relationships in order to
         // prevent inifinite loops when loading models that have a
         // relationship that is declared on both sides
-        $this->_cache[$id] = $model;
+        $this->cache[$id] = $model;
 
         // Populate the model's properties
         #{ each properties as prop
