@@ -14,6 +14,7 @@
  */
 namespace zpt\orm\companion;
 
+use zpt\db\DatabaseConnection;
 use zpt\opal\CompanionAwareInterface;
 use zpt\opal\CompanionLoaderFactory;
 use zpt\orm\companion\PersisterCompanionDirector;
@@ -35,7 +36,19 @@ abstract class PersisterBase extends ModelCompanionBase
 	protected $validatorLoader;
 	protected $queryBuilderLoader;
 
+	/**
+	 * Pool of cached entities.
+	 */
 	protected $cache = [];
+
+	/**
+	 * {@link DatabaseConnection} to the database in which entities are persisted.
+	 */
+	protected $db;
+
+	public function __construct(DatabaseConnection $db) {
+		$this->db = $db;
+	}
 
 	/**
 	 * Clear the cache. If an id is provided, only the entity with the given id

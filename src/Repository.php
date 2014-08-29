@@ -48,7 +48,8 @@ class Repository
 	}
 
 	public function getPersister($model) {
-		return $this->persisterLdr->get($model);
+		$persister = $this->persisterLdr->get($model, $this->db);
+		return $persister;
 	}
 
 	public function getTransformer($model) {
