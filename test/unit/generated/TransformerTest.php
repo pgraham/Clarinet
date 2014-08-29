@@ -36,8 +36,7 @@ class TransformerTest extends TestCase {
 
   protected function setUp() {
     global $dynTarget;
-    $director = new TransformerCompanionDirector();
-    $loader = new CompanionLoader($director, $dynTarget);
+    $loader = new CompanionLoader('transformer', $dynTarget);
     $this->transformer = $loader->get('zpt\orm\test\mock\SimpleEntity');
   }
 

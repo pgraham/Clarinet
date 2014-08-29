@@ -30,7 +30,7 @@ require_once __DIR__ . '/../../setup.php';
  * @author Philip Graham <philip@zeptech.ca>
  */
 class ManyToOnePersisterTest extends TestCase {
-  
+
   /*
    * Suite wide setUp, ensures all Mock classes have had their actor's
    * generated.
@@ -53,8 +53,7 @@ class ManyToOnePersisterTest extends TestCase {
 
     // Instantiate a generated persister to test
     global $dynTarget;
-    $director = new PersisterCompanionDirector();
-    $this->loader = new CompanionLoader($director, $dynTarget);
+    $this->loader = new CompanionLoader('persister', $dynTarget);
     $this->persister = $this->loader->get('zpt\orm\test\mock\ManyToOneEntity');
   }
 
@@ -114,7 +113,7 @@ class ManyToOnePersisterTest extends TestCase {
 
     $retrieved = $this->persister->getById($manyId);
     $this->assertEquals('ManyEntity', $retrieved->getName());
-    
+
     $retrievedOne = $retrieved->getOne();
     $this->assertNotNull($retrievedOne);
     $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $retrievedOne);

@@ -54,8 +54,7 @@ class OneToManyPersisterTest extends TestCase {
 
     // Instantiate a generated persister to test
     global $dynTarget;
-    $director = new PersisterCompanionDirector();
-    $this->loader = new CompanionLoader($director, $dynTarget);
+    $this->loader = new CompanionLoader('persister', $dynTarget);
     $this->persister = $this->loader->get('zpt\orm\test\mock\OneToManyEntity');
   }
 

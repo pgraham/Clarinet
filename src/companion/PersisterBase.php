@@ -65,9 +65,9 @@ abstract class PersisterBase extends ModelCompanionBase
 	 * @param CompanionLoaderFactory $factory
 	 */
 	public function setCompanionLoaderFactory(CompanionLoaderFactory $factory) {
-		$persisterLoader = $factory->get(new PersisterCompanionDirector());
-		$transformerLoader = $factory->get(new TransformerCompanionDirector());
-		$validatorLoader = $factory->get(new ValidatorCompanionDirector());
+		$persisterLoader = $factory->get('persister');
+		$transformerLoader = $factory->get('transformer');
+		$validatorLoader = $factory->get('validator');
 
 		$this->persisterLoader = $persisterLoader;
 		$this->transformerLoader = $transformerLoader;

@@ -60,14 +60,17 @@ class Generator {
     }
 
     $persisterGen = new CompanionGenerator(
+      'persister',
       new PersisterCompanionDirector(self::$modelFactory),
       $target
     );
     $transformerGen = new CompanionGenerator(
+      'transformer',
       new TransformerCompanionDirector(self::$modelFactory),
       $target
     );
     $validatorGen = new CompanionGenerator(
+      'validator',
       new ValidatorCompanionDirector(self::$modelFactory),
       $target
     );
