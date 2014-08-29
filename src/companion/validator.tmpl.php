@@ -47,9 +47,9 @@ class /*# companionClass */ {
       }
 
       #{ if prop[values] ISSET
-        $accepted = array("/*# join:prop[values]:"," */");
+        $accepted = array("/*# join(","):prop[values] */");
         if (!in_array($val, $accepted)) {
-          return "$val is not an accepted value for /*# prop[name] */. Accepted values are: /*# join:prop[values]:, */";
+          return "$val is not an accepted value for /*# prop[name] */. Accepted values are: /*# join(,):prop[values] */";
         }
       #{ elseif prop[type] = email
         if (!filter_var($val, FILTER_VALIDATE_EMAIL)) {

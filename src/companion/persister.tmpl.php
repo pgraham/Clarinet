@@ -56,13 +56,13 @@ class /*# companionClass */ extends PersisterBase
 
     $this->createSql =
       "INSERT INTO /*# table */
-       (/*# join:column_names:, */) VALUES (/*# join:value_names:, */)";
-    $this->_create = $this->_pdo->prepare($this->createSql);
+       (/*# join(,):column_names */) VALUES (/*# join(,):value_names */)";
+    $this->_create = $this->db->prepare($this->createSql);
 
     #{ if has_update
       $this->updateSql =
         "UPDATE /*# table */
-         SET /*# join:sql_setters:, */
+         SET /*# join(,):sql_setters */
          WHERE /*# id_column */ = :id";
       $this->_update = $this->_pdo->prepare($this->updateSql);
     #{ else
