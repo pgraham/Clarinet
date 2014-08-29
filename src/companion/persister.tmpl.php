@@ -17,7 +17,7 @@ use \PDOException;
  * Instead, modify the model class of this persister, then run the clarinet
  * generator to re-generate this file.
  */
-class /*# companionClass */ extends PersisterBase
+class /*# companionClass #*/ extends PersisterBase
 {
 
   /**
@@ -55,21 +55,21 @@ class /*# companionClass */ extends PersisterBase
     $this->_pdo = PdoWrapper::get();
 
     $this->createSql =
-      "INSERT INTO /*# table */
-       (/*# join:column_names:, */) VALUES (/*# join:value_names:, */)";
+      "INSERT INTO /*# table #*/
+       (/*# join(,):column_names #*/) VALUES (/*# join(,):value_names #*/)";
     $this->_create = $this->_pdo->prepare($this->createSql);
 
     #{ if has_update
       $this->updateSql =
-        "UPDATE /*# table */
-         SET /*# join:sql_setters:, */
-         WHERE /*# id_column */ = :id";
+        "UPDATE /*# table #*/
+         SET /*# join(,):sql_setters #*/
+         WHERE /*# id_column #*/ = :id";
       $this->_update = $this->_pdo->prepare($this->updateSql);
     #{ else
       $this->_update = null;
     #}
 
-    $this->deleteSql = "DELETE FROM /*# table */ WHERE /*# id_column */ = :id";
+    $this->deleteSql = "DELETE FROM /*# table #*/ WHERE /*# id_column #*/ = :id";
     $this->_delete = $this->_pdo->prepare($this->deleteSql);
   }
 
@@ -85,7 +85,7 @@ class /*# companionClass */ extends PersisterBase
     }
 
     if ($c->getTable() === null) {
-      $c->setTable('/*# table */');
+      $c->setTable('/*# table #*/');
     }
 
 
@@ -106,7 +106,7 @@ class /*# companionClass */ extends PersisterBase
     } catch (PDOException $e) {
       // TODO - Create a PDOExceptionWrapper that parses the error message in
       //        order to present an error suitable for users
-      $e = new PdoExceptionWrapper($e, '/*# class */');
+      $e = new PdoExceptionWrapper($e, '/*# class #*/');
       $e->setSql($sql, $params);
       throw $e;
     }
@@ -117,15 +117,15 @@ class /*# companionClass */ extends PersisterBase
    *
    * @param ${class} $model
    */
-  public function create(\/*# class */ $model) {
+  public function create(\/*# class #*/ $model) {
     $validator = $this->getValidator('/*# class #*/');
 
     if (!$validator->validate($model, $e)) {
       throw $e;
     }
 
-    if ($model->get/*# id_property */() !== null) {
-      return $model->get/*# id_property */();
+    if ($model->get/*# id_property #*/() !== null) {
+      return $model->get/*# id_property #*/();
     }
 
     #{ if beforeCreate
@@ -135,30 +135,30 @@ class /*# companionClass */ extends PersisterBase
     try {
       $startTransaction = $this->_pdo->beginTransaction();
 
-      $model->set/*# id_property */(self::CREATE_MARKER);
+      $model->set/*# id_property #*/(self::CREATE_MARKER);
 
       $params = Array();
       #{ each properties as prop
-        #{ if prop[type] = boolean
-          $params['/*# prop[col] */'] = $model->get/*# prop[name] */() ? 1 : 0;
+        #{ if prop[type] = 'boolean'
+          $params['/*# prop[col] #*/'] = $model->get/*# prop[name] #*/() ? 1 : 0;
         #{ else
-          $params['/*# prop[col] */'] = $model->get/*# prop[name] */();
+          $params['/*# prop[col] #*/'] = $model->get/*# prop[name] #*/();
         #}
       #}
 
       #{ each relationships as rel
-        #{ if rel[type] = many-to-one
-          // Populate /*# rel[rhs] */ parameter --------------------------------
-          $rhs = $model->get/*# rel[lhsProperty] */();
+        #{ if rel[type] = 'many-to-one'
+          // Populate /*# rel[rhs] #*/ parameter --------------------------------
+          $rhs = $model->get/*# rel[lhsProperty] #*/();
           $rhsId = null;
           if ($rhs !== null) {
-            $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
+            $rhsId = $rhs->get/*# rel[rhsIdProperty] #*/();
             if ($rhsId === null) {
-              $persister = $this->getPersister('/*# rel[rhs] */');
+              $persister = $this->getPersister('/*# rel[rhs] #*/');
               $rhsId = $persister->create($rhs);
             }
           }
-          $params[':/*# rel[lhsColumn] */'] = $rhsId;
+          $params[':/*# rel[lhsColumn] #*/'] = $rhsId;
           // -------------------------------------------------------------------
         #}
       #}
@@ -167,7 +167,7 @@ class /*# companionClass */ extends PersisterBase
       $this->logQuery($sql, $params);
       $this->_create->execute($params);
 
-      $transformer = $this->getTransformer('/*# class */');
+      $transformer = $this->getTransformer('/*# class #*/');
       $id = $transformer->idFromDb($this->_pdo->lastInsertId());
       $model->set/*# id_property #*/($id);
       $this->cache[$id] = $model;
@@ -177,9 +177,9 @@ class /*# companionClass */ extends PersisterBase
       $params = null;
 
       #{ each collections as col
-        $this->insertCollection_/*# col[property] */(
+        $this->insertCollection_/*# col[property] #*/(
           $id,
-          $model->get/*# col[property] */()
+          $model->get/*# col[property] #*/()
         );
       #}
 
@@ -187,45 +187,45 @@ class /*# companionClass */ extends PersisterBase
       $saveLock->lock($model);
 
       #{ each relationships as rel
-        // Save related /*# rel[rhs] */ entities -------------------------------
-        $persister = $this->getPersister('/*# rel[rhs] */');
+        // Save related /*# rel[rhs] #*/ entities -------------------------------
+        $persister = $this->getPersister('/*# rel[rhs] #*/');
 
-        $related = $model->get/*# rel[lhsProperty] */();
-        #{ if rel[type] = many-to-many
+        $related = $model->get/*# rel[lhsProperty] #*/();
+        #{ if rel[type] = 'many-to-many'
           // If any of the related entities are new, save them to ensure that
           // they have an id, then update them.
           if ($related !== null) {
             foreach($related AS $rel) {
-              if ($rel->get/*# rel[rhsIdProperty] */() === null) {
+              if ($rel->get/*# rel[rhsIdProperty] #*/() === null) {
                 $persister->save($rel);
               }
             }
           }
 
           // Delete all link entries for this entity
-          $sql = "DELETE FROM /*# rel[linkTable] */
-                  WHERE /*# rel[lhsLinkColumn] */ = :id";
+          $sql = "DELETE FROM /*# rel[linkTable] #*/
+                  WHERE /*# rel[lhsLinkColumn] #*/ = :id";
           $params = array('id' => $id);
           $this->logQuery($sql, $params);
           $this->_pdo->prepare($sql)->execute($params);
 
           // Create new link entries for all related entities
           if ($related !== null) {
-            $sql = "INSERT INTO /*# rel[linkTable] */
-                    (/*# rel[lhsLinkColumn] */, /*# rel[rhsLinkColumn] */)
+            $sql = "INSERT INTO /*# rel[linkTable] #*/
+                    (/*# rel[lhsLinkColumn] #*/, /*# rel[rhsLinkColumn] #*/)
                     VALUES (:lhsId, :rhsId)";
             $createStmt = $this->_pdo->prepare($sql);
             foreach ($related AS $rel) {
               $params = array(
                 'lhsId' => $id,
-                'rhsId' => $rel->get/*# rel[rhsIdProperty] */()
+                'rhsId' => $rel->get/*# rel[rhsIdProperty] #*/()
               );
               $this->logQuery($sql, $params);
               $createStmt->execute($params);
             }
           }
 
-        #{ elseif rel[type] = one-to-many
+        #{ elseif rel[type] = 'one-to-many'
           if ($related === null) {
             $related = array();
           }
@@ -233,31 +233,31 @@ class /*# companionClass */ extends PersisterBase
           // Update or save the collection
           #{ if rel[mirrored]
            foreach ($related AS $rel) {
-             $rel->set/*# rel[rhsProperty] */($model);
+             $rel->set/*# rel[rhsProperty] #*/($model);
              $persister->save($rel);
            }
           #{ else
             foreach ($related AS $rel) {
-              if ($rel->get/*# rel[rhsIdProperty] */() === null) {
+              if ($rel->get/*# rel[rhsIdProperty] #*/() === null) {
                 $persister->create($rel);
               }
             }
 
-            $sql = "UPDATE /*# rel[rhsTable] */
-                    SET /*# rel[rhsColumn] */ = :id
-                    WHERE /*# rel[rhsIdColumn] */ = :relId";
+            $sql = "UPDATE /*# rel[rhsTable] #*/
+                    SET /*# rel[rhsColumn] #*/ = :id
+                    WHERE /*# rel[rhsIdColumn] #*/ = :relId";
             $updateStmt = $this->_pdo->prepare($sql);
 
             foreach ($related AS $rel) {
               $params = array(
                 'id' => $id,
-                'relId' => $rel->get/*# rel[rhsIdProperty] */()
+                'relId' => $rel->get/*# rel[rhsIdProperty] #*/()
               );
               $this->logQuery($sql, $params);
               $updateStmt->execute($params);
 
               // Clear the cache of the RHS entity as it may contain a stale id
-              $persister->clearCache($rel->get/*# rel[rhsIdProperty] */());
+              $persister->clearCache($rel->get/*# rel[rhsIdProperty] #*/());
             }
           #}
         #}
@@ -277,13 +277,13 @@ class /*# companionClass */ extends PersisterBase
       return $id;
     } catch (PDOException $e) {
       $this->_pdo->rollback();
-      $model->set/*# id_property */(null);
+      $model->set/*# id_property #*/(null);
 
       if (isset($saveLock)) {
         $saveLock->forceRelease();
       }
 
-      $e = new PdoExceptionWrapper($e, '/*# class */');
+      $e = new PdoExceptionWrapper($e, '/*# class #*/');
       $e->setSql($sql, $params);
       throw $e;
     }
@@ -292,12 +292,12 @@ class /*# companionClass */ extends PersisterBase
   /**
    * Delete the given entity.
    *
-   * @param ${class} $model
+   * @param /*# class #*/ $model
    */
-  public function delete(\/*# class */ $model) {
-    $id = $model->get/*# id_property */();
+  public function delete(\/*# class #*/ $model) {
+    $id = $model->get/*# id_property #*/();
     if ($id === null) {
-      throw new Exception("Can't delete /*# class_str */ because it does not have an id");
+      throw new Exception("Can't delete /*# class_str #*/ because it does not have an id");
     }
 
     $params = array();
@@ -316,22 +316,22 @@ class /*# companionClass */ extends PersisterBase
       $rowCount = $this->_delete->rowCount();
 
       #{ each collections as col
-        $this->removeCollection_/*# col[property] */($id);
+        $this->removeCollection_/*# col[property] #*/($id);
       #}
 
       #{ each relationships AS rel
         // ---------------------------------------------------------------------
-        // Delete related /*# rel[rhs] */ entities
-        #{ if rel[type] = one-to-many
-          $persister = $this->getPersister('/*# rel[rhs] */');
-          $related = $model->get/*# rel[lhsProperty] */();
+        // Delete related /*# rel[rhs] #*/ entities
+        #{ if rel[type] = 'one-to-many'
+          $persister = $this->getPersister('/*# rel[rhs] #*/');
+          $related = $model->get/*# rel[lhsProperty] #*/();
           foreach ($related AS $rel) {
             $persister->delete($rel);
           }
 
-        #{ elseif rel[type] = many-to-many
-          $sql = 'DELETE FROM /*# rel[linkTable] */
-                  WHERE /*# rel[lhsLinkColumn] */ = :id';
+        #{ elseif rel[type] = 'many-to-many'
+          $sql = 'DELETE FROM /*# rel[linkTable] #*/
+                  WHERE /*# rel[lhsLinkColumn] #*/ = :id';
           $params = array('id' => $id);
           $deleteStmt = $this->_pdo->prepare($sql);
           $this->logQuery($sql, $params);
@@ -356,7 +356,7 @@ class /*# companionClass */ extends PersisterBase
     } catch (PDOException $e) {
       $this->_pdo->rollback();
 
-      $e = new PdoExceptionWrapper($e, '/*# class */');
+      $e = new PdoExceptionWrapper($e, '/*# class #*/');
       $e->setSql($sql, $params);
       throw $e;
     }
@@ -367,12 +367,12 @@ class /*# companionClass */ extends PersisterBase
    * then null is returned.
    *
    * @param integer $id
-   * @return /*# class */
+   * @return /*# class #*/
    */
   public function getById($id) {
     if (!isset($this->cache[$id])) {
       $c = new Criteria();
-      $c->addEquals('/*# id_column */', $id);
+      $c->addEquals('/*# id_column #*/', $id);
 
       // We don't care about the result since the retrieve method will
       // populate the cache
@@ -392,7 +392,7 @@ class /*# companionClass */ extends PersisterBase
    * is returned
    *
    * @param Criteria $c Criteria that will result in a single entity
-   * @return /*# class */
+   * @return /*# class #*/
    * @throws Exception if the criteria results in more than one entity.
    */
   public function retrieveOne(Criteria $c) {
@@ -421,7 +421,7 @@ class /*# companionClass */ extends PersisterBase
     }
 
     if ($c->getTable() === null) {
-      $c->setTable('/*# table */');
+      $c->setTable('/*# table #*/');
     }
 
 
@@ -438,10 +438,10 @@ class /*# companionClass */ extends PersisterBase
       $this->logQuery($sql, $params);
       $stmt->execute($params);
 
-      $transformer = $this->getTransformer('/*# class */');
+      $transformer = $this->getTransformer('/*# class #*/');
       $result = array();
       foreach ($stmt AS $row) {
-        $id = $transformer->idFromDb($row['/*# id_column */']);
+        $id = $transformer->idFromDb($row['/*# id_column #*/']);
 
         // Don't allow two instances for the same id to be created
         if (isset($this->cache[$id])) {
@@ -449,8 +449,8 @@ class /*# companionClass */ extends PersisterBase
           continue;
         }
 
-        $model = new \/*# class */();
-        $model->set/*# id_property */($id);
+        $model = new \/*# class #*/();
+        $model->set/*# id_property #*/($id);
 
         // Cache the instance before populating any relationships in order to
         // prevent inifinite loops when loading models that have a
@@ -459,14 +459,14 @@ class /*# companionClass */ extends PersisterBase
 
         // Populate the model's properties
         #{ each properties as prop
-          #{ if prop[type] = boolean
-          $model->set/*# prop[name] */($row['/*# prop[col] */'] == 1 ? true : false);
+          #{ if prop[type] = 'boolean'
+          $model->set/*# prop[name] #*/($row['/*# prop[col] #*/'] == 1 ? true : false);
 
-          #{ elseif prop[type] = integer
-          $model->set/*# prop[name] */((int) $row['/*# prop[col] */']);
+          #{ elseif prop[type] = 'integer'
+          $model->set/*# prop[name] #*/((int) $row['/*# prop[col] #*/']);
 
           #{ else
-            $model->set/*# prop[name] */($row['/*# prop[col] */']);
+            $model->set/*# prop[name] #*/($row['/*# prop[col] #*/']);
 
           #}
         #}
@@ -476,50 +476,50 @@ class /*# companionClass */ extends PersisterBase
         $params = null;
         #{ each collections as col
           // TODO Figure out a way of getting SQL into any exceptions
-          $this->retrieveCollection_/*# col[property] */($id, $model);
+          $this->retrieveCollection_/*# col[property] #*/($id, $model);
         #}
 
         // Populate any relationships
         #{ each relationships as rel
           // -------------------------------------------------------------------
-          // Populate the /*# rel[rhs] */
-          #{ if rel[type] = one-to-many
+          // Populate the /*# rel[rhs] #*/
+          #{ if rel[type] = 'one-to-many'
             $c = new Criteria();
-            $c->addEquals('/*# rel[rhsColumn] */', $id);
+            $c->addEquals('/*# rel[rhsColumn] #*/', $id);
             #{ if rel[orderByCol] ISSET
-              $c->addSort('/*# rel[orderByCol] */', '/*# rel[orderByDir] */');
+              $c->addSort('/*# rel[orderByCol] #*/', '/*# rel[orderByDir] #*/');
             #{ else
-              $c->addSort('/*# rel[rhsIdProperty] */', 'asc');
+              $c->addSort('/*# rel[rhsIdProperty] #*/', 'asc');
             #}
 
-            $persister = $this->getPersister('/*# rel[rhs] */');
+            $persister = $this->getPersister('/*# rel[rhs] #*/');
             $related = $persister->retrieve($c);
-            $model->set/*# rel[lhsProperty] */($related);
+            $model->set/*# rel[lhsProperty] #*/($related);
 
-          #{ elseif rel[type] = many-to-many
+          #{ elseif rel[type] = 'many-to-many'
             $c = new Criteria();
-            $c->addSelect('/*# rel[rhsTable] */.*');
-            $c->addInnerJoin('/*# rel[linkTable] */', '/*# rel[rhsIdColumn] */', '/*# rel[rhsLinkColumn] */');
-            $c->addEquals('/*# rel[lhsLinkColumn] */', $id);
+            $c->addSelect('/*# rel[rhsTable] #*/.*');
+            $c->addInnerJoin('/*# rel[linkTable] #*/', '/*# rel[rhsIdColumn] #*/', '/*# rel[rhsLinkColumn] #*/');
+            $c->addEquals('/*# rel[lhsLinkColumn] #*/', $id);
             #{ if rel[orderByCol] ISSET
-              $c->addSort('/*# rel[orderByCol] */', '/*# rel[orderByDir] */');
+              $c->addSort('/*# rel[orderByCol] #*/', '/*# rel[orderByDir] #*/');
             #}
 
-            $persister = $this->getPersister('/*# rel[rhs] */');
+            $persister = $this->getPersister('/*# rel[rhs] #*/');
             $related = $persister->retrieve($c);
-            $model->set/*# rel[lhsProperty] */($related);
+            $model->set/*# rel[lhsProperty] #*/($related);
 
-          #{ elseif rel[type] = many-to-one
-            $relId = $row['/*# rel[lhsColumn] */'];
+          #{ elseif rel[type] = 'many-to-one'
+            $relId = $row['/*# rel[lhsColumn] #*/'];
             if ($relId !== null) {
-              $persister = $this->getPersister('/*# rel[rhs] */');
+              $persister = $this->getPersister('/*# rel[rhs] #*/');
               $related = $persister->getById($relId);
 
               if ($related === null) {
-                throw new Exception("No /*# rel[rhsStr] */ with id $relId.");
+                throw new Exception("No /*# rel[rhsStr] #*/ with id $relId.");
               }
 
-              $model->set/*# rel[lhsProperty] */($related);
+              $model->set/*# rel[lhsProperty] #*/($related);
             }
 
           #}
@@ -531,7 +531,7 @@ class /*# companionClass */ extends PersisterBase
 
       return $result;
     } catch (PDOException $e) {
-      $e = new PdoExceptionWrapper($e, '/*# class */');
+      $e = new PdoExceptionWrapper($e, '/*# class #*/');
       $e->setSql($sql, $params);
       throw $e;
     }
@@ -543,8 +543,8 @@ class /*# companionClass */ extends PersisterBase
    *
    * @param ${class} $model
    */
-  public function save(\/*# class */ $model) {
-    $id = $model->get/*# id_property */();
+  public function save(\/*# class #*/ $model) {
+    $id = $model->get/*# id_property #*/();
     if ($id === null) {
       $this->create($model);
     } else {
@@ -557,17 +557,17 @@ class /*# companionClass */ extends PersisterBase
    *
    * @param ${class} $model
    */
-  public function update(\/*# class */ $model) {
-    $id = $model->get/*# id_property */();
+  public function update(\/*# class #*/ $model) {
+    $id = $model->get/*# id_property #*/();
     if ($id === null) {
-      throw new Exception("Can't update /*# class_str */ because it does not have an id");
+      throw new Exception("Can't update /*# class_str #*/ because it does not have an id");
     }
 
     if (SaveLock::isLocked($model)) {
       return;
     }
 
-    $validator = $this->getValidator('/*# class */');
+    $validator = $this->getValidator('/*# class #*/');
     if (!$validator->validate($model, $e)) {
       throw $e;
     }
@@ -585,27 +585,27 @@ class /*# companionClass */ extends PersisterBase
       $params = Array();
       $params[':id'] = $id;
       #{ each properties as prop
-        #{ if prop[type] = boolean
-          $params[':/*# prop[col] */'] = $model->get/*# prop[name] */() ? 1 : 0;
+        #{ if prop[type] = 'boolean'
+          $params[':/*# prop[col] #*/'] = $model->get/*# prop[name] #*/() ? 1 : 0;
         #{ else
-          $params[':/*# prop[col] */'] = $model->get/*# prop[name] */();
+          $params[':/*# prop[col] #*/'] = $model->get/*# prop[name] #*/();
         #}
       #}
 
       #{ each relationships as rel
 
-        #{ if rel[type] = many-to-one
-          // Populate /*# rel[rhs] */ parameter
-          $rhs = $model->get/*# rel[lhsProperty] */();
+        #{ if rel[type] = 'many-to-one'
+          // Populate /*# rel[rhs] #*/ parameter
+          $rhs = $model->get/*# rel[lhsProperty] #*/();
           $rhsId = null;
           if ($rhs !== null) {
-            $rhsId = $rhs->get/*# rel[rhsIdProperty] */();
+            $rhsId = $rhs->get/*# rel[rhsIdProperty] #*/();
             if ($rhsId === null) {
-              $persister = $this->getPersister('/*# rel[rhs] */');
+              $persister = $this->getPersister('/*# rel[rhs] #*/');
               $rhsId = $persister->create($rhs);
             }
           }
-          $params[':/*# rel[lhsColumn] */'] = $rhsId;
+          $params[':/*# rel[lhsColumn] #*/'] = $rhsId;
         #}
 
       #}
@@ -623,30 +623,30 @@ class /*# companionClass */ extends PersisterBase
       $sql = null;
       $params = null;
       #{ each collections as col
-          $this->removeCollection_/*# col[property] */($id);
-          $this->insertCollection_/*# col[property] */($id, $model->get/*# col[property] */());
+          $this->removeCollection_/*# col[property] #*/($id);
+          $this->insertCollection_/*# col[property] #*/($id, $model->get/*# col[property] #*/());
       #}
 
 
       #{ each relationships as rel
         // ---------------------------------------------------------------------
-        // Save related /*# rel[rhs] */ entities
-        $persister = $this->getPersister('/*# rel[rhs] */');
+        // Save related /*# rel[rhs] #*/ entities
+        $persister = $this->getPersister('/*# rel[rhs] #*/');
 
-        #{ if rel[type] = many-to-many
+        #{ if rel[type] = 'many-to-many'
           // If any of the related entities are new, save them to ensure that
           // they have an id, then update them.
-          $related = $model->get/*# rel[lhsProperty] */();
+          $related = $model->get/*# rel[lhsProperty] #*/();
           if ($related !== null) {
             foreach($related AS $rel) {
-              if ($rel->get/*# rel[rhsIdProperty] */() === null) {
+              if ($rel->get/*# rel[rhsIdProperty] #*/() === null) {
                 $persister->save($rel);
               }
             }
           }
 
           // Delete all link entries for this entity
-          $sql = "DELETE FROM /*# rel[linkTable] */ WHERE /*# rel[lhsLinkColumn] */ = :id";
+          $sql = "DELETE FROM /*# rel[linkTable] #*/ WHERE /*# rel[lhsLinkColumn] #*/ = :id";
           $params = array('id' => $id);
           $deleteStmt = $this->_pdo->prepare($sql);
           $this->logQuery($sql, $params);
@@ -654,7 +654,7 @@ class /*# companionClass */ extends PersisterBase
 
           // Create new link entries for all related entities
           if ($related !== null) {
-            $sql = "INSERT INTO /*# rel[linkTable] */ (/*# rel[lhsLinkColumn] */, /*# rel[rhsLinkColumn] */) VALUES (:lhsId, :rhsId)";
+            $sql = "INSERT INTO /*# rel[linkTable] #*/ (/*# rel[lhsLinkColumn] #*/, /*# rel[rhsLinkColumn] #*/) VALUES (:lhsId, :rhsId)";
             $createStmt = $this->_pdo->prepare($sql);
             foreach ($related AS $rel) {
               $params = array(
@@ -666,7 +666,7 @@ class /*# companionClass */ extends PersisterBase
             }
           }
 
-        #{ elseif rel[type] = one-to-many
+        #{ elseif rel[type] = 'one-to-many'
           $related = $model->get/*# rel[lhsProperty] #*/();
           if ($related === null) {
             $related = array();
@@ -678,7 +678,7 @@ class /*# companionClass */ extends PersisterBase
           }
 
           $c = new Criteria();
-          $c->addEquals('/*# rel[rhsColumn] */', $id);
+          $c->addEquals('/*# rel[rhsColumn] #*/', $id);
           $current = $persister->retrieve($c);
 
           // Update or save the collection
@@ -706,30 +706,30 @@ class /*# companionClass */ extends PersisterBase
             foreach ($related AS $rel) {
               $params = array(
                 'id' => $id,
-                'relId' => $rel->get/*# rel[rhsIdProperty] */()
+                'relId' => $rel->get/*# rel[rhsIdProperty] #*/()
               );
               $this->logQuery($sql, $params);
               $updateStmt->execute($params);
 
               // Clear the cache of the RHS entity as it may contain a stale id
-              $persister->clearCache($rel->get/*# rel[rhsIdProperty] */());
+              $persister->clearCache($rel->get/*# rel[rhsIdProperty] #*/());
             }
 
             #{ if rel[deleteOrphan]
-              $sql = "DELETE FROM /*# rel[rhsTable] */ WHERE /*# rel[rhsIdColumn] */ = :relId";
+              $sql = "DELETE FROM /*# rel[rhsTable] #*/ WHERE /*# rel[rhsIdColumn] #*/ = :relId";
               $orphanStmt = $this->_pdo->prepare($sql);
             #{ else
-              $sql = "UPDATE /*# rel[rhsTable] */ SET /*# rel[rhsColumn] */ = null WHERE /*# rel[rhsIdColumn] */ = :relId";
+              $sql = "UPDATE /*# rel[rhsTable] #*/ SET /*# rel[rhsColumn] #*/ = null WHERE /*# rel[rhsIdColumn] #*/ = :relId";
               $orphanStmt = $this->_pdo->prepare($sql);
             #}
             foreach ($current AS $cur) {
-              if (!in_array($cur->get/*# rel[rhsIdProperty] */(), $relIds)) {
-                $params = array('relId' => $cur->get/*# rel[rhsIdProperty] */());
+              if (!in_array($cur->get/*# rel[rhsIdProperty] #*/(), $relIds)) {
+                $params = array('relId' => $cur->get/*# rel[rhsIdProperty] #*/());
                 $this->logQuery($sql, $params);
                 $orphanStmt->execute($params);
               }
 
-              $persister->clearCache($rel->get/*# rel[rhsIdProperty] */());
+              $persister->clearCache($rel->get/*# rel[rhsIdProperty] #*/());
             }
           #}
         #}
@@ -756,7 +756,7 @@ class /*# companionClass */ extends PersisterBase
       $this->_pdo->rollback();
       $saveLock->forceRelease();
 
-      $e = new PdoExceptionWrapper($e, '/*# class */');
+      $e = new PdoExceptionWrapper($e, '/*# class #*/');
       $e->setSql($sql, $params);
       throw $e;
     }
@@ -770,8 +770,8 @@ class /*# companionClass */ extends PersisterBase
 
   #-- Create methods for removing each of the model's collections
   #{ each collections as col
-    private function removeCollection_/*# col[property] */($id) {
-      $sql = 'DELETE FROM /*# col[link] */ WHERE /*# col[idCol] */ = :id';
+    private function removeCollection_/*# col[property] #*/($id) {
+      $sql = 'DELETE FROM /*# col[link] #*/ WHERE /*# col[idCol] #*/ = :id';
       $params = array('id' => $id);
       $this->logQuery($sql, $params);
       $this->_pdo->prepare($sql)->execute($params);
@@ -780,11 +780,11 @@ class /*# companionClass */ extends PersisterBase
 
   #-- Create methods for persisting each of the model's collections
   #{ each collections as col
-    private function insertCollection_/*# col[property] */($id, $collection) {
-      #{ if col[type] = set
+    private function insertCollection_/*# col[property] #*/($id, $collection) {
+      #{ if col[type] = 'set'
         $sql =
-          "INSERT INTO /*# col[link] */
-           (/*# collection[idCol] */, /*# col[valCol] */)
+          "INSERT INTO /*# col[link] #*/
+           (/*# collection[idCol] #*/, /*# col[valCol] #*/)
            VALUES (:id, :val)";
         $stmt = $this->_pdo->prepare($sql);
 
@@ -798,10 +798,10 @@ class /*# companionClass */ extends PersisterBase
           $stmt->execute($params);
         }
 
-      #{ elseif col[type] = list
+      #{ elseif col[type] = 'list'
         $sql =
-          "INSERT INTO /*# col[link] */
-           (/*# col[idCol] */, /*# col[valCol] */, /*# col[seqCol] */)
+          "INSERT INTO /*# col[link] #*/
+           (/*# col[idCol] #*/, /*# col[valCol] #*/, /*# col[seqCol] #*/)
            VALUES (:id, :val, :seq)";
         $stmt = $this->_pdo->prepare($sql);
 
@@ -816,10 +816,10 @@ class /*# companionClass */ extends PersisterBase
           $stmt->execute($params);
         }
 
-      #{ elseif col[type] = map
+      #{ elseif col[type] = 'map'
         $sql =
-          "INSERT INTO /*# col[link] */
-           (/*# col[idCol] */, /*# col[keyCol] */, /*# col[valCol] */)
+          "INSERT INTO /*# col[link] #*/
+           (/*# col[idCol] #*/, /*# col[keyCol] #*/, /*# col[valCol] #*/)
            VALUES (:id, :key, :val)";
         $stmt = $this->_pdo->prepare($sql);
 
@@ -840,48 +840,48 @@ class /*# companionClass */ extends PersisterBase
 
   #-- Create methods for retrieve each of the model's collections
   #{ each  collections as col
-    private function retrieveCollection_/*# col[property] */($id, $model) {
-      #{ if col[type] = set
-        $sql = 'SELECT /*# col[valCol] */ FROM /*# col[link] */ WHERE /*# col[idCol] */ = :id';
+    private function retrieveCollection_/*# col[property] #*/($id, $model) {
+      #{ if col[type] = 'set'
+        $sql = 'SELECT /*# col[valCol] #*/ FROM /*# col[link] #*/ WHERE /*# col[idCol] #*/ = :id';
         $params = array('id' => $id);
         $this->logQuery($sql, $params);
         $this->_pdo->prepare($sql)->execute($params);
 
         $collection = array();
         foreach ($stmt as $row) {
-          $collection[] = $row['/*# col[valCol] */'];
+          $collection[] = $row['/*# col[valCol] #*/'];
         }
-        $model->set/*# col[property] */($collection);
+        $model->set/*# col[property] #*/($collection);
 
-      #{ elseif col[type] = list
+      #{ elseif col[type] = 'list'
         $sql =
-          'SELECT /*# col[valCol] */ FROM /*# col[link] */
-          WHERE /*# col[idCol] */ = :id
-          ORDER BY /*# col[seqCol] */';
+          'SELECT /*# col[valCol] #*/ FROM /*# col[link] #*/
+          WHERE /*# col[idCol] #*/ = :id
+          ORDER BY /*# col[seqCol] #*/';
         $params = array('id' => $id);
         $this->logQuery($sql, $params);
         $this->_pdo->prepare($sql)->execute($params);
 
         $collection = array();
         foreach ($stmt as $row) {
-          $collection[] = $row['/*# col[valCol] */'];
+          $collection[] = $row['/*# col[valCol] #*/'];
         }
-        $model->set/*# col[property] */($collection);
+        $model->set/*# col[property] #*/($collection);
 
-      #{ elseif col[type] = map
+      #{ elseif col[type] = 'map'
         $sql =
-          'SELECT /*# col[keyCol] */, /*# col[valCol] */
-           FROM /*# col[link] */
-           WHERE /*# col[idCol] */ = :id';
+          'SELECT /*# col[keyCol] #*/, /*# col[valCol] #*/
+           FROM /*# col[link] #*/
+           WHERE /*# col[idCol] #*/ = :id';
         $params = array('id' => $id);
         $this->logQuery($sql, $params);
         $this->_pdo->prepare($sql)->execute($params);
 
         $collection = array();
         foreach ($stmt as $row) {
-          $collection[$row['/*# col[keyCol] */']] = $row['/*# col[valCol] */'];
+          $collection[$row['/*# col[keyCol] #*/']] = $row['/*# col[valCol] #*/'];
         }
-        $model->set/*# col[property] */($collection);
+        $model->set/*# col[property] #*/($collection);
 
       #}
     }
