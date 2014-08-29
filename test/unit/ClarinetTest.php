@@ -55,8 +55,7 @@ class ClarinetTest extends TestCase {
 
 		// Instantiate a persister
 		global $dynTarget;
-		$director = new PersisterCompanionDirector();
-		$loader = new CompanionLoader($director, $dynTarget);
+		$loader = new CompanionLoader('persister', $dynTarget);
 		$persister = $loader->get('zpt\orm\test\mock\SimpleEntity');
 
 		$entity = new SimpleEntity();
@@ -73,8 +72,7 @@ class ClarinetTest extends TestCase {
 	public function testGetAllFunction() {
 		// Instantiate a persister
 		global $dynTarget;
-		$director = new PersisterCompanionDirector();
-		$loader = new CompanionLoader($director, $dynTarget);
+		$loader = new CompanionLoader('persister', $dynTarget);
 		$persister = $loader->get('zpt\orm\test\mock\SimpleEntity');
 
 		$entity = new SimpleEntity();

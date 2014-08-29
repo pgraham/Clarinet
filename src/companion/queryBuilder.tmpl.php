@@ -114,8 +114,8 @@ class /*# companionClass #*/ {
   private function _getProp($prop) {
     switch ($prop) {
       #{ each properties as prop
-        case '/*# prop[name] */':
-        return /*# php:prop */;
+        case '/*# prop[name] #*/':
+        return /*# php:prop #*/;
         break;
       #}
 
@@ -128,8 +128,8 @@ class /*# companionClass #*/ {
   private function _getRel($rel) {
     switch ($rel) {
       #{ each relationships as rel
-        case '/*# rel[name] */':
-        return /*# php:rel */;
+        case '/*# rel[name] #*/':
+        return /*# php:rel #*/;
         break;
       #}
 

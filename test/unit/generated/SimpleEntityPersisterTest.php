@@ -44,8 +44,7 @@ class SimpleEntityPersisterTest extends TestCase {
 
     // Instantiate a persister
     global $dynTarget;
-    $director = new PersisterCompanionDirector();
-    $loader = new CompanionLoader($director, $dynTarget);
+    $loader = new CompanionLoader('persister', $dynTarget);
     $this->persister = $loader->get('zpt\orm\test\mock\SimpleEntity');
   }
 

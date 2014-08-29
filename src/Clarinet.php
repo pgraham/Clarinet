@@ -153,10 +153,7 @@ class Clarinet {
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 		PdoWrapper::set($pdo);
 
-		self::$persisterLoader = new CompanionLoader(
-			new PersisterCompanionDirector(),
-			$companionGen
-		);
+		self::$persisterLoader = new CompanionLoader('persister', $companionGen);
 	}
 
 	/**

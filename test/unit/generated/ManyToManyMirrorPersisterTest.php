@@ -53,7 +53,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
     // Instantiate a generated persister to test
     global $dynTarget;
     $director = new PersisterCompanionDirector();
-    $loader = new CompanionLoader($director, $dynTarget);
+    $loader = new CompanionLoader('persister', $dynTarget);
     $this->persister = $loader->get($modelName);
   }
 
@@ -291,7 +291,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
     foreach ($lhs AS $lhsE) {
       $this->assertNotEquals($deletedId, $lhsE->getId());
       $this->assertContains($lhsE->getId(), $lhsIds);
-      
+
       $rhs = $lhsE->getMany();
       $this->assertInternalType('array', $rhs);
       $this->assertEquals(5, count($rhs));

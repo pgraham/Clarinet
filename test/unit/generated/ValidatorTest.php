@@ -42,8 +42,7 @@ class ValidatorTest extends TestCase {
 
     DB::setUp();
 
-    $director = new ValidatorCompanionDirector();
-    $loader = new CompanionLoader($director, $dynTarget);
+    $loader = new CompanionLoader('validator', $dynTarget);
     $this->validator = $loader->get('zpt\orm\test\mock\SimpleEntity');
   }
 

@@ -1,30 +1,31 @@
 {
-    "name": "zeptech/clarinet",
-    "type": "library",
-    "description": "Lightweight PHP ORM",
-    "keywords": [ "orm" ],
-    "homepage": "https://github.com/pgraham/Clarinet",
-    "license": "BSD",
-    "authors": [
-	{
-	    "name": "Philip Graham",
-	    "email": "philip@zeptech.ca"
+	"name": "zeptech/clarinet",
+	"type": "library",
+	"description": "Lightweight PHP ORM",
+	"keywords": [ "orm" ],
+	"homepage": "https://github.com/pgraham/Clarinet",
+	"license": "BSD",
+	"authors": [
+		{
+			"name": "Philip Graham",
+			"email": "philip@zeptech.ca"
+		}
+	],
+	"autoload": {
+		"psr-4": {
+			"zpt\\orm\\": "src/"
+		}
+	},
+	"minimum-stability": "dev",
+	"require": {
+		"php": ">=5.4",
+		"psr/log": "1.0.0",
+		"zeptech/opal": "dev-master",
+		"zeptech/annotations": "1.0.*",
+		"zeptech/utility": "dev-master"
+	},
+	"require-dev": {
+		"mockery/mockery": "dev-master",
+		"monolog/monolog": "1.10.0",
 	}
-    ],
-    "autoload": {
-	"psr-4": {
-	    "zpt\\orm\\": "src/"
-	}
-    },
-    "minimum-stability": "dev",
-    "require": {
-	"php": ">=5.4",
-	"psr/log": "1.0.0",
-	"zeptech/opal": "dev-master",
-	"zeptech/annotations": "1.0.*",
-	"zeptech/utility": "dev-master"
-    },
-    "require-dev": {
-	"mockery/mockery": "dev-master"
-    }
 }

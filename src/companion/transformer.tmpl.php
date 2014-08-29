@@ -18,54 +18,54 @@ use \StdClass;
  * - Entities involved in a relationship with the entity being transformed are
  *   always represented by IDs, not models, in the array representation.
  */
-class /*# companionClass */ {
+class /*# companionClass #*/ {
 
   /**
    * Transform the given model object into an array.
    *
    * @param ${class} $model The model instance to convert.
    */
-  public function asArray(\/*# class */ $model = null) {
+  public function asArray(\/*# class #*/ $model = null) {
     if ($model === null) {
       return null;
     }
 
     $a = array();
 
-    $a['/*# idIdx */'] = $model->get/*# id */();
+    $a['/*# idIdx #*/'] = $model->get/*# id #*/();
 
     #{ each properties AS property
-      $a['/*# property[id] */'] = $model->get/*# property[id] */();
+      $a['/*# property[id] #*/'] = $model->get/*# property[id] #*/();
     #}
 
     #{ each collections as col
-      $a['/*# col[property] */'] = $model->get/*# col[property] */();
+      $a['/*# col[property] #*/'] = $model->get/*# col[property] #*/();
     #}
 
     #{ each relationships AS relationship
-      $relVal = $model->get/*# relationship[name] */();
+      $relVal = $model->get/*# relationship[name] #*/();
       if ($relVal === null) {
-        $a['/*# relationship[idx] */'] = null;
+        $a['/*# relationship[idx] #*/'] = null;
       } else {
         $transformer = $this->__opal__loader->get(
           'zpt\dyn\orm\transformer',
-          '/*# relationship[rhs] */'
+          '/*# relationship[rhs] #*/'
         );
         #{ if relationship[type] = many-to-many
           $rels = array();
           foreach ($relVal as $rel) {
-            $rels[] = $rel->get/*# relationship[rhsIdProperty] */();
+            $rels[] = $rel->get/*# relationship[rhsIdProperty] #*/();
           }
-          $a['/*# relationship[idx] */'] = $rels;
+          $a['/*# relationship[idx] #*/'] = $rels;
         #{ elseif relationship[type] = one-to-many
           $rels = array();
           foreach ($relVal as $rel) {
             $rels[] = $transformer->asArray($rel);
           }
-          $a['/*# relationship[idx] */'] = $rels;
+          $a['/*# relationship[idx] #*/'] = $rels;
         #{ elseif relationship[type] = many-to-one
-          $relId = $relVal->get/*# relationship[rhsIdProperty] */();
-          $a['/*# relationship[idx] */'] = $relId;
+          $relId = $relVal->get/*# relationship[rhsIdProperty] #*/();
+          $a['/*# relationship[idx] #*/'] = $relId;
         #}
       }
 
@@ -82,7 +82,7 @@ class /*# companionClass */ {
   public function asCollection(array $models) {
     $a = array();
     foreach ($models AS $model) {
-      if (!($model instanceof \/*# class */)) {
+      if (!($model instanceof \/*# class #*/)) {
         throw new Exception("Cannot transform " . print_r($model, true));
       }
       $a[] = $this->asArray($model);
@@ -102,18 +102,18 @@ class /*# companionClass */ {
    */
   public function fromArray(array $a, $model = null, array $whiteList = null) {
     if ($model === null) {
-      if (isset($a['/*# idIdx */'])) {
+      if (isset($a['/*# idIdx #*/'])) {
         $persister = $this->__opal__loader->get('zpt\dyn\orm\persister', $this);
-        $model = $persister->getById($a['/*# idIdx */']);
+        $model = $persister->getById($a['/*# idIdx #*/']);
       } else {
-        $model = new \/*# class */();
+        $model = new \/*# class #*/();
       }
     }
 
     #{ each properties AS property
-      if ($whiteList === null || in_array('/*# property[id] */', $whiteList)) {
-        if (array_key_exists('/*# property[id] */', $a)) {
-          $val = $a['/*# property[id] */'];
+      if ($whiteList === null || in_array('/*# property[id] #*/', $whiteList)) {
+        if (array_key_exists('/*# property[id] #*/', $a)) {
+          $val = $a['/*# property[id] #*/'];
 
           #{ if property[default] ISSET
             if ($val === null) {
@@ -122,7 +122,7 @@ class /*# companionClass */ {
               #{ elseif property[type] = date and property[default] = current_date
                 $val = date('Y-m-d');
               #{ else
-                $val = /*# property[default] */;
+                $val = /*# property[default] #*/;
               #}
             }
           #}
@@ -140,7 +140,7 @@ class /*# companionClass */ {
               // will get handled during model validation.
             }
           #}
-          $model->set/*# property[id] */($val);
+          $model->set/*# property[id] #*/($val);
         }
       }
 
@@ -148,34 +148,34 @@ class /*# companionClass */ {
 
     #-- Add each collection into the model
     #{ each collections as col
-      if ($whiteList === null || in_array('/*# col[property] */', $whiteList)) {
-        if (array_key_exists('/*# col[property] */', $a)) {
-          $model->set/*# col[property] */($a['/*# col[property] */']);
+      if ($whiteList === null || in_array('/*# col[property] #*/', $whiteList)) {
+        if (array_key_exists('/*# col[property] #*/', $a)) {
+          $model->set/*# col[property] #*/($a['/*# col[property] #*/']);
         }
       }
     #}
 
     #{ each relationships AS relationship
       #{ if relationship[type] = many-to-many or relationship[type] = one-to-many
-        if ($whiteList === null || in_array('/*# relationship[idx] */', $whiteList)) {
-          if (isset($a['/*# relationship[idx] */'])) {
-            $rels = $a['/*# relationship[idx] */'];
+        if ($whiteList === null || in_array('/*# relationship[idx] #*/', $whiteList)) {
+          if (isset($a['/*# relationship[idx] #*/'])) {
+            $rels = $a['/*# relationship[idx] #*/'];
 
             $transformer = $this->__opal__loader->get(
               'zpt\dyn\orm\transformer',
-              '/*# relationship[rhs] */'
+              '/*# relationship[rhs] #*/'
             );
             $relVal = $transformer->fromCollection($rels);
 
-            $model->set/*# relationship[name] */($relVal);
+            $model->set/*# relationship[name] #*/($relVal);
           }
         }
 
       #{ elseif relationship[type] = many-to-one
 
-        if ($whiteList === null || in_array('/*# relationship[idx] */', $whiteList)) {
-          if (isset($a['/*# relationship[idx] */'])) {
-            $relId = $a['/*# relationship[idx] */'];
+        if ($whiteList === null || in_array('/*# relationship[idx] #*/', $whiteList)) {
+          if (isset($a['/*# relationship[idx] #*/'])) {
+            $relId = $a['/*# relationship[idx] #*/'];
 
             if ($relId !== null) {
               $persister = $this->__opal__loader->get(
@@ -183,7 +183,7 @@ class /*# companionClass */ {
                 $this
               );
               $relVal = $persister->getById($relId);
-              $model->set/*# relationship[name] */($relVal);
+              $model->set/*# relationship[name] #*/($relVal);
             }
           }
         }
@@ -231,7 +231,7 @@ class /*# companionClass */ {
    * @return mixed The entity's id.
    */
   public function getId($entity) {
-    return $entity->get/*# id */();
+    return $entity->get/*# id #*/();
   }
 
   /**
@@ -241,6 +241,6 @@ class /*# companionClass */ {
    * @param string $dbVal The value from the PDO result set to convert.
    */
   public function idFromDb($dbVal) {
-    return /*# from_db_id_cast */$dbVal;
+    return /*# from_db_id_cast #*/$dbVal;
   }
 }
