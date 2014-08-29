@@ -23,7 +23,7 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
 {
 
   public function __construct(ModelFactory $modelFactory = null) {
-    parent::__construct('persister', $modelFactory);
+    parent::__construct($modelFactory);
   }
 
 

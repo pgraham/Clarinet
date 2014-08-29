@@ -36,7 +36,7 @@ class QueryBuilderCompanionDirector extends BaseModelCompanionDirector
 {
 
   public function __construct(ModelFactory $modelFactory = null) {
-    parent::__construct('querybuilder', $modelFactory);
+    parent::__construct($modelFactory);
   }
 
   public function getTemplatePath() {

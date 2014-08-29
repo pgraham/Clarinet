@@ -21,7 +21,7 @@ class ValidatorCompanionDirector extends BaseModelCompanionDirector
 {
 
   public function __construct(ModelFactory $modelFactory = null) {
-    parent::__construct('validator', $modelFactory);
+    parent::__construct($modelFactory);
   }
 
   public function getTemplatePath() {

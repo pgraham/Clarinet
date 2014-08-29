@@ -23,7 +23,7 @@ class TransformerCompanionDirector extends BaseModelCompanionDirector
 {
 
   public function __construct(ModelFactory $modelFactory = null) {
-    parent::__construct('transformer', $modelFactory);
+    parent::__construct($modelFactory);
   }
 
   public function getTemplatePath() {

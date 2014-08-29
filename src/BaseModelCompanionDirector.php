@@ -14,7 +14,7 @@
  */
 namespace zpt\orm;
 
-use zpt\opal\BaseCompanionDirector;
+use zpt\opal\CompanionDirector;
 use zpt\orm\model\Model;
 use zpt\orm\model\ModelFactory;
 use ReflectionClass;
@@ -26,13 +26,12 @@ use ReflectionClass;
  *
  * @author Philip Graham <philip@zeptech.ca>
  */
-abstract class BaseModelCompanionDirector extends BaseCompanionDirector
+abstract class BaseModelCompanionDirector implements CompanionDirector
 {
 
 	private $modelFactory;
 
-	protected function __construct($type, ModelFactory $modelFactory = null) {
-		parent::__construct($type);
+	protected function __construct(ModelFactory $modelFactory = null) {
 		$this->modelFactory = $modelFactory;
 	}
 
