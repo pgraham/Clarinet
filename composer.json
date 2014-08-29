@@ -26,6 +26,6 @@
 	},
 	"require-dev": {
 		"mockery/mockery": "dev-master",
-		"monolog/monolog": "1.10.0",
+		"monolog/monolog": "1.10.0"
 	}
 }
