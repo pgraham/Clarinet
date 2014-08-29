@@ -43,11 +43,8 @@ class Repository
 	public function __construct(DatabaseConnection $db, Psr4Dir $dynTarget) {
 		$this->db = $db;
 
-		$modelFactory = new ModelFactory();
-		$persisterCompDir = new PersisterCompanionDirector($modelFactory);
-
 		$ldrFactory = new CompanionLoaderFactory($dynTarget);
-		$this->persisterLdr = $ldrFactory->get($persisterCompDir);
+		$this->persisterLdr = $ldrFactory->get('persister');
 	}
 
 	public function getPersister($model) {
