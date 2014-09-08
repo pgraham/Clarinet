@@ -39,6 +39,8 @@ class OneToManyPersisterTest extends TestCase {
     Generator::generate();
   }
 
+  private $db;
+
   /* Companion loader */
   private $loader;
 
@@ -50,12 +52,15 @@ class OneToManyPersisterTest extends TestCase {
    * that is the object under test.
    */
   protected function setUp() {
-    Db::setUp();
+    $this->db = Db::setUp();
 
     // Instantiate a generated persister to test
     global $dynTarget;
     $this->loader = new CompanionLoader('persister', $dynTarget);
-    $this->persister = $this->loader->get('zpt\orm\test\mock\OneToManyEntity');
+    $this->persister = $this->loader->get(
+      'zpt\orm\test\mock\OneToManyEntity',
+      $this->db
+    );
   }
 
   /**
@@ -195,7 +200,10 @@ class OneToManyPersisterTest extends TestCase {
     $retrieved = $this->persister->getById($id);
     $this->assertNull($retrieved);
 
-    $rhsPersister = $this->loader->get('zpt\orm\test\mock\OneToManyRhs');
+    $rhsPersister = $this->loader->get(
+      'zpt\orm\test\mock\OneToManyRhs',
+      $this->db
+    );
 
     $c = new Criteria();
     $c->addEquals('one_to_many_entity_id', $id);

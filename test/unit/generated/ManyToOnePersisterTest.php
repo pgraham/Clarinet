@@ -39,9 +39,6 @@ class ManyToOnePersisterTest extends TestCase {
     Generator::generate();
   }
 
-  /* Companion Loader */
-  private $loader;
-
   /* The object under test */
   private $persister;
 
@@ -49,12 +46,12 @@ class ManyToOnePersisterTest extends TestCase {
    * Prepare a clean database and the object under test.
    */
   protected function setUp() {
-    Db::setUp();
+    $db = Db::setUp();
 
     // Instantiate a generated persister to test
     global $dynTarget;
-    $this->loader = new CompanionLoader('persister', $dynTarget);
-    $this->persister = $this->loader->get('zpt\orm\test\mock\ManyToOneEntity');
+    $loader = new CompanionLoader('persister', $dynTarget);
+    $this->persister = $loader->get('zpt\orm\test\mock\ManyToOneEntity', $db);
   }
 
   /**

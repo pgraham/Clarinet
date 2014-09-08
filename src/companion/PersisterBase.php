@@ -88,7 +88,7 @@ abstract class PersisterBase extends ModelCompanionBase
 	}
 
 	protected function getPersister($className) {
-		return $this->persisterLoader->get($className);
+		return $this->persisterLoader->get($className, $this->db);
 	}
 
 	protected function getTransformer($className) {

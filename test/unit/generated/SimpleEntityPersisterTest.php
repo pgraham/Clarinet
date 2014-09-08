@@ -40,12 +40,12 @@ class SimpleEntityPersisterTest extends TestCase {
   private $persister;
 
   protected function setUp() {
-    Db::setUp();
+    $db = Db::setUp();
 
     // Instantiate a persister
     global $dynTarget;
     $loader = new CompanionLoader('persister', $dynTarget);
-    $this->persister = $loader->get('zpt\orm\test\mock\SimpleEntity');
+    $this->persister = $loader->get('zpt\orm\test\mock\SimpleEntity', $db);
   }
 
   protected function tearDown() {

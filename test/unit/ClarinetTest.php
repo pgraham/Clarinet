@@ -36,19 +36,17 @@ class ClarinetTest extends TestCase {
 		Generator::generate();
 	}
 
+	private $db;
+
 	protected function setUp() {
-		Db::setUp();
+		$this->db = Db::setUp();
+		global $dynTarget;
+
+		Clarinet::init($this->db, $dynTarget);
 	}
 
 	protected function tearDown() {
 		Db::tearDown();
-	}
-
-	public function testInit() {
-		global $dynTarget;
-		$pdo = new PDO('sqlite::memory:');
-
-		Clarinet::init($pdo, $dynTarget);
 	}
 
 	public function testGetAllProperty() {
@@ -56,7 +54,7 @@ class ClarinetTest extends TestCase {
 		// Instantiate a persister
 		global $dynTarget;
 		$loader = new CompanionLoader('persister', $dynTarget);
-		$persister = $loader->get('zpt\orm\test\mock\SimpleEntity');
+		$persister = $loader->get('zpt\orm\test\mock\SimpleEntity', $this->db);
 
 		$entity = new SimpleEntity();
 		$entity->setName('entity1');
@@ -73,7 +71,7 @@ class ClarinetTest extends TestCase {
 		// Instantiate a persister
 		global $dynTarget;
 		$loader = new CompanionLoader('persister', $dynTarget);
-		$persister = $loader->get('zpt\orm\test\mock\SimpleEntity');
+		$persister = $loader->get('zpt\orm\test\mock\SimpleEntity', $this->db);
 
 		$entity = new SimpleEntity();
 		$entity->setName('entity1');

@@ -5,7 +5,6 @@ use zpt\db\DatabaseConnection;
 use \zpt\orm\companion\PersisterBase;
 use \zpt\orm\runtime\SaveLock;
 use \zpt\orm\PdoExceptionWrapper;
-use \zpt\orm\PdoWrapper;
 use \zpt\orm\Criteria;
 use \Psr\Log\LoggerAwareInterface;
 use \Psr\Log\LoggerAwareTrait;
@@ -96,9 +95,9 @@ class /*# companionClass #*/ extends PersisterBase
     try {
 
       $stmt = $this->db->prepare($sql);
-      $stmt->execute($params);
+      $qr = $stmt->execute($params);
 
-      return (int) $stmt->fetchColumn();
+      return (int) $qr->fetchColumn();
     } catch (PDOException $e) {
       // TODO - Create a PDOExceptionWrapper that parses the error message in
       //        order to present an error suitable for users
@@ -161,10 +160,10 @@ class /*# companionClass #*/ extends PersisterBase
 
       $sql = $this->createSql; // If there is an exception this is handy to know
       $this->logQuery($sql, $params);
-      $this->_create->execute($params);
+      $r = $this->_create->execute($params);
 
       $transformer = $this->getTransformer('/*# class #*/');
-      $id = $transformer->idFromDb($this->db->lastInsertId());
+      $id = $transformer->idFromDb($r->getInsertId());
       $model->set/*# id_property #*/($id);
       $this->cache[$id] = $model;
 
@@ -308,8 +307,8 @@ class /*# companionClass #*/ extends PersisterBase
 
       $sql = $this->deleteSql; // Set SQL in case there is an exception
       $this->logQuery($sql, $params);
-      $this->_delete->execute($params);
-      $rowCount = $this->_delete->rowCount();
+      $qr = $this->_delete->execute($params);
+      $rowCount = $qr->getRowCount();
 
       #{ each collections as col
         $this->removeCollection_/*# col[property] #*/($id);
@@ -420,7 +419,6 @@ class /*# companionClass #*/ extends PersisterBase
       $c->setTable('/*# table #*/');
     }
 
-
     // Clear the selects so that the default of all columns for the FROM table
     // are selected and ensure that only distinct entities are returned
     $c->clearSelects()
@@ -431,11 +429,11 @@ class /*# companionClass #*/ extends PersisterBase
     try {
       $stmt = $this->db->prepare($sql);
       $this->logQuery($sql, $params);
-      $stmt->execute($params);
+      $qr = $stmt->execute($params);
 
+      $result = [];
       $transformer = $this->getTransformer('/*# class #*/');
-      $result = array();
-      foreach ($stmt AS $row) {
+      foreach ($qr AS $row) {
         $id = $transformer->idFromDb($row['/*# id_column #*/']);
 
         // Don't allow two instances for the same id to be created
@@ -608,8 +606,8 @@ class /*# companionClass #*/ extends PersisterBase
       #{ if has_update
         $sql = $this->updateSql;
         $this->logQuery($sql, $params);
-        $this->_update->execute($params);
-        $rowCount = $this->_update->rowCount();
+        $qr = $this->_update->execute($params);
+        $rowCount = $qr->getRowCount();
       #}
 
       #-- Update each of the model's collections by first removing the existing
@@ -746,7 +744,6 @@ class /*# companionClass #*/ extends PersisterBase
       #{ else
         return 1;
       #}
-      return $rowCount;
     } catch (PDOException $e) {
       $this->db->rollback();
       $saveLock->forceRelease();
@@ -840,10 +837,10 @@ class /*# companionClass #*/ extends PersisterBase
         $sql = 'SELECT /*# col[valCol] #*/ FROM /*# col[link] #*/ WHERE /*# col[idCol] #*/ = :id';
         $params = array('id' => $id);
         $this->logQuery($sql, $params);
-        $this->db->prepare($sql)->execute($params);
+        $qr = $this->db->prepare($sql)->execute($params);
 
         $collection = array();
-        foreach ($stmt as $row) {
+        foreach ($qr as $row) {
           $collection[] = $row['/*# col[valCol] #*/'];
         }
         $model->set/*# col[property] #*/($collection);
@@ -855,10 +852,10 @@ class /*# companionClass #*/ extends PersisterBase
           ORDER BY /*# col[seqCol] #*/';
         $params = array('id' => $id);
         $this->logQuery($sql, $params);
-        $this->db->prepare($sql)->execute($params);
+        $qr = $this->db->prepare($sql)->execute($params);
 
         $collection = array();
-        foreach ($stmt as $row) {
+        foreach ($qr as $row) {
           $collection[] = $row['/*# col[valCol] #*/'];
         }
         $model->set/*# col[property] #*/($collection);
@@ -870,10 +867,10 @@ class /*# companionClass #*/ extends PersisterBase
            WHERE /*# col[idCol] #*/ = :id';
         $params = array('id' => $id);
         $this->logQuery($sql, $params);
-        $this->db->prepare($sql)->execute($params);
+        $qr = $this->db->prepare($sql)->execute($params);
 
         $collection = array();
-        foreach ($stmt as $row) {
+        foreach ($qr as $row) {
           $collection[$row['/*# col[keyCol] #*/']] = $row['/*# col[valCol] #*/'];
         }
         $model->set/*# col[property] #*/($collection);

@@ -46,7 +46,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
    * that is the object under test.
    */
   protected function setUp() {
-    Db::setUp();
+    $db = Db::setUp();
 
     $modelName = 'zpt\orm\test\mock\ManyToManyMirrorLhsEntity';
 
@@ -54,7 +54,7 @@ class ManyToManyMirrorPersisterTest extends TestCase {
     global $dynTarget;
     $director = new PersisterCompanionDirector();
     $loader = new CompanionLoader('persister', $dynTarget);
-    $this->persister = $loader->get($modelName);
+    $this->persister = $loader->get($modelName, $db);
   }
 
   /**

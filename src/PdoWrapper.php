@@ -81,7 +81,7 @@ class PdoWrapper {
     if ($this->_inTransaction) {
       return false;
     }
-    
+
     $this->_inTransaction = $this->_pdo->beginTransaction();
     return $this->_inTransaction;
   }
@@ -91,7 +91,7 @@ class PdoWrapper {
    * reference when instantiating.  This will nullify the original variable.  If
    * any other references to the PDO connection exist outside of clarinet they
    * need to be nullified before the connection will actually be closed.
-   * 
+   *
    * Calling this function will render any instantiate persisters useless.
    */
   public function close() {

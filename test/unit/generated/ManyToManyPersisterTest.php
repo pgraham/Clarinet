@@ -15,7 +15,6 @@
 namespace zpt\orm\companion;
 
 use \zpt\opal\CompanionLoader;
-use \zpt\orm\PdoWrapper;
 use \zpt\orm\test\mock\ManyToManyEntity;
 use \zpt\orm\test\mock\SimpleEntity;
 use \zpt\orm\test\Db;
@@ -39,6 +38,10 @@ class ManyToManyPersisterTest extends TestCase {
       Generator::generate();
   }
 
+  /* Database Connection */
+  private $db;
+
+  /* Persister companion loader */
   private $loader;
 
   /* The object under test */
@@ -49,7 +52,7 @@ class ManyToManyPersisterTest extends TestCase {
    * that is the object under test.
    */
   protected function setUp() {
-      Db::setUp();
+      $this->db = Db::setUp();
 
       // Instantiate a generated persister to test
       $modelName = 'zpt\orm\test\mock\ManyToManyEntity';
@@ -57,7 +60,7 @@ class ManyToManyPersisterTest extends TestCase {
       // Instantiate a generated persister to test
       global $dynTarget;
       $this->loader = new CompanionLoader('persister', $dynTarget);
-      $this->persister = $this->loader->get($modelName);
+      $this->persister = $this->loader->get($modelName, $this->db);
   }
 
   /**
@@ -153,7 +156,7 @@ class ManyToManyPersisterTest extends TestCase {
     foreach ($many1 AS $e) {
       $this->assertNotNull($e);
       $this->assertInstanceOf('zpt\orm\test\mock\SimpleEntity', $e);
-      
+
       $e->setName('New' . $e->getName());
       $e->setValue('New' . $e->getValue());
     }
@@ -175,10 +178,12 @@ class ManyToManyPersisterTest extends TestCase {
   public function testUpdate() {
     $persister1 = $this->loader->get(
       'zpt\orm\test\mock\ManyToManyEntity',
+      $this->db,
       $useCache = false
     );
     $persister2 = $this->loader->get(
       'zpt\orm\test\mock\ManyToManyEntity',
+      $this->db,
       $useCache = false
     );
 
@@ -263,7 +268,7 @@ class ManyToManyPersisterTest extends TestCase {
 
     $this->assertNull($this->persister->getById($id));
 
-    $pdo = PdoWrapper::get();
+    $pdo = $this->db->getPdo();
     $stmt = $pdo->prepare('SELECT COUNT(*)
       FROM many_to_many_entity_simple_entity_link
       WHERE many_to_many_entity_id = :id');

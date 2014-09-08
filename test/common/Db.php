@@ -14,9 +14,7 @@
  */
 namespace zpt\orm\test;
 
-use \zpt\orm\Clarinet;
-use \zpt\orm\PdoWrapper;
-use \PDO;
+use zpt\db\DatabaseConnection;
 
 /**
  * This class provides setUp functionality common to all tests that require
@@ -38,9 +36,13 @@ class Db {
 
     copy(__DIR__ . '/mock_db.template.sq3', __DIR__ . '/../gen/db.sq3');
 
-    $pdo = new PDO('sqlite:' . __DIR__ . '/../gen/db.sq3');
-    Clarinet::init($pdo, $dynTarget);
-    //PdoWrapper::set($pdo);
+    $schemaPath = realpath(__DIR__ . '/../gen/db.sq3');
+    $db = new DatabaseConnection([
+      'driver' => 'sqlite',
+      'schema' => $schemaPath
+    ]);
+
+    return $db;
   }
 
   /**
@@ -49,7 +51,6 @@ class Db {
    * @param PDO PDO connection to clean up.
    */
   public static function tearDown() {
-    Clarinet::reset();
     unlink(__DIR__ . '/../gen/db.sq3');
   }
 }
