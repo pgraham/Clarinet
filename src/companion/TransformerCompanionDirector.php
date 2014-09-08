@@ -78,11 +78,6 @@ class TransformerCompanionDirector extends BaseModelCompanionDirector
       $relationships[] = $rel;
     }
 
-    $fromDbIdCast = '';
-    if ($model->getId()->getType() == Property::TYPE_INTEGER) {
-      $fromDbIdCast = '(int) ';
-    }
-
     $templateValues = Array
     (
       'class'           => $model->getName(),
@@ -90,8 +85,7 @@ class TransformerCompanionDirector extends BaseModelCompanionDirector
       'idIdx'           => StringUtils::fromCamelCase($id),
       'properties'      => $properties,
       'collections'     => $collections,
-      'relationships'   => $relationships,
-      'from_db_id_cast' => $fromDbIdCast
+      'relationships'   => $relationships
     );
     return $templateValues;
   }

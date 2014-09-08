@@ -135,6 +135,9 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
       $relationships[] = $vals;
     }
 
+    $idSeqName =
+      $model->getTable() . '_' . $model->getId()->getColumn() . '_seq';
+
     $templateValues = Array
     (
       'class'                  => $className,
@@ -145,6 +148,8 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
 
       'id_property'            => $model->getId()->getName(),
       'id_column'              => $model->getId()->getColumn(),
+      'id_type'                => $model->getId()->getType(),
+      'id_seq_name'            => $idSeqName,
 
       'properties'             => $properties,
       'collections'            => $collections,

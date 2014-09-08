@@ -233,14 +233,4 @@ class /*# companionClass #*/ {
   public function getId($entity) {
     return $entity->get/*# id #*/();
   }
-
-  /**
-   * Transform the value returned by the DB into the appropriate type for
-   * the model.  This is needed since PDO seems to only return string values.
-   *
-   * @param string $dbVal The value from the PDO result set to convert.
-   */
-  public function idFromDb($dbVal) {
-    return /*# from_db_id_cast #*/$dbVal;
-  }
 }

@@ -162,8 +162,7 @@ class /*# companionClass #*/ extends PersisterBase
       $this->logQuery($sql, $params);
       $r = $this->_create->execute($params);
 
-      $transformer = $this->getTransformer('/*# class #*/');
-      $id = $transformer->idFromDb($r->getInsertId());
+      $id = $this->castId($r->getInsertId('/*# id_seq_name #*/'));
       $model->set/*# id_property #*/($id);
       $this->cache[$id] = $model;
 
@@ -432,9 +431,8 @@ class /*# companionClass #*/ extends PersisterBase
       $qr = $stmt->execute($params);
 
       $result = [];
-      $transformer = $this->getTransformer('/*# class #*/');
       foreach ($qr AS $row) {
-        $id = $transformer->idFromDb($row['/*# id_column #*/']);
+        $id = $this->castId($row['/*# id_column #*/']);
 
         // Don't allow two instances for the same id to be created
         if (isset($this->cache[$id])) {
@@ -759,6 +757,14 @@ class /*# companionClass #*/ extends PersisterBase
    * Private Helpers
    * ================================================================================
    */
+
+  private function castId($id) {
+    #{ if id_type = 'integer'
+      return (int) $id;
+    #}{ else
+      return $id;
+    #}
+  }
 
   #-- Create methods for removing each of the model's collections
   #{ each collections as col
