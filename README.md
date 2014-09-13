@@ -1,31 +1,40 @@
-#Clarinet User Guide
+# ORMdr
 
-Clarinet is a PHP ORM with a syntax loosely based on JPA/Hibernate.  However,
-Clarinet is nowhere near as feature rich as Hibernate.  It is intended to be
-easy and fast to build with.   This makes it ideal for small websites and
+Clarinet is an ORM for PHP with a syntax loosely based on JPA/Hibernate.
+However, Clarinet is nowhere near as feature rich as Hibernate. It is intended
+to be easy and fast to build with. This makes it ideal for small websites and
 prototyping.
 
-First a couple of definitions.  Throughout this guide and the code, you will see
-the terms model and entity.  Model is used to refer to the definition of
-something that can be persisted while entity is used to refer to an instance of
-a model.
+Throughout this guide and the code, you will see the terms model and entity.
+Model is used to refer to the definition of something that can be persisted
+while entity is used to refer to an instance of a model.
 
 * * *
 NOTE: Although the documentation is being updated to more consistent in its use
 of these terms, there may be some spots where they are used interchangeably.
 * * *
 
+## Install
+
+Composer: zeptech/clarinet
+
 ## Model Classes
 
-Persistance information is extracted from model classes.  Typically, each table
+Persistance information is extracted from model classes. Typically, each table
 in your database will be represented by a model class.  An exception being link
 tables for a many-to-many relationship, which are handled transparently by
 Clarinet.
 
+* * *
+All annotations used for defining model classes are parsed according to the
+rules of the
+[php-annotations library](https://github.com/pgraham/php-annotations).
+* * *
+
 A model class must follow some simple conventions that make them look a lot like
 Java beans.
 
-To start, each model class must annotated with @Entity:
+Each model class must annotated with @Entity:
 
 ```php
 <?php
@@ -214,7 +223,7 @@ found in the file LICENSE.txt in the same directory as this file.
 Clarinet supports collection relationships for storing array properties. There
 are three supported collection types, @Set, @List and @Map
 
-## Actor Generation
+## Usage
 
 Clarinet uses the
 [PHP Code Templates](https://github.com/pgraham/php-code-templates) library
@@ -222,20 +231,9 @@ for generating persister, validator and transformer actors for a given model
 class. In order to use clarinet\*Generator classes, the classes for this library
 must be available.
 
-## Usage
-
 ### Initialization
 
-Clarinet provides three types of model actors, persiters, transformers and
-validators.  Before Clarinet's model actors can be used, clarinet itself needs
-to be initialized.
-
-```php
-<?php
-use zeptech\orm\runtime\Clarinet;
-$pdo = new PDO(/*...*/);
-Clarinet::init($pdo);
-```
+TODO
 
 ### Generating actors
 
