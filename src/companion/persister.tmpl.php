@@ -31,17 +31,12 @@ class /*# companionClass #*/ extends PersisterBase
    */
   const CREATE_MARKER = 0;
 
-  /* PDOStatement for inserting new entities into the database */
   private $createSql;
-  private $_create = null;
-
-  /* PDOStatement for updating existing entities. */
+  private $create;
   private $updateSql;
-  private $_update = null;
-
-  /* PDOStatement for deleting existing entities. */
+  private $update;
   private $deleteSql;
-  private $_delete = null;
+  private $delete;
 
   /**
    * Create a new persister for ${class} entities.
@@ -49,23 +44,36 @@ class /*# companionClass #*/ extends PersisterBase
   public function __construct(DatabaseConnection $db) {
     parent::__construct($db);
 
+    $columns = /*# php:column_names #*/;
+    $queryAdapter = $this->db->getQueryAdapter();
+
+    $escaped = [];
+    $params = [];
+    $setters = [];
+    foreach ($columns as $col) {
+      $escapedCol = $queryAdapter->escapeField($col);
+      $paramName = ":$col";
+
+      $escaped[] = $escapedCol;
+      $params[] = $paramName;
+      $setters[] = "$escapedCol = $paramName";
+    }
+    $escapedCols = implode(',', $escaped);
+    $paramCols = implode(',', $params);
+    $setterClauses = implode(',', $setters);
+
     $this->createSql =
-      "INSERT INTO /*# table #*/
-       (/*# join(,):column_names */) VALUES (/*# join(,):value_names */)";
-    $this->_create = $this->db->prepare($this->createSql);
+      "INSERT INTO /*# table #*/ ($escapedCols) VALUES ($paramCols)";
+    $this->create = $this->db->prepare($this->createSql);
 
     #{ if has_update
-      $this->updateSql =
-        "UPDATE /*# table #*/
-         SET /*# join(,):sql_setters */
-         WHERE /*# id_column */ = :id";
-      $this->_update = $this->db->prepare($this->updateSql);
-    #{ else
-      $this->_update = null;
+      $this->updateSql = "UPDATE /*# table #*/
+        SET $setterClauses WHERE /*# id_column #*/ = :id";
+      $this->update = $this->db->prepare($this->updateSql);
     #}
 
     $this->deleteSql = "DELETE FROM /*# table #*/ WHERE /*# id_column */ = :id";
-    $this->_delete = $this->db->prepare($this->deleteSql);
+    $this->delete = $this->db->prepare($this->deleteSql);
   }
 
   /**
@@ -160,7 +168,7 @@ class /*# companionClass #*/ extends PersisterBase
 
       $sql = $this->createSql; // If there is an exception this is handy to know
       $this->logQuery($sql, $params);
-      $r = $this->_create->execute($params);
+      $r = $this->create->execute($params);
 
       $id = $this->castId($r->getInsertId('/*# id_seq_name #*/'));
       $model->set/*# id_property #*/($id);
@@ -306,7 +314,7 @@ class /*# companionClass #*/ extends PersisterBase
 
       $sql = $this->deleteSql; // Set SQL in case there is an exception
       $this->logQuery($sql, $params);
-      $qr = $this->_delete->execute($params);
+      $qr = $this->delete->execute($params);
       $rowCount = $qr->getRowCount();
 
       #{ each collections as col
@@ -604,7 +612,7 @@ class /*# companionClass #*/ extends PersisterBase
       #{ if has_update
         $sql = $this->updateSql;
         $this->logQuery($sql, $params);
-        $qr = $this->_update->execute($params);
+        $qr = $this->update->execute($params);
         $rowCount = $qr->getRowCount();
       #}
 

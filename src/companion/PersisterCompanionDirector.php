@@ -61,9 +61,7 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
         'col'  => $col
       );
 
-      $columnNames[] = "`$col`";
-      $valueNames[] = ":$col";
-      $sqlSetters[] = "`$col` = :$col";
+      $columnNames[] = $col;
     }
 
     $collections = array();
@@ -112,9 +110,7 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
         case 'many-to-one':
         $lhsCol = $rel->getLhsColumn();
         $vals['lhsColumn'] = $lhsCol;
-        $columnNames[] = "`$lhsCol`";
-        $valueNames[] = ":$lhsCol";
-        $sqlSetters[] = "`$lhsCol` = :$lhsCol";
+        $columnNames[] = $lhsCol;
         break;
 
         case 'many-to-many':
@@ -155,9 +151,7 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
       'collections'            => $collections,
       'relationships'          => $relationships,
 
-      'column_names'           => $columnNames,
-      'value_names'            => $valueNames,
-      'sql_setters'            => $sqlSetters,
+      'column_names'           => $columnNames
     );
 
     // Add booleans for callbacks
@@ -186,7 +180,7 @@ class PersisterCompanionDirector extends BaseModelCompanionDirector
 
     // If the model doesn't define any columns (only relationships) then don't
     // generate an UPDATE statement as it will result in an SQL error
-    if (count($sqlSetters) > 0) {
+    if (count($columnNames) > 0) {
       $templateValues['has_update'] = true;
     }
     return $templateValues;
