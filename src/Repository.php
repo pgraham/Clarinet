@@ -47,6 +47,10 @@ class Repository
 		$this->persisterLdr = $ldrFactory->get('persister');
 	}
 
+	public function getDb() {
+		return $this->db;
+	}
+
 	public function getPersister($model) {
 		$persister = $this->persisterLdr->get($model, $this->db);
 		return $persister;
