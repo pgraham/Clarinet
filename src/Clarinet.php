@@ -123,7 +123,7 @@ class Clarinet {
 	 */
 	public static function getOne($className, Criteria $c = null) {
 		if ($c === null) {
-			$c = new Criteria();
+			$c = new Criteria(self::$db->getQueryAdapter());
 		}
 		$c->setLimit(1);
 

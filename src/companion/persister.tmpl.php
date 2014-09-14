@@ -45,13 +45,12 @@ class /*# companionClass #*/ extends PersisterBase
     parent::__construct($db);
 
     $columns = /*# php:column_names #*/;
-    $queryAdapter = $this->db->getQueryAdapter();
 
     $escaped = [];
     $params = [];
     $setters = [];
     foreach ($columns as $col) {
-      $escapedCol = $queryAdapter->escapeField($col);
+      $escapedCol = $this->queryAdapter->escapeField($col);
       $paramName = ":$col";
 
       $escaped[] = $escapedCol;
@@ -84,7 +83,7 @@ class /*# companionClass #*/ extends PersisterBase
    */
   public function count(Criteria $c) {
     if ($c === null) {
-      $c = new Criteria();
+      $c = new Criteria($this->queryAdapter);
     }
 
     if ($c->getTable() === null) {
@@ -373,7 +372,7 @@ class /*# companionClass #*/ extends PersisterBase
    */
   public function getById($id) {
     if (!isset($this->cache[$id])) {
-      $c = new Criteria();
+      $c = new Criteria($this->queryAdapter);
       $c->addEquals('/*# id_column #*/', $id);
 
       // We don't care about the result since the retrieve method will
@@ -419,7 +418,7 @@ class /*# companionClass #*/ extends PersisterBase
    */
   public function retrieve(Criteria $c = null) {
     if ($c === null) {
-      $c = new Criteria();
+      $c = new Criteria($this->queryAdapter);
     }
 
     if ($c->getTable() === null) {
@@ -483,7 +482,7 @@ class /*# companionClass #*/ extends PersisterBase
           // -------------------------------------------------------------------
           // Populate the /*# rel[rhs] #*/
           #{ if rel[type] = 'one-to-many'
-            $c = new Criteria();
+            $c = new Criteria($this->queryAdapter);
             $c->addEquals('/*# rel[rhsColumn] #*/', $id);
             #{ if rel[orderByCol] ISSET
               $c->addSort('/*# rel[orderByCol] #*/', '/*# rel[orderByDir] #*/');
@@ -496,7 +495,7 @@ class /*# companionClass #*/ extends PersisterBase
             $model->set/*# rel[lhsProperty] #*/($related);
 
           #{ elseif rel[type] = 'many-to-many'
-            $c = new Criteria();
+            $c = new Criteria($this->queryAdapter);
             $c->addSelect('/*# rel[rhsTable] #*/.*');
             $c->addInnerJoin('/*# rel[linkTable] #*/', '/*# rel[rhsIdColumn] #*/', '/*# rel[rhsLinkColumn] #*/');
             $c->addEquals('/*# rel[lhsLinkColumn] #*/', $id);
@@ -676,7 +675,7 @@ class /*# companionClass #*/ extends PersisterBase
             $relIds[] = $rel->get/*# rel[rhsIdProperty] #*/();
           }
 
-          $c = new Criteria();
+          $c = new Criteria($this->queryAdapter);
           $c->addEquals('/*# rel[rhsColumn] #*/', $id);
           $current = $persister->retrieve($c);
 

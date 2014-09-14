@@ -1,6 +1,7 @@
 <?php
 namespace /*# companionNs #*/;
 
+use zpt\db\DatabaseConnection;
 use zpt\orm\Criteria;
 
 /**
@@ -14,8 +15,8 @@ class /*# companionClass #*/ {
 
   private $_joinedTo = array();
 
-  public function __construct() {
-    $this->_c = new Criteria();
+  public function __construct(DatabaseConnection $db) {
+    $this->_c = new Criteria($db->getQueryAdapter());
   }
 
   public function addFilter($field, $value, $op = '=') {

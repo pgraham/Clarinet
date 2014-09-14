@@ -46,8 +46,14 @@ abstract class PersisterBase extends ModelCompanionBase
 	 */
 	protected $db;
 
+	/**
+	 * {@link zpt\db\adapterQueryAdapter} for the driver used by {@link #$db}.
+	 */
+	protected $queryAdapter;
+
 	public function __construct(DatabaseConnection $db) {
 		$this->db = $db;
+		$this->queryAdapter = $db->getQueryAdapter();
 	}
 
 	/**

@@ -14,7 +14,9 @@
  */
 namespace zpt\orm;
 
-use \Exception;
+use zpt\db\adapter\MysqlQueryAdapter;
+use zpt\db\adapter\QueryAdapter;
+use Exception;
 
 /**
  * This class encapsulates a set of criteria for a SELECT statement.
@@ -23,7 +25,7 @@ use \Exception;
  */
 class Criteria {
 
-	// 
+	//
 	// Constants representing all valid column transformations
 	//
 
@@ -43,7 +45,7 @@ class Criteria {
 
 	//
 	// Constants representing all of the valid sorts directions
-	// 
+	//
 
 	/** Standard ASCending sort */
 	const SORT_ASC = 'asc';
@@ -91,36 +93,6 @@ class Criteria {
 	 * modified as part of a predicate without being backticked (`).
 	 */
 	private static $transforms;
-
-	/**
-	 * Escape the given field name.  This handles qualified fields as well as
-	 * aliases
-	 *
-	 * @param string $fieldName The fieldname to escape.
-	 */
-	public static function escapeFieldName($fieldName) {
-		if ($fieldName === '*') {
-			return $fieldName;
-		}
-
-		if (strpos($fieldName, '.') === false &&
-				strpos($fieldName, ' ') === false)
-		{
-			return '`' . str_replace('`', '``', $fieldName) . '`';
-		}
-
-		$toEscape = explode(' ', $fieldName);
-		$escaped = array();
-		foreach ($toEscape AS $f) {
-			$parts = explode('.', $f);
-			$escapedField = array();
-			foreach ($parts AS $part) {
-				$escapedField[] = self::escapeFieldName($part);
-			}
-			$escaped[] = implode('.', $escapedField);
-		}
-		return implode(' ', $escaped);
-	}
 
 	/**
 	 * Getter for the function lambda that performs the requested transformation.
@@ -233,9 +205,23 @@ class Criteria {
 	private $table = null;
 
 	/**
+	 * Create a new Criteria object.
+	 *
+	 * @param QueryAdapter $queryAdapter
+	 *   Adapter used to output SQL specific to a specific database engine.
+	 *   Defaults to a MysqlQueryAdapter to maintain backswards compatibility.
+	 */
+	public function __construct(QueryAdapter $queryAdapter = null) {
+		if ($queryAdapter === null) {
+			$queryAdapter = new MysqlQueryAdapter();
+		}
+		$this->queryAdapter = $queryAdapter;
+	}
+
+	/**
 	 * Return the SQL representation of the criteria.  This will be a complete SQL
 	 * statement.
-	 * 
+	 *
 	 * @return string
 	 */
 	public function __toString() {
@@ -246,7 +232,7 @@ class Criteria {
 			$select .= 'DISTINCT ';
 		}
 
-		$escTable = self::escapeFieldName($this->table);
+		$escTable = $this->queryAdapter->escapeField($this->table);
 		if ($this->selectColumns === null) {
 			$select .= "$escTable.*";
 		} else {
@@ -304,7 +290,7 @@ class Criteria {
 			throw new Exception('BETWEEN end points cannot be NULL');
 		}
 
-		$escCol = self::escapeFieldName($column);
+		$escCol = $this->queryAdapter->escapeField($column);
 
 		$idx = count($this->params);
 		$paramName1 = ":param$idx";
@@ -352,7 +338,7 @@ class Criteria {
 			return;
 		}
 
-		$escCol = self::escapeFieldName($column);
+		$escCol = $this->queryAdapter->escapeField($column);
 		$paramNames = Array();
 
 		$idx = count($this->params);
@@ -391,7 +377,7 @@ class Criteria {
 	 * @return $this
 	 */
 	public function addIsNotNull($column) {
-		$escCol = self::escapeFieldName($column);
+		$escCol = $this->queryAdapter->escapeField($column);
 		$this->conditions[] = "$escCol IS NOT NULL";
 
 		return $this;
@@ -405,7 +391,7 @@ class Criteria {
 	 * @return $this
 	 */
 	public function addIsNull($column) {
-		$escCol = self::escapeFieldName($column);
+		$escCol = $this->queryAdapter->escapeField($column);
 		$this->conditions[] = "$escCol IS NULL";
 
 		return $this;
@@ -413,11 +399,11 @@ class Criteria {
 
 	/**
 	 * Add a JOIN clause to the criteria. The name of the table gets substituted
-	 * at the time the criteria is transformed into an SQL string.	All joins are
+	 * at the time the criteria is transformed into an SQL string. All joins are
 	 * against the criteria's FROM table. In order to chain joins, use the
 	 * chain() method of the JOIN object returned by this method:
 	 *
-	 *     $c = new Criteria();
+	 *     $c = new Criteria($queryAdapter);
 	 *     $c->setFrom('foo');
 	 *     $c->addJoin('goo', 'INNER', 'goo_id', 'id');
 	 *     $c->addJoin('hoo', 'INNER', 'hoo_id', 'id');
@@ -430,7 +416,7 @@ class Criteria {
 	 *     vs.
 	 *     ---
 	 *
-	 *     $c = new Criteria();
+	 *     $c = new Criteria($queryAdapter);
 	 *     $c->setFrom('foo');
 	 *     $c->addJoin('goo', 'INNER', 'goo_id', 'id')
 	 *         ->chain('hoo', 'INNER', 'hoo_id', id');
@@ -452,7 +438,7 @@ class Criteria {
 	 * @return $this
 	 */
 	public function addJoin($table, $type, $lhs, $rhs = null) {
-		$join = new Join($table, $type);
+		$join = new Join($table, $type, $this->queryAdapter);
 		if ($rhs !== null) {
 			$join->setRhsColumn($rhs);
 			$join->setLhsColumn($lhs);
@@ -548,7 +534,7 @@ class Criteria {
 			$value = 0;
 		}
 
-		$escCol = self::escapeFieldName($column);
+		$escCol = $this->queryAdapter->escapeField($column);
 		if ($transform !== null) {
 			$escCol = $transform($escCol);
 		}
@@ -574,14 +560,14 @@ class Criteria {
 
 	/**
 	 * Add a select column.
-	 * 
+	 *
 	 * @param string $select The name of the column to select.
 	 */
 	public function addSelect($select) {
 		if ($this->selectColumns === null) {
 			$this->selectColumns = array();
 		}
-		$this->selectColumns[] = self::escapeFieldName($select);
+		$this->selectColumns[] = $this->queryAdapter->escapeField($select);
 
 		return $this;
 	}
@@ -602,7 +588,7 @@ class Criteria {
 		}
 
 		foreach ($sort AS $col) {
-			$escCol = self::escapeFieldName(trim($col));
+			$escCol = $this->queryAdapter->escapeField(trim($col));
 			if ($direction === self::SORT_NULLS_LAST) {
 
 				//$this->sorts[] = "CASE $escCol WHEN NULL THEN 1 ELSE 0 END";
@@ -722,6 +708,16 @@ class Criteria {
 	}
 
 	/**
+	 * Setter for the {@link QueryAdapter} to use when rendering queries using
+	 * features specific to a particular database engine.
+	 *
+	 * @param QueryAdapter $queryAdapter
+	 */
+	public function setQueryAdapter(QueryAdapter $queryAdapter) {
+		$this->queryAdapter = $queryAdapter;
+	}
+
+	/**
 	 * Setter for the table that this criteria will query. It is generally not
 	 * necessary to call this method manually as it will be set by the persister
 	 * executing the query.
@@ -746,7 +742,7 @@ class Criteria {
 				throw new Exception('Predicate value cannot be an object');
 			}
 		}
-		
+
 		$idx = count($this->params);
 		$paramName = ":param$idx";
 		$this->params[$paramName] = $value;
