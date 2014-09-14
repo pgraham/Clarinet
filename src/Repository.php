@@ -40,10 +40,11 @@ class Repository
 	 *   The PSR-4 prefix target directory where generated Companion sources are
 	 *   found.
 	 */
-	public function __construct(DatabaseConnection $db, Psr4Dir $dynTarget) {
+	public function __construct(
+		DatabaseConnection $db,
+		CompanionLoaderFactory $ldrFactory
+	) {
 		$this->db = $db;
-
-		$ldrFactory = new CompanionLoaderFactory($dynTarget);
 		$this->persisterLdr = $ldrFactory->get('persister');
 	}
 
